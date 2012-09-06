@@ -1,0 +1,96 @@
+header {
+	height: 30px;
+	width: 100%;
+	position: absolute;
+	top:0;
+	padding: 10px 0;
+	border-bottom: 1px solid grey;
+}
+  header h1          { margin:0; line-height: 32px; }
+  header #logo       { padding: 0 0 0 10px; }
+  header #actionForm { padding: 0 10px 0 0; }
+    header #actionForm div{ padding: 0 5px; }
+
+footer {
+	height: 20px;
+	padding: 5px 0;
+	width: 100%;
+	position: absolute;
+	bottom:0;
+	border-top: 1px solid grey;
+}
+  footer #copyright  { padding: 0 0 0 10px; }
+  footer #position   { padding: 0 10px 0 0; }
+
+#mapCanvas { position:absolute; width: 100%; top:51px; bottom: 31px; background: url("/img/bg_tile.jpg"); box-shadow: 0 0 10px black inset;}
+  #mapCanvas img { max-width: none; } /* Twitter bootstrap fails with GMAPS */
+  #mapCanvas label { width: auto; display:inline; }  /* Twitter bootstrap fails with GMAPS */
+
+#multipleChoices{
+	width: 262px;
+	top: 39px;
+	left: 329px;
+	padding: 10px;
+}
+  #multipleChoices li { cursor: pointer; }
+  #multipleChoices li:hover { background: lightGrey; }	
+
+
+/* CSS LOADER
+ */
+
+.loader_back {
+	width: 58px;
+	height: 58px;
+	padding: 10px;
+	color: #fff;
+	font-weight: bold;
+	text-align: center;
+	background: #000;
+	
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-left: -29px;
+	margin-top: -29px;
+}
+
+.loader {
+	width: 50px;
+	height: 50px;
+	border-right: 4px solid #4D4D4D;
+	border-bottom: 4px solid #4D4D4D;
+
+
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border-radius: 50%;
+	
+	-webkit-animation: rotate 2s infinite linear;
+	-moz-animation: rotate 2s infinite linear;
+	-ms-animation: rotate 2s infinite linear;
+	animation: rotate 2s infinite linear;
+	border-left: 4px solid white;
+	border-top: 4px solid white;	
+}
+
+@-webkit-keyframes rotate {
+	from {-webkit-transform: rotate(0deg);}
+	to {-webkit-transform: rotate(360deg);}
+}
+@-moz-keyframes rotate {
+	from {-webkit-transform: rotate(0deg);}
+	to {-webkit-transform: rotate(360deg);}
+}
+@-ms-keyframes rotate {
+	from {-webkit-transform: rotate(0deg);}
+	to {-webkit-transform: rotate(360deg);}
+}
+@keyframes rotate {
+	from {-webkit-transform: rotate(0deg);}
+	to {-webkit-transform: rotate(360deg);}
+}
