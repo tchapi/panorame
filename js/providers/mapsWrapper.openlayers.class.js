@@ -31,10 +31,12 @@ var mapsWrapper = function(type) {
                         "click": $.proxy(function(e){
                             if (this.addPin == true) {
                                 var lonlat = this.map.getLonLatFromPixel(e.xy);
-                                lonlat = OpenLayers.Layer.SphericalMercator.inverseMercator(lonlat.lon, lonlat.lat);
-                                this.setPosition(lonlat.lat, lonlat.lon, null);
+                                lonlat = this.inverseMercator(lonlat.lat, lonlat.lon);
+                                this.setPosition(lonlat.lat, lonlat.lng, null);
                             }
-                        }, this)
+                        }, this),
+                        "moveend": genericOptions.updateOverlayCallback,
+                        "zoomend": genericOptions.updateOverlayCallback
                     }
         };
 
@@ -140,6 +142,12 @@ var mapsWrapper = function(type) {
 
     };
 
+    this.inverseMercator = function(unproj_lat, unproj_lng){
+        
+        lonlat = OpenLayers.Layer.SphericalMercator.inverseMercator(unproj_lng, unproj_lat);
+        return {lat:lonlat.lat, lng:lonlat.lon};
+    }
+
     this.setPosition = function(lat, lng, description){
 
         if (this.map && lat != null && lng != null) {
@@ -178,4 +186,20 @@ var mapsWrapper = function(type) {
             
     };
 
+    this.getBoundsAsLatLng = function(){
+
+        var bounds = this.map.getExtent();
+
+            var NW = this.inverseMercator(bounds.top, bounds.left);
+            var SE = this.inverseMercator(bounds.bottom, bounds.right);
+
+        return {NW_lat:NW.lat, NW_lng:NW.lng, SE_lat:SE.lat, SE_lng:SE.lng};
+
+    };
+        
+    this.removeOverlays = function(){
+
+        
+
+    };
 }

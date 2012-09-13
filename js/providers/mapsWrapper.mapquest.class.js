@@ -47,6 +47,14 @@ var mapsWrapper = function(type) {
           if (this.addPin == true) this.setPosition(e.ll.lat, e.ll.lng, null);
         }, this));
 
+        MQA.EventManager.addListener(this.map, 'moveend', function(e){
+          genericOptions.updateOverlayCallback();
+        });
+        MQA.EventManager.addListener(this.map, 'zoomend', function(e){
+          genericOptions.updateOverlayCallback();
+        });
+
+
         this.positionCallback = genericOptions.positionCallback;
 
     };
@@ -136,5 +144,23 @@ var mapsWrapper = function(type) {
         }
 
     };
+
+    this.getBoundsAsLatLng = function(){
+
+        var bounds = this.map.getBounds();
+
+            var NW = bounds.ul;
+            var SE = bounds.lr;
+
+        return {NW_lat:NW.lat, NW_lng:NW.lng, SE_lat:SE.lat, SE_lng:SE.lng};
+
+    };
+    
+    this.removeOverlays = function(){
+
+        
+
+    };
+
 
 }

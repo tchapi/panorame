@@ -69,6 +69,10 @@ var mapsWrapper = function(type) {
           if (this.addPin == true) this.setPosition(event.latLng.lat(), event.latLng.lng(), null);
         }, this));
 
+        google.maps.event.addListener(this.map, 'bounds_changed', function(event) {
+          genericOptions.updateOverlayCallback();
+        });
+
         $('#'+genericOptions.addPinButton).click($.proxy(function(event){
 
             var button = $('#'+genericOptions.addPinButton);
@@ -113,6 +117,23 @@ var mapsWrapper = function(type) {
             this.positionCallback(lat, lng);
 
         }
+
+    };
+
+    this.getBoundsAsLatLng = function(){
+
+        var bounds = this.map.getBounds();
+
+            var NE = bounds.getNorthEast();
+            var SW = bounds.getSouthWest();
+
+        return {NW_lat:NE.lat(), NW_lng:SW.lng(), SE_lat:SW.lat(), SE_lng:NE.lng()};
+
+    };
+
+    this.removeOverlays = function(){
+
+
 
     };
 

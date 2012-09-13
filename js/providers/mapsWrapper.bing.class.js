@@ -21,38 +21,36 @@ var mapsWrapper = function(type) {
 
     this.createMap = function(genericOptions){
 
-        Microsoft.Maps.loadModule('Microsoft.Maps.Themes.BingTheme', { callback: $.proxy(function(){
+        switch(this.type){
+            case 'bing-hybrid':
+                var mapTypeId = Microsoft.Maps.MapTypeId.aerial;
+                break;
+            case 'bing-road':
+            default:
+                var mapTypeId = Microsoft.Maps.MapTypeId.road;
+                break;
+        }
 
-            switch(this.type){
-                case 'bing-hybrid':
-                    var mapTypeId = Microsoft.Maps.MapTypeId.aerial;
-                    break;
-                case 'bing-road':
-                default:
-                    var mapTypeId = Microsoft.Maps.MapTypeId.road;
-                    break;
-            }
+        var options = {
+            credentials: genericOptions.apiKeys.bing,
+            center: new Microsoft.Maps.Location(genericOptions.center.lat, genericOptions.center.lng),
+            mapTypeId: mapTypeId,
+            zoom: 17,
+            //theme: new Microsoft.Maps.Themes.BingTheme(),
+            enableSearchLogo: false,
+            enableClickableLogo: false,
+            disableBirdseye: true,
+            showBreadcrumb: false,
+            showMapTypeSelector: false,
+        };
 
-            var options = {
-                credentials: genericOptions.apiKeys.bing,
-                center: new Microsoft.Maps.Location(genericOptions.center.lat, genericOptions.center.lng),
-                mapTypeId: mapTypeId,
-                zoom: 17,
-                theme: new Microsoft.Maps.Themes.BingTheme(),
-                enableSearchLogo: false,
-                enableClickableLogo: false,
-                disableBirdseye: true,
-                showBreadcrumb: false,
-                showMapTypeSelector: false,
-            };
+        /*Construct an instance of Bing maps with the options object*/ 
+        this.map = new Microsoft.Maps.Map(document.getElementById(genericOptions.canvas), options);
 
-            /*Construct an instance of Bing maps with the options object*/ 
-            this.map = new Microsoft.Maps.Map(document.getElementById(genericOptions.canvas), options);
+        /*Click for adding pins*/
+        Microsoft.Maps.Events.addHandler(this.map, 'click', $.proxy(function(e){this.addMarker(e);},this));
 
-            Microsoft.Maps.Events.addHandler(this.map, 'click', $.proxy(function(e){this.addMarker(e);},this));
-
-        }, this)});
-
+        /*Geocoding*/
         Microsoft.Maps.loadModule('Microsoft.Maps.Search', { callback: $.proxy(function(){
 
             this.searchManager = new Microsoft.Maps.Search.SearchManager(this.map);
@@ -60,6 +58,9 @@ var mapsWrapper = function(type) {
         }, this)});
 
         this.positionCallback = genericOptions.positionCallback;
+
+        /*Update visible overlay*/
+        Microsoft.Maps.Events.addHandler(this.map, 'viewchangeend', genericOptions.updateOverlayCallback);
 
     };
 
@@ -148,11 +149,12 @@ var mapsWrapper = function(type) {
                 // Displays the infoWindow
                if (!this.infoWindow) {
                     this.infoWindow = new Microsoft.Maps.Infobox(this.position);
+                    this.map.entities.push(this.infoWindow);
                 } else {
                     this.infoWindow.setLocation(this.position)
                 }
-                this.map.entities.push(this.infoWindow);
                 this.infoWindow.setOptions({ title:description});
+                this.infoWindow.setOptions({ visible:true });
             } else {
                 if (this.infoWindow) this.infoWindow.setOptions({ visible:false });
             }
@@ -164,4 +166,20 @@ var mapsWrapper = function(type) {
 
     };
 
+    this.getBoundsAsLatLng = function(){
+
+        var bounds = this.map.getBounds();
+
+            var NW = bounds.getNorthwest();
+            var SE = bounds.getSoutheast();
+
+        return {NW_lat:NW.latitude, NW_lng:NW.longitude, SE_lat:SE.latitude, SE_lng:SE.longitude};
+        
+    };
+    
+    this.removeOverlays = function(){
+
+        
+
+    };
 }

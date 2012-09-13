@@ -19,6 +19,9 @@ var isocronMap = function() {
     // Helpers
     this.userPosition = new userPositionHelper();
 
+    // Precision
+    this.digits = 10000;
+
     this.insertScript = function(canvas, searchInput, addPinButton){
 
         // We make it all asynchronous
@@ -46,7 +49,8 @@ var isocronMap = function() {
             searchInput: this.searchInput,
             addPinButton: this.addPinButton,
             apiKeys: this.apiKeys,
-            positionCallback: this.updateCurrentPosition
+            positionCallback: $.proxy(this.updateCurrentPosition, this),
+            updateOverlayCallback: $.proxy(this.displayOverlay, this)
         };
 
         mapsWrapper.createMap(options);
@@ -59,6 +63,7 @@ var isocronMap = function() {
 
         // Finally, we center the map at the user's position
         this.setToUserPositionIfAvailable();
+        this.displayOverlay();
 
     };
 
@@ -66,6 +71,7 @@ var isocronMap = function() {
 
         $('.radiusType').tooltip({placement: 'bottom'});
         $('#addPin').popover({placement: 'bottom'});
+
     };
 
     this.setToUserPositionIfAvailable = function(){
@@ -76,10 +82,45 @@ var isocronMap = function() {
 
     this.updateCurrentPosition = function(lat, lng){
 
-        var digit = 10000;
-        $('#position span').html(Math.round(lat*digit)/digit + ' — ' + Math.round(lng*digit)/digit);
+        $('#position span').html(Math.round(lat*this.digits)/this.digits + ' — ' + Math.round(lng*this.digits)/this.digits);
 
     };
+
+    this.getBounds = function(){
+
+        var bounds = mapsWrapper.getBoundsAsLatLng();
+
+        $('#position b').popover('destroy')
+        $('#position b').popover({placement: 'top', trigger: 'click', title:"Actual bounds",
+            content: 'NW : (' + Math.round(bounds.NW_lat*this.digits)/this.digits + ', ' + Math.round(bounds.NW_lng*this.digits)/this.digits + ')<br/>' +
+                     'SE : (' + Math.round(bounds.SE_lat*this.digits)/this.digits + ', ' + Math.round(bounds.SE_lng*this.digits)/this.digits + ')<br/>'
+        });
+
+        return bounds;
+
+    };
+
+    this.displayOverlay = function(){
+
+        /* Vertices */
+        databaseWrapper.getVerticesIn(this.getBounds(),function(data){
+            $('#objects span').html(data.vertices.length);
+        });
+
+        /* Plus tard : ...
+        databaseWrapper.getOverlay(this.getBounds(),function(data){
+            console.log(data);
+        });
+        */
+
+    };
+
+    this.removeOverlay = function(){
+
+        mapsWrapper.removeOverlays();
+
+    };
+
 }
 
 /* Instanciates

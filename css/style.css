@@ -4,7 +4,7 @@ header {
 	position: absolute;
 	top:0;
 	padding: 10px 0;
-	border-bottom: 1px solid grey;
+	border-bottom: 1px solid gray;
 }
   header h1          { margin:0; line-height: 32px; }
   header #logo       { padding: 0 0 0 10px; }
@@ -17,10 +17,10 @@ footer {
 	width: 100%;
 	position: absolute;
 	bottom:0;
-	border-top: 1px solid grey;
+	border-top: 1px solid gray;
 }
   footer #copyright  { padding: 0 0 0 10px; }
-  footer #position   { padding: 0 10px 0 0; }
+  footer #position, footer #objects  { padding: 0 10px 0 0; cursor: pointer;}
 
 #mapCanvas { position:absolute; width: 100%; top:51px; bottom: 31px; background: url("/img/bg_tile.jpg"); box-shadow: 0 0 10px black inset;}
   #mapCanvas img { max-width: none; } /* Twitter bootstrap fails with GMAPS */

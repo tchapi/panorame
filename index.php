@@ -1,20 +1,19 @@
 <?php
 
+/*
+ * FRAMEWORK = API Provider
+ */
 if (isset($_GET['framework'])){
 
   switch ($_GET['framework']) {
     case 'mapquest':
-      $script = "mapsWrapper.mapquest.class.js";
-      break;
     case 'gmaps':
-      $script = "mapsWrapper.gmaps.class.js";
-      break;
     case 'bing':
-      $script = "mapsWrapper.bing.class.js";
-      break;
     case 'openlayers':
+      $framework = $_GET['framework'];
+      break;
     default:
-      $script = "mapsWrapper.openlayers.class.js";
+      $framework = "openlayers";
       break;
   }
 
@@ -24,6 +23,9 @@ if (isset($_GET['framework'])){
 
 }
 
+/*
+ * PROVIDER = Tiles Provider
+ */ 
 if (isset($_GET['provider'])){
 
   switch ($_GET['provider']) {
@@ -43,6 +45,12 @@ if (isset($_GET['provider'])){
   $provider = '';
 
 }
+
+/*
+ * DATABASE = Database Provider
+ */
+
+$database = 'mysql';
 
 ?><!DOCTYPE html>
 <html>
@@ -70,6 +78,7 @@ if (isset($_GET['provider'])){
 
     <header class='row-fluid' id="header">
 
+      <!-- navbar -->
       <div class="span2" id="logo">
         <h1><a href="/">ISOCRON</a></h1>
       </div>
@@ -108,9 +117,11 @@ if (isset($_GET['provider'])){
       </div>
     </div>
     
+    <!-- footer -->
     <footer class='row-fluid'>
-      <div class="span9" id="copyright"><b class="icon-info-sign"></b> Copyright <a href="https://about.me/tchap">tchap</a></div>
+      <div class="span8" id="copyright"><b class="icon-info-sign"></b> Copyright <a href="https://about.me/tchap">tchap</a></div>
       <div class="pull-right" id="position"><b class="icon-screenshot"></b> <span>Calculating ...</span></div>
+      <div class="pull-right" id="objects"><b class="icon-th"></b> <span>0</span> Object(s)</div>
     </footer>
 
   </body>
@@ -118,10 +129,16 @@ if (isset($_GET['provider'])){
   <script src="bootstrap/js/bootstrap.min.js"></script>
   <script src="js/helpers/userPositionHelper.js" type="text/javascript"></script>
   <script src="js/isocronMap.class.js" type="text/javascript"></script>
-  <script src="js/providers/<?php echo $script; ?>" type="text/javascript"></script>
+  <script src="js/providers/mapsWrapper.<?php echo $framework; ?>.class.js" type="text/javascript"></script>
   <script>
-    /* Instanciates the wrapper
+    /* Instanciates the MAPS API wrapper
      */
     mapsWrapper = new mapsWrapper("<?php echo $provider; ?>");
+  </script>
+  <script src="js/database/databaseWrapper.<?php echo $database; ?>.class.js" type="text/javascript"></script>
+  <script>
+    /* Instanciates the DATABASE wrapper
+     */
+    databaseWrapper = new databaseWrapper();
   </script>
 </html>
