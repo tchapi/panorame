@@ -7,21 +7,15 @@ var databaseWrapper = function() {
 	var path = "include/actions/";
 
 	var actions = {
-		getEdgesIn: 	path + "getEdgesIn.action.php",
-		getVerticesIn: 	path + "getVerticesIn.action.php",
+		getObjectsIn: 	path + "getObjectsIn.action.php",
 		addVertex: 		path + "addVertex.action.php",
 		addEdge:   		path + "addEdge.action.php",
 	};
 	/* ---------------------------------------- */
 
-	this.getVerticesIn = function(bounds, callback){
+	this.getObjectsIn = function(bounds, type, callback){
 
-		$.post(actions.getVerticesIn, {bounds: bounds}, callback);
-	};
-
-	this.getEdgesIn = function(bounds, callback){
-
-		$.post(actions.getEdgesIn, {bounds: bounds}, callback);
+		$.post(actions.getObjectsIn, {bounds: bounds, type: type}, callback);
 	};
 
 	this.addVertex = function(lat, lng){

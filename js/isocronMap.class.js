@@ -102,10 +102,10 @@ var isocronMap = function() {
 
     this.getData = function(){
 
-        /* Vertices */
-        databaseWrapper.getVerticesIn(this.getBounds(),function(data){
-            $('#objects span').html(data.vertices.length);
-            mapsWrapper.setVertices(data.vertices);
+        /* Edges */
+        databaseWrapper.getObjectsIn(this.getBounds(), 'edges', function(data){
+            $('#objects span').html(data.count);
+            mapsWrapper.setEdges(data.edges);
         });
 
         /* Plus tard : ...

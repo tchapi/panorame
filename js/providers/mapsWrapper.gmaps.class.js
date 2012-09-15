@@ -131,6 +131,17 @@ var mapsWrapper = function(type) {
 
     };
 
+    this.setEdges = function(vertices){
+
+
+    };
+
+    this.displayOverlays = function(){
+
+
+
+    };
+
     this.removeOverlays = function(){
 
 
