@@ -50,7 +50,7 @@ var isocronMap = function() {
             addPinButton: this.addPinButton,
             apiKeys: this.apiKeys,
             positionCallback: $.proxy(this.updateCurrentPosition, this),
-            updateOverlayCallback: $.proxy(this.displayOverlay, this)
+            updateOverlayCallback: $.proxy(this.getData, this)
         };
 
         mapsWrapper.createMap(options);
@@ -63,7 +63,7 @@ var isocronMap = function() {
 
         // Finally, we center the map at the user's position
         this.setToUserPositionIfAvailable();
-        this.displayOverlay();
+        this.getData();
 
     };
 
@@ -100,11 +100,12 @@ var isocronMap = function() {
 
     };
 
-    this.displayOverlay = function(){
+    this.getData = function(){
 
         /* Vertices */
         databaseWrapper.getVerticesIn(this.getBounds(),function(data){
             $('#objects span').html(data.vertices.length);
+            mapsWrapper.setVertices(data.vertices);
         });
 
         /* Plus tard : ...
@@ -113,6 +114,11 @@ var isocronMap = function() {
         });
         */
 
+    };
+
+    this.displayOverlay = function(){
+
+        mapsWrapper.displayOverlays();
     };
 
     this.removeOverlay = function(){
