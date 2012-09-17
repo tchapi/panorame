@@ -4,6 +4,9 @@ class Utils {
 
 	const earth_radius = 6367500; // in m
 	
+	/*
+	 * START -- FOR TESTING PURPOSES ONLY
+	 */ 
 	public static function fillWithRandomStuff($limit){
 
 		// LAST ID
@@ -54,9 +57,6 @@ class Utils {
 			$currentNextId += 2;
 		}
 
-		//print "Vertices : \n\r\n\r $vertices";
-		//print "\n\r\n\r= = = = = = = = =\n\r\n\rEdges : \n\r\n\r $edges";
-
 		$exe = mysql_query($vertices);
 		$error = !(mysql_errno() == 0);
 
@@ -68,6 +68,9 @@ class Utils {
 		return array('success' => !$error, 'description' => $description );
 
 	}
+	/*
+	 * END -- FOR TESTING PURPOSES ONLY
+	 */ 
 
 	/*
 	 * HAVERSINE function for distance between two points on Earth
@@ -98,6 +101,7 @@ class Utils {
 
 		$getVerticesIn_query = sprintf("SELECT `id`, Y(`point`) AS lat, X(`point`), elevation AS lng FROM `isocron`.`vertices` 
 								WHERE Intersects( `point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F, %F %F))') );",
+								// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
 						mysql_real_escape_string($NW_lng),
 						mysql_real_escape_string($NW_lat),
 						mysql_real_escape_string($SE_lng),
@@ -138,8 +142,12 @@ class Utils {
 	 */
 	public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng){
 
-		$getVerticesIn_query = sprintf("SELECT `id`, Y(`point`) AS lat, X(`point`), elevation AS lng FROM `isocron`.`edges` 
-								WHERE Intersects( `point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F, %F %F))') );",
+		$getEdgesIn_query = sprintf("SELECT e.`id` AS id, Y(v_start.`point`) AS lat_start, X(v_start.`point`) AS lng_start,
+													      Y(v_dest.`point`) AS lat_dest, X(v_dest.`point`) AS lng_dest
+								FROM `isocron`.`edges` e
+								INNER JOIN `isocron`.`vertices` v_start ON v_start.`id` = e.`from_id`
+								INNER JOIN `isocron`.`vertices` v_dest ON v_dest.`id` = e.`to_id`
+								WHERE Intersects( v_start.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F, %F %F))') );",
 						mysql_real_escape_string($NW_lng),
 						mysql_real_escape_string($NW_lat),
 						mysql_real_escape_string($SE_lng),
@@ -151,22 +159,25 @@ class Utils {
 						mysql_real_escape_string($NW_lng),
 						mysql_real_escape_string($NW_lat));
 
-		$exe = mysql_query($getVerticesIn_query);
+		$exe = mysql_query($getEdgesIn_query);
 
 		// Returns true if the query was well executed
 		if (!$exe || $exe == false ) {
 		  return false;
 		} else {
-		  // Fetch the points
+		  // Fetch the edges
 		  $result = array();
 	      while ($row = mysql_fetch_array($exe, MYSQL_ASSOC)) {
 	        $result[] = array(
 					        	'id' => intval($row["id"]), 
-					        	'point' => array(
-					        		'lat' => floatval($row["lat"]),
-					        		'lng' => floatval($row['lng'])
+					        	'start' => array(
+					        		'lat' => floatval($row["lat_start"]),
+					        		'lng' => floatval($row['lng_start'])
 					        	),
-					        	'alt' => floatval($row['elevation'])
+					        	'dest' => array(
+					        		'lat' => floatval($row["lat_dest"]),
+					        		'lng' => floatval($row['lng_dest'])
+					        	)
 					        );
 	      }
 	      return $result;
@@ -178,6 +189,7 @@ class Utils {
 	/*
 	 * Adding an edge
 	 */
+	/*
 	public static function addEdge($start_lat, $start_lon, $start_alt, $dest_lat, $dest_lon, $dest_alt, $type){
 
 		$start_point_query = sprintf("INSERT INTO `isocron`.`vertices` (`id`, `point`, `elevation`) VALUES (NULL, GeomFromText('point(%F %F)'), '%d');",
@@ -240,5 +252,5 @@ class Utils {
 		  var_dump($row);
 		}
 	}
-
+	*/
 }

@@ -85,7 +85,7 @@
      */
     mapsWrapper = new mapsWrapper("<?php echo $provider; ?>");
   </script>
-  <script src="js/database/databaseWrapper.<?php echo $database; ?>.class.js" type="text/javascript"></script>
+  <script src="js/database/databaseWrapper.class.js" type="text/javascript"></script>
   <script>
     /* Instanciates the DATABASE wrapper
      */

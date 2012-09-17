@@ -105,7 +105,7 @@ var isocronMap = function() {
         /* Edges */
         databaseWrapper.getObjectsIn(this.getBounds(), 'edges', function(data){
             $('#objects span').html(data.count);
-            mapsWrapper.setEdges(data.edges);
+            mapsWrapper.setEdges(data.edges, data.count);
         });
 
         /* Plus tard : ...
@@ -124,6 +124,10 @@ var isocronMap = function() {
     this.removeOverlay = function(){
 
         mapsWrapper.removeOverlays();
+
+    };
+
+    this.dijkstra = function(){
 
     };
 

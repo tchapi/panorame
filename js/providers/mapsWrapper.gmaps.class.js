@@ -131,8 +131,20 @@ var mapsWrapper = function(type) {
 
     };
 
-    this.setEdges = function(vertices){
+    this.setEdges = function(edges, count){
 
+        this.edges = {};
+
+        for(var i = 0; i < count; i++) {
+            this.edges[i] = new google.maps.Polyline({
+              path: [
+                new google.maps.LatLng(edges[i].start.lat, edges[i].start.lng),
+                new google.maps.LatLng(edges[i].dest.lat, edges[i].dest.lng)],
+              strokeColor: '#FF0000',
+              strokeOpacity: 1.0,
+              strokeWeight: 2
+            });
+        };
 
     };
 

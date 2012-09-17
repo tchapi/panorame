@@ -1,13 +1,7 @@
 <?php
 
-/*
- * Defaults
- */
-
-$addedScript = "";
-$framework   = "gmaps";
-$provider    = "";
-$database    = 'mysql';
+$app = '_FRONTEND';
+include('include/config.php');
 
 /*
  * FRAMEWORK = API Provider

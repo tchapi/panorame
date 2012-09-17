@@ -1,8 +1,7 @@
 <?php
 
-	include_once('config.php');
-	include_once('DB/DB.php');
-	include_once('DB/Utils.php');
+	$app = '_BACKEND';
+	include_once('../config.php');
 
 	$start_lat = floatval($_POST['start_lat']);
 	$start_lon = floatval($_POST['start_lon']);

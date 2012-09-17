@@ -18,8 +18,19 @@ var databaseWrapper = function() {
 		$.post(actions.getObjectsIn, {bounds: bounds, type: type}, callback);
 	};
 
-	this.addVertex = function(lat, lng){
+	this.addVertex = function(lat, lng, alt){
 
+		var data = {
+			lat: lat, 
+			lng: lng, 
+			alt: alt
+		};
+
+		$.post(actions.addVertex, data,function(data){
+
+			console.log(data);
+
+		});
 	};
 
 	this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type){
