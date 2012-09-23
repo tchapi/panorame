@@ -55,10 +55,10 @@ var mapsWrapper = function(type) {
                 var tiles = new OpenLayers.Layer.Google('', {type: google.maps.MapTypeId.HYBRID});
                 break;
             case 'bing-road':
-                var tiles = new OpenLayers.Layer.Bing({key: genericOptions.apiKeys.bing,type: "Road",wrapDateLine: true});
+                var tiles = new OpenLayers.Layer.Bing({key: genericOptions.apiKeys.bing,type: "Road", wrapDateLine: true});
                 break;
             case 'bing-hybrid':
-                var tiles = new OpenLayers.Layer.Bing({key: genericOptions.apiKeys.bing,type: "AerialWithLabels",wrapDateLine: true});
+                var tiles = new OpenLayers.Layer.Bing({key: genericOptions.apiKeys.bing,type: "AerialWithLabels", wrapDateLine: true});
                 break;
             case 'osmaps':
             default:
@@ -70,13 +70,15 @@ var mapsWrapper = function(type) {
         this.markers = new OpenLayers.Layer.Markers( "Markers" );
         this.map.addLayer(this.markers);
 
-        var size = new OpenLayers.Size(21,25);
-        this.markerIcon = new OpenLayers.Icon('http://www.openlayers.org/dev/img/marker.png', size, new OpenLayers.Pixel(-(size.w/2), -size.h*1.2));
-
         this.positionCallback = genericOptions.positionCallback;
 
-        this.colors = genericOptions.colors;
-        this.thicknesses = genericOptions.thicknesses;
+        this.colorsForType = genericOptions.colorsForType;
+        this.thicknessesForType = genericOptions.thicknessesForType;
+        this.standardPinImage = genericOptions.standardPinImage;
+        this.closestPointPinImage = genericOptions.closestPointPinImage;
+
+        var size = new OpenLayers.Size(34,50);
+        this.markerIcon = new OpenLayers.Icon(this.standardPinImage, size, new OpenLayers.Pixel(-(size.w/2), -size.h*0.9));
 
         genericOptions.mapReadyCallback();
     };
@@ -199,9 +201,9 @@ var mapsWrapper = function(type) {
 
     };
       
-    this.setEdgesAndDisplay = function(edges, count){
+    this.setDataOverlay = function(edges, closestPoint, count){
 
-        this.removeOverlays();
+        this.removeDataOverlay();
         this.edges.length = 0;
 
         this.edgesCollection = new OpenLayers.Layer.Vector("edges");
@@ -212,29 +214,43 @@ var mapsWrapper = function(type) {
                 this.pointFromLonLat(edges[i].dest.point.lat, edges[i].dest.point.lng)
             ]));
             this.edges[i].style = {
-                strokeColor: this.colors[edges[i].type],
-                strokeWidth: this.thicknesses[edges[i].type]
+                strokeColor: this.colorsForType[edges[i].type],
+                strokeWidth: this.thicknessesForType[edges[i].type]
             };
         };
 
+        var size = new OpenLayers.Size(34,50);
+        this.closestPoint = new OpenLayers.Marker(new OpenLayers.LonLat(closestPoint.lng, closestPoint.lat).transform(
+                new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                this.map.getProjectionObject() // to Spherical Mercator Projection
+              ), new OpenLayers.Icon(this.closestPointPinImage, size, new OpenLayers.Pixel(-size.w/2, -size.h*0.9)));
+
         this.edgesCollection.addFeatures(this.edges);
 
-        this.displayOverlays();
+        this.displayDataOverlay();
 
     };
 
-    this.displayOverlays = function(){
+    this.displayDataOverlay = function(){
 
         if (this.edgesCollection) {
             this.map.addLayer(this.edgesCollection);
+            this.map.setLayerIndex(this.edgesCollection, 0);
         }
+        if (this.closestPoint) {
+            this.markers.addMarker(this.closestPoint);
+        }
+
         
     };
 
-    this.removeOverlays = function(){
+    this.removeDataOverlay = function(){
 
         if (this.edgesCollection) {
             this.map.removeLayer(this.edgesCollection);
+        }
+        if (this.closestPoint) {
+            this.markers.removeMarker(this.closestPoint);
         }
     };
 }

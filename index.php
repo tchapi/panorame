@@ -30,7 +30,7 @@
 
       <!-- navbar -->
       <div class="span2" id="logo">
-        <h1><a href="/">ISOCRON</a></h1>
+        <h1><a href="/">MSVKGFSHR</a></h1>
       </div>
 
       <div class="input-prepend input-append span4" id="searchForm">

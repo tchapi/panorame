@@ -5,7 +5,7 @@
         define('_PATH', dirname(__FILE__) . '/');
   
   /* Closest function radius (in m) */
-  define('_closestPointRadius_search', 100);
+  define('_closestPointRadius_search', 200);
   define('_closestPointRadius_edit', 10);
 
 	if ($app == '_FRONTEND') {

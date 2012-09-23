@@ -52,8 +52,10 @@ var isocronMap = function() {
             apiKeys: this.apiKeys,
             positionCallback: $.proxy(this.updateCurrentPosition, this),
             updateOverlayCallback: $.proxy(this.getData, this),
-            colors: ['#FF0000','#0000FF','#000000'], // 0, 1, 2
-            thicknesses: [4,4,4], // 0, 1, 2
+            colorsForType: ['#FF0000','#0000FF','#000000'], // 0, 1, 2
+            thicknessesForType: [4,4,4], // 0, 1, 2
+            standardPinImage: '/img/pins/Blue/8.png',
+            closestPointPinImage: '/img/pins/Green/8.png',
             mapReadyCallback: $.proxy(this.mapIsReady, this),
             addEdgeCallback: $.proxy(this.addEdge, this)
         };
@@ -154,7 +156,7 @@ var isocronMap = function() {
         /* Edges */
         databaseWrapper.getObjectsIn(this.getBounds(), 'edges', this.position, function(data){
             $('#objects span').html(data.count);
-            mapsWrapper.setEdgesAndDisplay(data.edges, data.count);
+            mapsWrapper.setDataOverlay(data.edges, data.closest.point, data.count);
         });
 
         /* Vertices with Children

@@ -50,8 +50,10 @@ var mapsWrapper = function(type) {
 
         this.positionCallback = genericOptions.positionCallback;
 
-        this.colors = genericOptions.colors;
-        this.thicknesses = genericOptions.thicknesses;
+        this.colorsForType = genericOptions.colorsForType;
+        this.thicknessesForType = genericOptions.thicknessesForType;
+        this.standardPinImage = genericOptions.standardPinImage;
+        this.closestPointPinImage = genericOptions.closestPointPinImage;
 
         /*Click for adding pins*/
         Microsoft.Maps.Events.addHandler(this.map, 'click', $.proxy(function(e){this.addMarker(e);},this));
@@ -137,7 +139,7 @@ var mapsWrapper = function(type) {
             
             // Creates the marker & infoWindow
             if (!this.marker) {
-                this.marker = new Microsoft.Maps.Pushpin(this.position);
+                this.marker = new Microsoft.Maps.Pushpin(this.position, {zIndex: 11, icon: this.standardPinImage, height: 50, width: 34});
             } else {
                 this.marker.setLocation(this.position);
             }
@@ -152,7 +154,7 @@ var mapsWrapper = function(type) {
                 } else {
                     this.infoWindow.setLocation(this.position)
                 }
-                this.infoWindow.setOptions({ title:description});
+                this.infoWindow.setOptions({ title:description, zIndex: 10});
                 this.infoWindow.setOptions({ visible:true });
             } else {
                 if (this.infoWindow) this.infoWindow.setOptions({ visible:false });
@@ -176,9 +178,9 @@ var mapsWrapper = function(type) {
         
     };
     
-    this.setEdgesAndDisplay = function(edges, count){
+    this.setDataOverlay = function(edges, closestPoint, count){
 
-        this.removeOverlays();
+        this.removeDataOverlay();
         this.edges.length = 0;
 
         this.edgesCollection = new Microsoft.Maps.EntityCollection();
@@ -188,28 +190,38 @@ var mapsWrapper = function(type) {
                 new Microsoft.Maps.Location(edges[i].start.point.lat, edges[i].start.point.lng),
                 new Microsoft.Maps.Location(edges[i].dest.point.lat, edges[i].dest.point.lng)
             ], {
-                strokeColor:new Microsoft.Maps.Color.fromHex(this.colors[edges[i].type]), 
-                strokeThickness: this.thicknesses[edges[i].type]
+                strokeColor:new Microsoft.Maps.Color.fromHex(this.colorsForType[edges[i].type]), 
+                strokeThickness: this.thicknessesForType[edges[i].type]
             });
             this.edgesCollection.push(this.edges[i]);
         };
 
-        this.displayOverlays();
+        this.closestPoint = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(closestPoint.lat, closestPoint.lng),{
+            icon: this.closestPointPinImage, height: 50, width: 34, zIndex: 12
+        });
+
+        this.displayDataOverlay();
 
     };
 
-    this.displayOverlays = function(){
+    this.displayDataOverlay = function(){
 
         if (this.edgesCollection) {
             this.map.entities.push(this.edgesCollection);
         }
+        if (this.closestPoint) {
+            this.map.entities.push(this.closestPoint);
+        }
 
     };
 
-    this.removeOverlays = function(){
+    this.removeDataOverlay = function(){
 
         if (this.edgesCollection) {
             this.map.entities.remove(this.edgesCollection);
+        }
+        if (this.closestPoint) {
+            this.map.entities.remove(this.closestPoint);
         }
 
     };

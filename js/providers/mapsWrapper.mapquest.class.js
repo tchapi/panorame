@@ -24,7 +24,7 @@ var mapsWrapper = function(type) {
 
         var options = {
           elt: document.getElementById(genericOptions.canvas),     /*ID of element on the page where you want the map added*/ 
-          zoom:14,                         /*initial zoom level of the map*/ 
+          zoom:17,                         /*initial zoom level of the map*/ 
           latLng:genericOptions.center,  /*center of map in latitude/longitude */ 
           mtype:'map'                      /*map type (map)*/ 
         };
@@ -34,8 +34,13 @@ var mapsWrapper = function(type) {
 
         this.positionCallback = genericOptions.positionCallback;
 
-        this.colors = genericOptions.colors;
-        this.thicknesses = genericOptions.thicknesses;
+        this.colorsForType = genericOptions.colorsForType;
+        this.thicknessesForType = genericOptions.thicknessesForType;
+        this.standardPinImage = genericOptions.standardPinImage;
+        this.closestPointPinImage = genericOptions.closestPointPinImage;
+
+        this.markerIcon = new MQA.Icon(this.standardPinImage,34,50);
+
 
         MQA.EventManager.addListener(this.map, 'click', $.proxy(function(e){
           if (this.addPin == true) this.setPosition(e.ll.lat, e.ll.lng, null);
@@ -126,6 +131,9 @@ var mapsWrapper = function(type) {
             // Creates the marker
             this.map.removeAllShapes();
             this.marker = new MQA.Poi({lat:lat, lng:lng});
+            this.marker.setIcon(this.markerIcon);
+            this.marker.setShadow(false);
+            this.marker.setBias({x:10,y:0});
             this.map.addShape(this.marker);
 
             this.map.savedCenter = {lat:lat, lng:lng};
@@ -154,9 +162,9 @@ var mapsWrapper = function(type) {
 
     };
     
-    this.setEdgesAndDisplay = function(edges, count){
+    this.setDataOverlay = function(edges, closestPoint, count){
 
-        this.removeOverlays();
+        this.removeDataOverlay();
         this.edges.length = 0;
 
         this.edgesCollection = new MQA.ShapeCollection();
@@ -166,15 +174,21 @@ var mapsWrapper = function(type) {
             this.edges[i] = new MQA.LineOverlay();
             this.edges[i].setShapePoints([edges[i].start.point.lat, edges[i].start.point.lng, edges[i].dest.point.lat, edges[i].dest.point.lng]);
             this.edgesCollection.add(this.edges[i]);
-            this.edges[i].color = this.colors[edges[i].type];
-            this.edges[i].borderWith = this.thicknesses[edges[i].type];
+            this.edges[i].color = this.colorsForType[edges[i].type];
+            this.edges[i].borderWith = this.thicknessesForType[edges[i].type];
         };
 
-        this.displayOverlays();
+        this.closestPoint = new MQA.Poi({lat:closestPoint.lat, lng:closestPoint.lng});
+        this.closestPoint.setIcon(new MQA.Icon(this.closestPointPinImage,34,50));
+        this.closestPoint.setShadow(false);
+        this.closestPoint.setBias({x:10,y:0});
+        this.edgesCollection.add(this.closestPoint);
+
+        this.displayDataOverlay();
 
     };
 
-    this.displayOverlays = function(){
+    this.displayDataOverlay = function(){
 
         if (this.edgesCollection) {
             this.map.addShapeCollection(this.edgesCollection);
@@ -182,7 +196,7 @@ var mapsWrapper = function(type) {
         
     };
 
-    this.removeOverlays = function(){
+    this.removeDataOverlay = function(){
 
         this.map.removeShapeCollection('edges');
 

@@ -11,6 +11,7 @@ var mapsWrapper = function(type) {
     this.type = type;
     this.map = null;
     this.edges = [];
+    this.closestPoint = null;
 
     this.getUrl = function(genericOptions){
 
@@ -53,8 +54,10 @@ var mapsWrapper = function(type) {
         this.positionCallback = genericOptions.positionCallback;
         this.addEdgeCallback = genericOptions.addEdgeCallback;
 
-        this.colors = genericOptions.colors;
-        this.thicknesses = genericOptions.thicknesses;
+        this.colorsForType = genericOptions.colorsForType;
+        this.thicknessesForType = genericOptions.thicknessesForType;
+        this.standardPinImage = genericOptions.standardPinImage;
+        this.closestPointPinImage = genericOptions.closestPointPinImage;
 
         genericOptions.mapReadyCallback();
     };
@@ -116,6 +119,7 @@ var mapsWrapper = function(type) {
                 });
             }
             this.marker.setPosition(this.position);
+            this.marker.setIcon(this.standardPinImage);
 
             if (description != null){
                 // Displays the infoWindow
@@ -142,9 +146,9 @@ var mapsWrapper = function(type) {
 
     };
 
-    this.setEdgesAndDisplay = function(edges, count){
+    this.setDataOverlay = function(edges, closestPoint, count){
 
-        this.removeOverlays();
+        this.removeDataOverlay();
         this.edges.length = 0;
 
         for(var i = 0; i < count; i++) {
@@ -152,38 +156,43 @@ var mapsWrapper = function(type) {
               path: [
                 new google.maps.LatLng(edges[i].start.point.lat, edges[i].start.point.lng),
                 new google.maps.LatLng(edges[i].dest.point.lat, edges[i].dest.point.lng)],
-              strokeColor: this.colors[edges[i].type],
-              strokeWeight: this.thicknesses[edges[i].type]
+              strokeColor: this.colorsForType[edges[i].type],
+              strokeWeight: this.thicknessesForType[edges[i].type]
             });
             google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
 
         };
 
-        this.displayOverlays();
+        this.closestPoint = new google.maps.Marker();
+        this.closestPoint.setIcon(this.closestPointPinImage);
+        this.closestPoint.setPosition(new google.maps.LatLng(closestPoint.lat, closestPoint.lng));
+
+        this.displayDataOverlay();
 
     };
 
-    this.setClosestPointAndDisplay = function(){
-
-
-    };
-
-    this.displayOverlays = function(){
+    this.displayDataOverlay = function(){
 
         if (this.edges) {
             for (i in this.edges) {
               this.edges[i].setMap(this.map);
             }
         }
+        if (this.closestPoint){
+            this.closestPoint.setMap(this.map);
+        }
 
     };
 
-    this.removeOverlays = function(){
+    this.removeDataOverlay = function(){
 
         if (this.edges) {
             for (i in this.edges) {
               this.edges[i].setMap(null);
             }
+        }
+        if (this.closestPoint){
+            this.closestPoint.setMap(null);
         }
 
     };
