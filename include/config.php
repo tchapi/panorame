@@ -1,5 +1,13 @@
 <?php
 
+  /** Absolute path to the Tuneefy directory. */
+  if ( !defined('_PATH') )
+        define('_PATH', dirname(__FILE__) . '/');
+  
+  /* Closest function radius (in m) */
+  define('_closestPointRadius_search', 100);
+  define('_closestPointRadius_edit', 10);
+
 	if ($app == '_FRONTEND') {
 
 		/*
@@ -21,13 +29,13 @@
 		$password = "isocron";
 		$database = "isocron";
 
-		$database = "mongo"; // OR mysql
+		$engine = "mysql"; // OR mysql
 
 		/* ----------------------------- */
 		/* ------- DO NOT MODIFY ------- */
 
-			$database_connector_path = 'DB/'.$database.'/DBConnector.php';
-			$database_utils_path = 'DB/'.$database.'/DBUtils.php';
+			$database_connector_path = _PATH.'DB/'.$engine.'/DBConnector.php';
+			$database_utils_path = _PATH.'DB/'.$engine.'/DBUtils.php';
 
 			include_once($database_connector_path);
 			include_once($database_utils_path);

@@ -7,33 +7,18 @@ var databaseWrapper = function() {
 	var path = "include/actions/";
 
 	var actions = {
-		getObjectsIn: 	path + "getObjectsIn.action.php",
-		addVertex: 		path + "addVertex.action.php",
-		addEdge:   		path + "addEdge.action.php",
+		getObjectsIn: 		path + "getObjectsIn.action.php",
+		getClosestVertex: 	path + "getClosestVertex.action.php",
+		addEdge:   			path + "addEdge.action.php",
 	};
 	/* ---------------------------------------- */
 
-	this.getObjectsIn = function(bounds, type, callback){
+	this.getObjectsIn = function(bounds, type, poi, callback){
 
-		$.post(actions.getObjectsIn, {bounds: bounds, type: type}, callback);
+		$.post(actions.getObjectsIn, {bounds: bounds, type: type, poi: poi}, callback);
 	};
 
-	this.addVertex = function(lat, lng, alt){
-
-		var data = {
-			lat: lat, 
-			lng: lng, 
-			alt: alt
-		};
-
-		$.post(actions.addVertex, data,function(data){
-
-			console.log(data);
-
-		});
-	};
-
-	this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type){
+	this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type, callback){
 
 		var data = {
 			start_lat: start_lat, 
@@ -45,11 +30,18 @@ var databaseWrapper = function() {
 			type: type 
 		};
 
-		$.post(actions.addEdge, data,function(data){
+		$.post(actions.addEdge, data, callback);
+	};
 
-			console.log(data);
+	this.getClosestVertex = function(lat, lng, radius, callback){
 
-		});
+		var data = {
+			lat: lat, 
+			lng: lng,
+			radius: radius 
+		};
+
+		$.post(actions.getClosestVertex, data,callback);
 	};
 
 }

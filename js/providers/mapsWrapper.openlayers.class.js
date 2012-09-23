@@ -10,6 +10,7 @@ var mapsWrapper = function(type) {
 
     this.type = type;
     this.map = null;
+    this.edges = [];
 
     this.getUrl = function(genericOptions){
 
@@ -37,7 +38,8 @@ var mapsWrapper = function(type) {
                         }, this),
                         "moveend": genericOptions.updateOverlayCallback,
                         "zoomend": genericOptions.updateOverlayCallback
-                    }
+                    },
+            center: new OpenLayers.LonLat(genericOptions.center.lng, genericOptions.center.lat)
         };
 
         this.map = new OpenLayers.Map(genericOptions.canvas, options);
@@ -65,11 +67,6 @@ var mapsWrapper = function(type) {
 
         this.map.addLayer(tiles);
 
-        this.map.setCenter(new OpenLayers.LonLat(genericOptions.center.lng, genericOptions.center.lat).transform(
-                new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-                this.map.getProjectionObject() // to Spherical Mercator Projection
-              ));
-
         this.markers = new OpenLayers.Layer.Markers( "Markers" );
         this.map.addLayer(this.markers);
 
@@ -77,6 +74,11 @@ var mapsWrapper = function(type) {
         this.markerIcon = new OpenLayers.Icon('http://www.openlayers.org/dev/img/marker.png', size, new OpenLayers.Pixel(-(size.w/2), -size.h*1.2));
 
         this.positionCallback = genericOptions.positionCallback;
+
+        this.colors = genericOptions.colors;
+        this.thicknesses = genericOptions.thicknesses;
+
+        genericOptions.mapReadyCallback();
     };
 
     this.setupEvents = function(genericOptions){
@@ -124,29 +126,29 @@ var mapsWrapper = function(type) {
             }
         }, this));
 
-        $('#'+genericOptions.addPinButton).click($.proxy(function(event){
+    };
 
-            var button = $('#'+genericOptions.addPinButton);
+    this.setAddPin = function(booleanValue){
+        this.addPin = booleanValue;
+    };
 
-            if (button.hasClass('active')){
-                this.addPin = false;
-                button.html('<b class="icon-map-marker icon-white"></b> Drop Pin');
-                button.removeClass('active');
-            } else {
-                this.addPin = true;
-                button.html('<b class="icon-ok icon-white"></b> Finish');
-                button.addClass('active');
-            }
-
-        },this));
-
+    this.setAddEdge = function(booleanValue){
+        this.addEdge = booleanValue;
     };
 
     this.inverseMercator = function(unproj_lat, unproj_lng){
         
         lonlat = OpenLayers.Layer.SphericalMercator.inverseMercator(unproj_lng, unproj_lat);
         return {lat:lonlat.lat, lng:lonlat.lon};
-    }
+    };
+
+    this.pointFromLonLat = function(lat, lon){
+        var convertedPoint = new OpenLayers.LonLat(lon, lat);
+        convertedPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+        
+        return new OpenLayers.Geometry.Point(convertedPoint.lon, convertedPoint.lat);
+       
+    };
 
     this.setPosition = function(lat, lng, description){
 
@@ -196,10 +198,43 @@ var mapsWrapper = function(type) {
         return {NW_lat:NW.lat, NW_lng:NW.lng, SE_lat:SE.lat, SE_lng:SE.lng};
 
     };
+      
+    this.setEdgesAndDisplay = function(edges, count){
+
+        this.removeOverlays();
+        this.edges.length = 0;
+
+        this.edgesCollection = new OpenLayers.Layer.Vector("edges");
+
+        for(var i = 0; i < count; i++) {
+            this.edges[i] = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([
+                this.pointFromLonLat(edges[i].start.point.lat, edges[i].start.point.lng),
+                this.pointFromLonLat(edges[i].dest.point.lat, edges[i].dest.point.lng)
+            ]));
+            this.edges[i].style = {
+                strokeColor: this.colors[edges[i].type],
+                strokeWidth: this.thicknesses[edges[i].type]
+            };
+        };
+
+        this.edgesCollection.addFeatures(this.edges);
+
+        this.displayOverlays();
+
+    };
+
+    this.displayOverlays = function(){
+
+        if (this.edgesCollection) {
+            this.map.addLayer(this.edgesCollection);
+        }
         
+    };
+
     this.removeOverlays = function(){
 
-        
-
+        if (this.edgesCollection) {
+            this.map.removeLayer(this.edgesCollection);
+        }
     };
 }

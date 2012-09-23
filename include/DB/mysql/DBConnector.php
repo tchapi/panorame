@@ -42,8 +42,9 @@ class DB {
     $success	= mysql_select_db($this->dbname, $this->link);
     
     if ( !$success ) {
-      
+   
       $this->error();
+
       
     } else {
     
@@ -55,13 +56,13 @@ class DB {
   public function error() 
   { 
       // Closes the current connection
+      print 'MySQL Error : '.mysql_error();
       mysql_close($this->link); 
-      
+
       die(0);
   }
   
 }
-
 
 /* *************************************************** */
 /*                                                     */

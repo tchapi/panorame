@@ -43,18 +43,28 @@ var isocronMap = function() {
 
         this.setupVisual();
 
-        var options={
+        // Options
+        this.options={
             canvas: this.canvas,      
             center:{lat:48.8566667, lng:2.3509871}, // PARIS
             searchInput: this.searchInput,
             addPinButton: this.addPinButton,
             apiKeys: this.apiKeys,
             positionCallback: $.proxy(this.updateCurrentPosition, this),
-            updateOverlayCallback: $.proxy(this.getData, this)
+            updateOverlayCallback: $.proxy(this.getData, this),
+            colors: ['#FF0000','#0000FF','#000000'], // 0, 1, 2
+            thicknesses: [4,4,4], // 0, 1, 2
+            mapReadyCallback: $.proxy(this.mapIsReady, this),
+            addEdgeCallback: $.proxy(this.addEdge, this)
         };
 
-        mapsWrapper.createMap(options);
-        mapsWrapper.setupEvents(options);
+        mapsWrapper.createMap(this.options);
+
+    };
+
+    this.mapIsReady = function(){
+
+        mapsWrapper.setupEvents(this.options);
 
         // We setup the events
         $('#self').click($.proxy(function(){
@@ -63,14 +73,45 @@ var isocronMap = function() {
 
         // Finally, we center the map at the user's position
         this.setToUserPositionIfAvailable();
-        this.getData();
 
     };
 
     this.setupVisual = function(){
 
+        var addPinButton = $('#addPin');
+        var addEdgeButton = $('#addEdge button');
+
         $('.radiusType').tooltip({placement: 'bottom'});
-        $('#addPin').popover({placement: 'bottom'});
+
+        addPinButton.popover({placement: 'bottom'});
+        addPinButton.click($.proxy(function(event){
+
+            if (addPinButton.hasClass('active')){
+                mapsWrapper.setAddPin(false);
+                addPinButton.html('<b class="icon-map-marker icon-white"></b> Drop Pin');
+                addPinButton.removeClass('active');
+            } else {
+                mapsWrapper.setAddPin(true);
+                addPinButton.html('<b class="icon-ok icon-white"></b> Finish');
+                addPinButton.addClass('active');
+            }
+
+        },this));
+
+        addEdgeButton.popover({placement: 'bottom'});
+        addEdgeButton.click($.proxy(function(event){
+
+            if (addEdgeButton.hasClass('active')){
+                mapsWrapper.setAddEdge(false);
+                addEdgeButton.html('<b class="icon-plus-sign icon-white"></b> Add edges');
+                addEdgeButton.removeClass('active');
+            } else {
+                mapsWrapper.setAddEdge(true);
+                addEdgeButton.html('<b class="icon-ok icon-white"></b> Finish');
+                addEdgeButton.addClass('active');
+            }
+
+        },this));
 
     };
 
@@ -82,6 +123,7 @@ var isocronMap = function() {
 
     this.updateCurrentPosition = function(lat, lng){
 
+        this.position = {lat: lat, lng: lng};
         $('#position span').html(Math.round(lat*this.digits)/this.digits + ' — ' + Math.round(lng*this.digits)/this.digits);
 
     };
@@ -102,17 +144,30 @@ var isocronMap = function() {
 
     this.getData = function(){
 
-        /* Edges */
-        databaseWrapper.getObjectsIn(this.getBounds(), 'edges', function(data){
+        /* Vertices
+        databaseWrapper.getObjectsIn(this.getBounds(), 'vertices', this.position, function(data){
             $('#objects span').html(data.count);
-            mapsWrapper.setEdges(data.edges, data.count);
-        });
-
-        /* Plus tard : ...
-        databaseWrapper.getOverlay(this.getBounds(),function(data){
-            console.log(data);
+            mapsWrapper.setVertices(data.vertices, data.count);
         });
         */
+
+        /* Edges */
+        databaseWrapper.getObjectsIn(this.getBounds(), 'edges', this.position, function(data){
+            $('#objects span').html(data.count);
+            mapsWrapper.setEdgesAndDisplay(data.edges, data.count);
+        });
+
+        /* Vertices with Children
+        databaseWrapper.getObjectsIn(this.getBounds(), 'tree', this.position, function(data){
+            $('#objects span').html(data.count);
+            
+        });
+        */
+    };
+
+    this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type){
+
+        var result = databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, $('#addEdge_type').val(), $.proxy(this.getData,this));
 
     };
 

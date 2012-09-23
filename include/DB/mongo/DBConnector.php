@@ -26,7 +26,8 @@ class DB {
   { 
     try {
 
-      $this->link = new Mongo(); 
+      $this->link = new Mongo("mongodb://".$this->username.":".$this->password."@".$this->server);
+      return true
     
     } catch ( MongoConnectionException $e ) {
     
@@ -40,6 +41,7 @@ class DB {
     try {
 
       $success  = $this->link->selectDB($this->dbname); 
+      return true;
     
     } catch ( MongoConnectionException $e ) {
     
@@ -52,7 +54,7 @@ class DB {
   { 
       // Closes the current connection
       // $this->link->lastError(); 
-      
+      print "Mongo DB Error : "."(no code)";
       die(0);
   }
   

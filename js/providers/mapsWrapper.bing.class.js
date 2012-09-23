@@ -10,6 +10,7 @@ var mapsWrapper = function(type) {
 
     this.type = type;
     this.map = null;
+    this.edges = [];
 
     this.getUrl = function(genericOptions){
 
@@ -47,20 +48,25 @@ var mapsWrapper = function(type) {
         /*Construct an instance of Bing maps with the options object*/ 
         this.map = new Microsoft.Maps.Map(document.getElementById(genericOptions.canvas), options);
 
+        this.positionCallback = genericOptions.positionCallback;
+
+        this.colors = genericOptions.colors;
+        this.thicknesses = genericOptions.thicknesses;
+
         /*Click for adding pins*/
         Microsoft.Maps.Events.addHandler(this.map, 'click', $.proxy(function(e){this.addMarker(e);},this));
+
+        /*Update visible overlay*/
+        Microsoft.Maps.Events.addHandler(this.map, 'viewchangeend', genericOptions.updateOverlayCallback);
 
         /*Geocoding*/
         Microsoft.Maps.loadModule('Microsoft.Maps.Search', { callback: $.proxy(function(){
 
             this.searchManager = new Microsoft.Maps.Search.SearchManager(this.map);
 
+            genericOptions.mapReadyCallback();
+
         }, this)});
-
-        this.positionCallback = genericOptions.positionCallback;
-
-        /*Update visible overlay*/
-        Microsoft.Maps.Events.addHandler(this.map, 'viewchangeend', genericOptions.updateOverlayCallback);
 
     };
 
@@ -100,21 +106,14 @@ var mapsWrapper = function(type) {
             }
         }, this));
 
-        $('#'+genericOptions.addPinButton).click($.proxy(function(event){
+    };
 
-            var button = $('#'+genericOptions.addPinButton);
+    this.setAddPin = function(booleanValue){
+        this.addPin = booleanValue;
+    };
 
-            if (button.hasClass('active')){
-                this.addPin = false;
-                button.html('<b class="icon-map-marker icon-white"></b> Drop Pin');
-                button.removeClass('active');
-            } else {
-                this.addPin = true;
-                button.html('<b class="icon-ok icon-white"></b> Finish');
-                button.addClass('active');
-            }
-
-        },this));
+    this.setAddEdge = function(booleanValue){
+        this.addEdge = booleanValue;
     };
 
     this.addMarker = function(event){
@@ -177,9 +176,41 @@ var mapsWrapper = function(type) {
         
     };
     
+    this.setEdgesAndDisplay = function(edges, count){
+
+        this.removeOverlays();
+        this.edges.length = 0;
+
+        this.edgesCollection = new Microsoft.Maps.EntityCollection();
+
+        for(var i = 0; i < count; i++) {
+            this.edges[i] = new Microsoft.Maps.Polyline([
+                new Microsoft.Maps.Location(edges[i].start.point.lat, edges[i].start.point.lng),
+                new Microsoft.Maps.Location(edges[i].dest.point.lat, edges[i].dest.point.lng)
+            ], {
+                strokeColor:new Microsoft.Maps.Color.fromHex(this.colors[edges[i].type]), 
+                strokeThickness: this.thicknesses[edges[i].type]
+            });
+            this.edgesCollection.push(this.edges[i]);
+        };
+
+        this.displayOverlays();
+
+    };
+
+    this.displayOverlays = function(){
+
+        if (this.edgesCollection) {
+            this.map.entities.push(this.edgesCollection);
+        }
+
+    };
+
     this.removeOverlays = function(){
 
-        
+        if (this.edgesCollection) {
+            this.map.entities.remove(this.edgesCollection);
+        }
 
     };
 }

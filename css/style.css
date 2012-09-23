@@ -12,17 +12,18 @@ header {
     header #actionForm div{ padding: 0 5px; }
 
 footer {
-	height: 20px;
+	height: 30px;
 	padding: 5px 0;
 	width: 100%;
 	position: absolute;
 	bottom:0;
 	border-top: 1px solid gray;
 }
-  footer #copyright  { padding: 0 0 0 10px; }
-  footer #position, footer #objects  { padding: 0 10px 0 0; cursor: pointer;}
+  footer #copyright  { padding: 5px 0 0 10px; }
+  footer #position, footer #objects { padding: 5px 5px 0 5px; cursor: pointer;}
+  footer #addEdge .btn {margin-bottom: 9px;}
 
-#mapCanvas { position:absolute; width: 100%; top:51px; bottom: 31px; background: url("/img/bg_tile.jpg"); box-shadow: 0 0 10px black inset;}
+#mapCanvas { position:absolute; width: 100%; top:51px; bottom: 41px; background: url("/img/bg_tile.jpg"); box-shadow: 0 0 10px black inset;}
   #mapCanvas img { max-width: none; } /* Twitter bootstrap fails with GMAPS */
   #mapCanvas label { width: auto; display:inline; }  /* Twitter bootstrap fails with GMAPS */
 

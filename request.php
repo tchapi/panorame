@@ -35,6 +35,7 @@ if (isset($_GET['provider'])){
     case 'bing-road':
     case 'bing-hybrid':
     case 'osmaps':
+    case 'mapquest':
       $provider = $_GET['provider'];
       break;
   }

@@ -10,6 +10,7 @@ var mapsWrapper = function(type) {
 
     this.type = type;
     this.map = null;
+    this.edges = [];
         
     this.getUrl = function(genericOptions){
 
@@ -31,17 +32,10 @@ var mapsWrapper = function(type) {
         /*Construct an instance of MQA.TileMap with the options object*/ 
         this.map = new MQA.TileMap(options);
 
-        MQA.withModule('viewoptions','largezoom','geocoder', $.proxy(function() {
+        this.positionCallback = genericOptions.positionCallback;
 
-          this.map.addControl(
-            new MQA.ViewOptions()
-          );
-          this.map.addControl(
-            new MQA.LargeZoom(),
-            new MQA.MapCornerPlacement(MQA.MapCorner.TOP_LEFT, new MQA.Size(5,5))
-          );
-
-        }, this));
+        this.colors = genericOptions.colors;
+        this.thicknesses = genericOptions.thicknesses;
 
         MQA.EventManager.addListener(this.map, 'click', $.proxy(function(e){
           if (this.addPin == true) this.setPosition(e.ll.lat, e.ll.lng, null);
@@ -50,12 +44,24 @@ var mapsWrapper = function(type) {
         MQA.EventManager.addListener(this.map, 'moveend', function(e){
           genericOptions.updateOverlayCallback();
         });
+
         MQA.EventManager.addListener(this.map, 'zoomend', function(e){
           genericOptions.updateOverlayCallback();
         });
 
+        MQA.withModule('viewoptions','largezoom','geocoder', 'shapes', $.proxy(function() {
 
-        this.positionCallback = genericOptions.positionCallback;
+          this.map.addControl(
+            new MQA.ViewOptions()
+          );
+          this.map.addControl(
+            new MQA.LargeZoom(),
+            new MQA.MapCornerPlacement(MQA.MapCorner.TOP_LEFT, new MQA.Size(5,5))
+          );
+          
+          genericOptions.mapReadyCallback();
+
+        }, this));
 
     };
 
@@ -103,22 +109,14 @@ var mapsWrapper = function(type) {
             }
         }, this));
 
-        $('#'+genericOptions.addPinButton).click($.proxy(function(event){
+    };
 
-            var button = $('#'+genericOptions.addPinButton);
+    this.setAddPin = function(booleanValue){
+        this.addPin = booleanValue;
+    };
 
-            if (button.hasClass('active')){
-                this.addPin = false;
-                button.html('<b class="icon-map-marker icon-white"></b> Drop Pin');
-                button.removeClass('active');
-            } else {
-                this.addPin = true;
-                button.html('<b class="icon-ok icon-white"></b> Finish');
-                button.addClass('active');
-            }
-
-        },this));
-
+    this.setAddEdge = function(booleanValue){
+        this.addEdge = booleanValue;
     };
 
     this.setPosition = function(lat, lng, description){
@@ -156,11 +154,38 @@ var mapsWrapper = function(type) {
 
     };
     
-    this.removeOverlays = function(){
+    this.setEdgesAndDisplay = function(edges, count){
 
-        
+        this.removeOverlays();
+        this.edges.length = 0;
+
+        this.edgesCollection = new MQA.ShapeCollection();
+        this.edgesCollection.collectionName = 'edges';
+
+        for(var i = 0; i < count; i++) {
+            this.edges[i] = new MQA.LineOverlay();
+            this.edges[i].setShapePoints([edges[i].start.point.lat, edges[i].start.point.lng, edges[i].dest.point.lat, edges[i].dest.point.lng]);
+            this.edgesCollection.add(this.edges[i]);
+            this.edges[i].color = this.colors[edges[i].type];
+            this.edges[i].borderWith = this.thicknesses[edges[i].type];
+        };
+
+        this.displayOverlays();
 
     };
 
+    this.displayOverlays = function(){
+
+        if (this.edgesCollection) {
+            this.map.addShapeCollection(this.edgesCollection);
+        }
+        
+    };
+
+    this.removeOverlays = function(){
+
+        this.map.removeShapeCollection('edges');
+
+    };
 
 }
