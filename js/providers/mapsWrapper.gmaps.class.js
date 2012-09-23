@@ -73,7 +73,7 @@ var mapsWrapper = function(type) {
 
         google.maps.event.addListener(this.map, 'click', $.proxy(this.clickListener, this));
 
-        google.maps.event.addListener(this.map, 'bounds_changed', function(event) {
+        google.maps.event.addListener(this.map, 'idle', function(event) {
           genericOptions.updateOverlayCallback();
         });
 
