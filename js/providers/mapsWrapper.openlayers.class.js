@@ -36,8 +36,8 @@ var mapsWrapper = function(type) {
                                 this.setPosition(lonlat.lat, lonlat.lng, null);
                             }
                         }, this),
-                        "moveend": genericOptions.updateOverlayCallback,
-                        "zoomend": genericOptions.updateOverlayCallback
+                        "moveend": genericOptions.boundsHaveChangedCallback,
+                        "zoomend": genericOptions.boundsHaveChangedCallback
                     },
             center: new OpenLayers.LonLat(genericOptions.center.lng, genericOptions.center.lat)
         };
@@ -198,53 +198,61 @@ var mapsWrapper = function(type) {
 
     };
       
-    this.setDataOverlay = function(edges, closestPoint, limit){
+    this.setDataOverlay = function(edges, limit, display){
 
-        this.removeDataOverlay();
+        if (display == true) this.removeDataOverlay();
         this.edges.length = 0;
 
         var count = edges.length;
+        var startPoint = null, destPoint = null;
 
         this.edgesCollection = new OpenLayers.Layer.Vector("edges");
 
         for(var i = 0; i < count; i++) {
             
             if (limit == null || (edges[i].start.cost < limit && edges[i].dest.cost < limit)){
-            
-                this.edges[i] = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([
-                    this.pointFromLonLat(edges[i].start.point.lat, edges[i].start.point.lng),
-                    this.pointFromLonLat(edges[i].dest.point.lat, edges[i].dest.point.lng)
-                ]));
-                this.edges[i].style = {
-                    strokeColor: this.colorsForType[edges[i].type],
-                    strokeWidth: this.thicknessesForType[edges[i].type]
-                };
+
+                startPoint = edges[i].start.point;
+                destPoint = edges[i].dest.point;
 
             } else if (edges[i].start.cost < limit && edges[i].dest.cost > limit){
-
-                 // semi-distance at the end of a leaf
-                var percent = (limit-edges[i].start.cost)/(edges[i].dest.cost - edges[i].start.cost);
-                var newPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
                 
-                this.edges[i] = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([
-                    this.pointFromLonLat(edges[i].start.point.lat, edges[i].start.point.lng),
-                    this.pointFromLonLat(newPoint.lat, newPoint.lng)
-                ]));
-                this.edges[i].style = {
-                    strokeColor: this.colorsForType[edges[i].type],
-                    strokeWidth: this.thicknessesForType[edges[i].type]
-                };
+                // semi-distance at the end of a leaf
+                startPoint = edges[i].start.point;
+                var percent = (limit-edges[i].start.cost)/(edges[i].dest.cost - edges[i].start.cost);
+                destPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
+                
+            } else { continue; }
 
-            }
+            this.edges[i] = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([
+                this.pointFromLonLat(startPoint.lat, startPoint.lng),
+                this.pointFromLonLat(destPoint.lat, destPoint.lng)
+            ]));
+            this.edges[i].style = {
+                strokeColor: this.colorsForType[edges[i].type],
+                strokeWidth: this.thicknessesForType[edges[i].type]
+            };
+
         };
 
-        var size = new OpenLayers.Size(34,50);
-        this.closestPoint = new OpenLayers.Marker(this.convertTo4326(closestPoint.lat, closestPoint.lng),
-            new OpenLayers.Icon(this.closestPointPinImage, size, new OpenLayers.Pixel(-size.w/2, -size.h*0.9)));
-
         this.edgesCollection.addFeatures(this.edges);
+        if (display == true) this.displayDataOverlay();
 
-        this.displayDataOverlay();
+    };
+
+    this.setClosestOverlay = function(closestPoint, display){
+
+        var position = this.convertTo4326(closestPoint.lat, closestPoint.lng);
+
+        if (this.closestPoint != null && position.lat == this.closestPoint.lonlat.lat && position.lng == this.closestPoint.lonlat.lng) {
+            return; // we will not display again
+        } else {
+            this.removeClosestOverlay();
+            var size = new OpenLayers.Size(34,50);
+            this.closestPoint = new OpenLayers.Marker(position, new OpenLayers.Icon(this.closestPointPinImage, size, new OpenLayers.Pixel(-size.w/2, -size.h*0.9)));
+
+            if (display == true) this.displayClosestOverlay();
+        }
 
     };
 
@@ -254,10 +262,13 @@ var mapsWrapper = function(type) {
             this.map.addLayer(this.edgesCollection);
             this.map.setLayerIndex(this.edgesCollection, 0);
         }
+    };
+
+    this.displayClosestOverlay = function(){
+
         if (this.closestPoint) {
             this.markers.addMarker(this.closestPoint);
         }
-
         
     };
 
@@ -266,8 +277,14 @@ var mapsWrapper = function(type) {
         if (this.edgesCollection) {
             this.map.removeLayer(this.edgesCollection);
         }
+
+    };
+
+    this.removeClosestOverlay = function(){
+
         if (this.closestPoint) {
             this.markers.removeMarker(this.closestPoint);
         }
+
     };
 }

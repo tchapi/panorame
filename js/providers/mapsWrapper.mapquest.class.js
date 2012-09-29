@@ -47,11 +47,11 @@ var mapsWrapper = function(type) {
         }, this));
 
         MQA.EventManager.addListener(this.map, 'moveend', function(e){
-          genericOptions.updateOverlayCallback();
+          genericOptions.boundsHaveChangedCallback();
         });
 
         MQA.EventManager.addListener(this.map, 'zoomend', function(e){
-          genericOptions.updateOverlayCallback();
+          genericOptions.boundsHaveChangedCallback();
         });
 
         MQA.withModule('viewoptions','largezoom','geocoder', 'shapes', $.proxy(function() {
@@ -133,7 +133,7 @@ var mapsWrapper = function(type) {
             this.marker = new MQA.Poi({lat:lat, lng:lng});
             this.marker.setIcon(this.markerIcon);
             this.marker.setShadow(false);
-            this.marker.setBias({x:10,y:0});
+            this.marker.setBias({x:0,y:-25});
             this.map.addShape(this.marker);
             this.marker.setDraggable(false);
 
@@ -163,12 +163,13 @@ var mapsWrapper = function(type) {
 
     };
     
-    this.setDataOverlay = function(edges, closestPoint, limit){
+    this.setDataOverlay = function(edges, limit, display){
 
-        this.removeDataOverlay();
+        if (display == true) this.removeDataOverlay();
         this.edges.length = 0;
 
         var count = edges.length;
+        var startPoint = null, destPoint = null;
 
         this.edgesCollection = new MQA.ShapeCollection();
         this.edgesCollection.collectionName = 'edges';
@@ -176,36 +177,44 @@ var mapsWrapper = function(type) {
         for(var i = 0; i < count; i++) {
             
             if (limit == null || (edges[i].start.cost < limit && edges[i].dest.cost < limit)){
-            
-                this.edges[i] = new MQA.LineOverlay();
-                this.edges[i].setShapePoints([edges[i].start.point.lat, edges[i].start.point.lng, edges[i].dest.point.lat, edges[i].dest.point.lng]);
-                this.edgesCollection.add(this.edges[i]);
-                this.edges[i].color = this.colorsForType[edges[i].type];
-                this.edges[i].borderWith = this.thicknessesForType[edges[i].type];
+
+                startPoint = edges[i].start.point;
+                destPoint = edges[i].dest.point;
 
             } else if (edges[i].start.cost < limit && edges[i].dest.cost > limit){
-
-                 // semi-distance at the end of a leaf
+                
+                // semi-distance at the end of a leaf
+                startPoint = edges[i].start.point;
                 var percent = (limit-edges[i].start.cost)/(edges[i].dest.cost - edges[i].start.cost);
-                var newPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
+                destPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
+                
+            } else { continue; }
 
-                this.edges[i] = new MQA.LineOverlay();
-                this.edges[i].setShapePoints([edges[i].start.point.lat, edges[i].start.point.lng, newPoint.lat, newPoint.lng]);
-                this.edgesCollection.add(this.edges[i]);
-                this.edges[i].color = this.colorsForType[edges[i].type];
-                this.edges[i].borderWith = this.thicknessesForType[edges[i].type];
-
-            }
+            this.edges[i] = new MQA.LineOverlay();
+            this.edges[i].setShapePoints([startPoint.lat, startPoint.lng, destPoint.lat, destPoint.lng]);
+            this.edgesCollection.add(this.edges[i]);
+            this.edges[i].color = this.colorsForType[edges[i].type];
+            this.edges[i].borderWith = this.thicknessesForType[edges[i].type];
 
         };
 
-        this.closestPoint = new MQA.Poi({lat:closestPoint.lat, lng:closestPoint.lng});
-        this.closestPoint.setIcon(new MQA.Icon(this.closestPointPinImage,34,50));
-        this.closestPoint.setShadow(false);
-        this.closestPoint.setBias({x:10,y:0});
-        this.edgesCollection.add(this.closestPoint);
+        if (display == true) this.displayDataOverlay();
+    };
 
-        this.displayDataOverlay();
+    this.setClosestOverlay = function(closestPoint, display){
+
+        var position = {lat:closestPoint.lat, lng:closestPoint.lng};
+
+        if (this.closestPoint != null && position == this.closestPoint.latLng) {
+            return; // we will not display again
+        } else {
+            this.removeClosestOverlay();
+            this.closestPoint = new MQA.Poi(position);
+            this.closestPoint.setIcon(new MQA.Icon(this.closestPointPinImage,34,50));
+            this.closestPoint.setShadow(false);
+            this.closestPoint.setBias({x:0,y:-25});
+            if (display == true) this.displayClosestOverlay();
+        }
 
     };
 
@@ -213,9 +222,17 @@ var mapsWrapper = function(type) {
 
         if (this.edgesCollection) {
             this.map.addShapeCollection(this.edgesCollection);
-            this.closestPoint.setDraggable(false);
         }
         
+    };
+
+    this.displayClosestOverlay = function(){
+
+        if (this.closestPoint) {
+            this.map.addShape(this.closestPoint);
+            this.closestPoint.setDraggable(false);
+        }
+
     };
 
     this.removeDataOverlay = function(){
@@ -224,4 +241,11 @@ var mapsWrapper = function(type) {
 
     };
 
+    this.removeClosestOverlay = function(){
+
+        if (this.closestPoint) {
+            this.map.removeShape(this.closestPoint);
+        }
+
+    };
 }

@@ -51,7 +51,8 @@
             <button class="btn btn-info radiusType" data-original-title="Suburban transport" ><b class="icon-plane"></b></button>
           </div>
           
-          <div id="limitDiv" class="alert alert-info pull-right">       
+          <div id="limitDiv" class="alert alert-info pull-right">
+            <b id="toggleDataOverlay" data-original-title="Toggle overlays" class="icon-eye-open pull-left"></b>
             <div id="limitSlider" class="noUiSlider pull-right"></div>
             <div id="limitValue"></div>
           </div>

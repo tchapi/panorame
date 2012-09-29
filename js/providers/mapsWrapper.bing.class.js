@@ -59,7 +59,7 @@ var mapsWrapper = function(type) {
         Microsoft.Maps.Events.addHandler(this.map, 'click', $.proxy(function(e){this.addMarker(e);},this));
 
         /*Update visible overlay*/
-        Microsoft.Maps.Events.addHandler(this.map, 'viewchangeend', genericOptions.updateOverlayCallback);
+        Microsoft.Maps.Events.addHandler(this.map, 'viewchangeend', genericOptions.boundsHaveChangedCallback);
 
         /*Geocoding*/
         Microsoft.Maps.loadModule('Microsoft.Maps.Search', { callback: $.proxy(function(){
@@ -178,51 +178,60 @@ var mapsWrapper = function(type) {
         
     };
     
-    this.setDataOverlay = function(edges, closestPoint, limit){
+    this.setDataOverlay = function(edges, limit, display){
 
         this.removeDataOverlay();
         this.edges.length = 0;
 
         var count = edges.length;
+        var startPoint = null, destPoint = null;
 
         this.edgesCollection = new Microsoft.Maps.EntityCollection();
 
         for(var i = 0; i < count; i++) {
 
             if (limit == null || (edges[i].start.cost < limit && edges[i].dest.cost < limit)){
-                
-                this.edges[i] = new Microsoft.Maps.Polyline([
-                    new Microsoft.Maps.Location(edges[i].start.point.lat, edges[i].start.point.lng),
-                    new Microsoft.Maps.Location(edges[i].dest.point.lat, edges[i].dest.point.lng)
-                ], {
-                    strokeColor:new Microsoft.Maps.Color.fromHex(this.colorsForType[edges[i].type]), 
-                    strokeThickness: this.thicknessesForType[edges[i].type]
-                });
-                this.edgesCollection.push(this.edges[i]);
+
+                startPoint = edges[i].start.point;
+                destPoint = edges[i].dest.point;
 
             } else if (edges[i].start.cost < limit && edges[i].dest.cost > limit){
                 
                 // semi-distance at the end of a leaf
+                startPoint = edges[i].start.point;
                 var percent = (limit-edges[i].start.cost)/(edges[i].dest.cost - edges[i].start.cost);
-                var newPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
+                destPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
+                
+            } else { continue; }
 
-                this.edges[i] = new Microsoft.Maps.Polyline([
-                    new Microsoft.Maps.Location(edges[i].start.point.lat, edges[i].start.point.lng),
-                    new Microsoft.Maps.Location(newPoint.lat, newPoint.lng)
-                ], {
-                    strokeColor:new Microsoft.Maps.Color.fromHex(this.colorsForType[edges[i].type]), 
-                    strokeThickness: this.thicknessesForType[edges[i].type]
-                });
-                this.edgesCollection.push(this.edges[i]);
-            }
+            this.edges[i] = new Microsoft.Maps.Polyline([
+                new Microsoft.Maps.Location(startPoint.lat, startPoint.lng),
+                new Microsoft.Maps.Location(destPoint.lat, destPoint.lng)
+            ], {
+                strokeColor:new Microsoft.Maps.Color.fromHex(this.colorsForType[edges[i].type]), 
+                strokeThickness: this.thicknessesForType[edges[i].type]
+            });
+            this.edgesCollection.push(this.edges[i]);
 
         };
 
-        this.closestPoint = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(closestPoint.lat, closestPoint.lng),{
-            icon: this.closestPointPinImage, height: 50, width: 34, zIndex: 12
-        });
+        if (display === true) this.displayDataOverlay();
 
-        this.displayDataOverlay();
+    };
+
+    this.setClosestOverlay = function(closestPoint, display){
+
+        var position = new Microsoft.Maps.Location(closestPoint.lat, closestPoint.lng);
+
+        if (this.closestPoint != null && Microsoft.Maps.Location.areEqual(position, this.closestPoint.getLocation())) {
+            return; // we will not display again
+        } else {
+            this.removeClosestOverlay();
+            this.closestPoint = new Microsoft.Maps.Pushpin(position,{
+                icon: this.closestPointPinImage, height: 50, width: 34, zIndex: 12
+            });
+            if (display == true) this.displayClosestOverlay();
+        }
 
     };
 
@@ -231,6 +240,10 @@ var mapsWrapper = function(type) {
         if (this.edgesCollection) {
             this.map.entities.push(this.edgesCollection);
         }
+    };
+
+    this.displayClosestOverlay = function(){
+
         if (this.closestPoint) {
             this.map.entities.push(this.closestPoint);
         }
@@ -242,6 +255,10 @@ var mapsWrapper = function(type) {
         if (this.edgesCollection) {
             this.map.entities.remove(this.edgesCollection);
         }
+    };
+
+    this.removeClosestOverlay = function(){
+
         if (this.closestPoint) {
             this.map.entities.remove(this.closestPoint);
         }

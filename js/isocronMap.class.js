@@ -22,6 +22,9 @@ var isocronMap = function() {
     // Precision
     this.digits = 10000;
 
+    // Display
+    this.displayData = true;
+
     this.insertScript = function(canvas, searchInput, addPinButton){
 
         // We make it all asynchronous
@@ -51,9 +54,9 @@ var isocronMap = function() {
             addPinButton: this.addPinButton,
             apiKeys: this.apiKeys,
             positionCallback: $.proxy(this.updateCurrentPosition, this),
-            updateOverlayCallback: $.proxy(this.updateOverlay, this),
-            colorsForType: ['#FF0000','#0000FF','#000000'], // 0, 1, 2
-            thicknessesForType: [4,4,4], // 0, 1, 2
+            boundsHaveChangedCallback : $.proxy(this.boundsHaveChanged, this),
+            colorsForType: ['#000000','#009900','#FF9933','#FF6666','#FF0000','#006699'], // 0, 1, 2
+            thicknessesForType: [1, 4, 4, 4, 4,4], // 0, 1, 2
             standardPinImage: '/img/pins/Blue/8.png',
             closestPointPinImage: '/img/pins/Red/8.png',
             mapReadyCallback: $.proxy(this.mapIsReady, this),
@@ -75,7 +78,7 @@ var isocronMap = function() {
 
         // Finally, we center the map at the user's position
         this.setToUserPositionIfAvailable();
-
+        this.mapIsReady = true;
     };
 
     this.setupVisual = function(){
@@ -84,8 +87,26 @@ var isocronMap = function() {
         var addEdgeButton = $('#addEdge button');
         this.limitSlider  = $('#limitSlider');
         this.limitValue   = $('#limitValue');
+        var toggleDataOverlay = $('#toggleDataOverlay');
 
         $('.radiusType').tooltip({placement: 'bottom'});
+        toggleDataOverlay.tooltip({placement: 'bottom'});
+
+        toggleDataOverlay.click($.proxy(function(event){
+
+            if (this.displayData == false){
+                toggleDataOverlay.toggleClass('icon-eye-close').toggleClass('icon-eye-open');
+                mapsWrapper.displayDataOverlay();
+                mapsWrapper.displayClosestOverlay();
+                this.displayData = true;
+            } else {
+                toggleDataOverlay.toggleClass('icon-eye-open').toggleClass('icon-eye-close');
+                mapsWrapper.removeDataOverlay();
+                mapsWrapper.removeClosestOverlay();
+                this.displayData = false;
+            }
+
+        },this));
 
         addPinButton.popover({placement: 'bottom'});
         addPinButton.click($.proxy(function(event){
@@ -124,9 +145,7 @@ var isocronMap = function() {
             start: 300,
             change:$.proxy(function(){
                 this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
-//            }, this),
-//            end: $.proxy(function(){
-                this.updateOverlay();
+                this.rangeHasChanged();
             }, this)
         });
 
@@ -143,20 +162,18 @@ var isocronMap = function() {
 
         this.position = {lat: lat, lng: lng};
         $('#position span').html(Math.round(lat*this.digits)/this.digits + ' — ' + Math.round(lng*this.digits)/this.digits);
+        console.log(this.mapIsReady);
+        this.poiHasChanged();
 
     };
 
-    this.updateOverlay = function() {
-
-        this.getData(this.limitSlider.noUiSlider('value')[1]);
-
-    };
-
-    this.getBounds = function(){
+    this.getBounds = function(includePoi){
 
         var bounds = mapsWrapper.getBoundsAsLatLng();
 
-        $('#position b').popover('destroy')
+        if (bounds == null) return null;
+
+        //$('#position b').popover('destroy')
         $('#position b').popover({placement: 'top', trigger: 'click', title:"Actual bounds",
             content: 'NW : (' + Math.round(bounds.NW_lat*this.digits)/this.digits + ', ' + Math.round(bounds.NW_lng*this.digits)/this.digits + ')<br/>' +
                      'SE : (' + Math.round(bounds.SE_lat*this.digits)/this.digits + ', ' + Math.round(bounds.SE_lng*this.digits)/this.digits + ')<br/>'
@@ -166,42 +183,45 @@ var isocronMap = function() {
 
     };
 
-    this.getData = function(limit){
+    this.getDataAndRecalculateGraph = function(){
 
-        /* Vertices
-        databaseWrapper.getObjectsIn(this.getBounds(), 'vertices', this.position, function(data){
-            $('#objects span').html(data.count);
-            mapsWrapper.setVertices(data.vertices, data.count);
-        });
-        */
-
-        /* Edges
-        databaseWrapper.getObjectsIn(this.getBounds(), 'edges', this.position, function(data){
-            $('#objects span').html(data.count);
-            if (data.count !=0 && data.poi != null) mapsWrapper.setDataOverlay(data.edges, data.closest.point, null);
-        });
-        */
-
-        /* Vertices with Children */
         databaseWrapper.getObjectsIn(this.getBounds(), 'tree', this.position, $.proxy(function(data){
             
             $('#objects span').html(data.count);
             
             if (data.count != 0 && data.closest != null) {
-                var edges = this.dijkstra(data.tree, this.position, data.closest)
-                mapsWrapper.setDataOverlay(edges, data.closest.point, limit);
+
+                this.data = data;
+                this.recalculateGraph();
+                
             }
 
         }, this));
         
     };
 
-    this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type){
+    this.recalculateGraph = function(){
 
-        var result = databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, $('#addEdge_type').val(), $.proxy(this.getData,this));
+        if (this.data == null) {
+            this.getData();
+            return;
+        }
+
+        mapsWrapper.setDataOverlay(
+            this.dijkstra(this.data.tree, this.position, this.data.closest),
+            this.limitSlider.noUiSlider('value')[1],
+            this.displayData
+        );
+        mapsWrapper.setClosestOverlay(this.data.closest.point, this.displayData);
 
     };
 
+    /* Event binding */
+    this.boundsHaveChanged = function() { console.log('bounds have changed'); this.getDataAndRecalculateGraph(); };
+    this.poiHasChanged = function()     { console.log('poi has changed'); this.getDataAndRecalculateGraph(); };
+    this.rangeHasChanged = function()   { console.log('range has changed'); this.recalculateGraph(); }
+
+    /* DIJKSTRA STUFF */
     this.findMinimumCost = function(array){
 
         var min = null;
@@ -219,24 +239,25 @@ var isocronMap = function() {
 
     this.dijkstra = function(tree, poi, closestPoint){
 
-        // init
-        // closest is in the tree <-- pas forcément vrai si le viewport ne contient pas notre poi !!!
-        
-        var nodeId = closestPoint.id;
-        var node = tree[nodeId];
+        // init, we need to copy
+        var treeCopy = $.extend(true, {}, tree);
 
+        // closest is in the tree <-- thanks to polygon(NW, SE, POI) in DBUtils
+        var nodeId = closestPoint.id;
+        var node = treeCopy[nodeId];
         
         node.cost = closestPoint.distance;
         node.path = [];
 
-        // Array of computed edges with 
+        // Array of computed edges
         var edges = [];
+
         // The first edge is POI -> root node
         edges.push({
             //id: 0,
-            distance: closestPoint.distance,
+            //distance: closestPoint.distance,
             // grade: closestPoint.grade,
-            type: -1,
+            type: 0,
             start:{
                 //id: 0,
                 point:{
@@ -257,21 +278,21 @@ var isocronMap = function() {
             }
         });
 
+        // Recurring now :
+
         var idInTree = null;
         var child = null;
-
-        // recur
 
         while (node != null) {
             
             // node has no cost : it will never be reached 
             if (node.cost == null) {
 
-                console.log('- found unreachable node : ' + nodeId);
+                //console.log('- found unreachable node : ' + nodeId);
 
             } else {
 
-                console.log('- checking reached node : ' + nodeId);
+                //console.log('- checking reached node : ' + nodeId);
 
                 // node has a cost : it has been reached, check his children
                 for(childIndex in node.children) {
@@ -279,9 +300,9 @@ var isocronMap = function() {
                     child = node.children[childIndex];
                     idInTree = child.id;
 
-                    if (tree[idInTree] != null && typeof(tree[idInTree]) !== 'undefined'){
+                    if (treeCopy[idInTree] != null && typeof(treeCopy[idInTree]) !== 'undefined'){
 
-                        childInTree = tree[idInTree];
+                        childInTree = treeCopy[idInTree];
 
                         // We replace the cost if we reach him at a lesser cost
                         if ( childInTree.out !== true && 
@@ -295,7 +316,7 @@ var isocronMap = function() {
                         }
 
                         // now we construct the edge we're going to need for display between node and childInTree
-                        console.log('  + found edge : ' + nodeId + ' => ' + idInTree + '(cost=' + childInTree.cost + ')')
+                        // console.log('  + found edge : ' + nodeId + ' => ' + idInTree + '(cost=' + childInTree.cost + ')')
                         
                         edges.push({
                             id: child.path_id,
@@ -327,12 +348,12 @@ var isocronMap = function() {
                 }
             }
 
-            tree[nodeId].out = true; // node is out
+            treeCopy[nodeId].out = true; // Node is out
 
-            //finding the min from the rest :
-            nodeId = this.findMinimumCost(tree);
+            // Finding the min from the rest :
+            nodeId = this.findMinimumCost(treeCopy);
             if (nodeId != null){
-                node = tree[nodeId];
+                node = treeCopy[nodeId];
                 if (node.path == null) node.path = [];
             } else {
                 node = null; //exit
@@ -340,8 +361,16 @@ var isocronMap = function() {
 
         }
 
-        console.log('-------------- end --------------');
+        // console.log('-------------- end --------------');
         return edges;
+    };
+
+
+    // ADMIN
+    this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type){
+
+        var result = databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, $('#addEdge_type').val(), $.proxy(this.getData,this));
+
     };
 
 }

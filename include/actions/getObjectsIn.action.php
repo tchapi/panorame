@@ -13,33 +13,27 @@
 		$type = 'tree';
 	}
 
-	if (isset($_POST['bounds'])){
+	if (isset($_POST['bounds']) && isset($_POST['poi'])){
 
 		$bounds = $_POST['bounds'];
 
+		// Get POI Closest point
+
+		$poi = array('lat' => $_POST['poi']['lat'], 'lng' => $_POST['poi']['lng']);
+		$closestVertex = Utils::getClosestVertex($poi['lat'], $poi['lng'], _closestPointRadius_search);
+
+		// GEt objects
 		if ($type == 'vertices'){
 
-			$objects = Utils::getVerticesIn($bounds["NW_lat"], $bounds["NW_lng"], $bounds["SE_lat"], $bounds["SE_lng"]);
+			$objects = Utils::getVerticesIn($bounds["NW_lat"], $bounds["NW_lng"], $bounds["SE_lat"], $bounds["SE_lng"], $closestVertex['point']['lat'], $closestVertex['point']['lng']);
 		
 		} elseif ($type == 'edges'){
 
-			$objects = Utils::getEdgesIn($bounds["NW_lat"], $bounds["NW_lng"], $bounds["SE_lat"], $bounds["SE_lng"]);
+			$objects = Utils::getEdgesIn($bounds["NW_lat"], $bounds["NW_lng"], $bounds["SE_lat"], $bounds["SE_lng"], $closestVertex['point']['lat'], $closestVertex['point']['lng']);
 
 		} elseif ($type == 'tree'){
 
-			$objects = Utils::getVerticesAndChildrenIn($bounds["NW_lat"], $bounds["NW_lng"], $bounds["SE_lat"], $bounds["SE_lng"]);
-
-		}
-
-		if (isset($_POST['poi'])){
-
-			$poi = array('lat' => $_POST['poi']['lat'], 'lng' => $_POST['poi']['lng']);
-			$closestVertex = Utils::getClosestVertex($poi['lat'], $poi['lng'], _closestPointRadius_search);
-
-		} else {
-
-		//	$poi = null;
-			$closestVertex = null;
+			$objects = Utils::getVerticesAndChildrenIn($bounds["NW_lat"], $bounds["NW_lng"], $bounds["SE_lat"], $bounds["SE_lng"], $closestVertex['point']['lat'], $closestVertex['point']['lng']);
 
 		}
 

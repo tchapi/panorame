@@ -77,7 +77,7 @@ var mapsWrapper = function(type) {
         google.maps.event.addListener(this.map, 'click', $.proxy(this.clickListener, this));
 
         google.maps.event.addListener(this.map, 'idle', function(event) {
-          genericOptions.updateOverlayCallback();
+          genericOptions.boundsHaveChangedCallback();
         });
 
     };
@@ -139,6 +139,8 @@ var mapsWrapper = function(type) {
 
         var bounds = this.map.getBounds();
 
+        if (!bounds) return null;
+        
             var NE = bounds.getNorthEast();
             var SW = bounds.getSouthWest();
 
@@ -146,47 +148,58 @@ var mapsWrapper = function(type) {
 
     };
 
-    this.setDataOverlay = function(edges, closestPoint, limit){
+    this.setDataOverlay = function(edges, limit, display){
 
         this.removeDataOverlay();
         this.edges.length = 0;
 
         var count = edges.length;
+        var startPoint = null, destPoint = null;
 
         for(var i = 0; i < count; i++) {
+
             if (limit == null || (edges[i].start.cost < limit && edges[i].dest.cost < limit)){
 
-                this.edges[i] = new google.maps.Polyline({
-                  path: [
-                    new google.maps.LatLng(edges[i].start.point.lat, edges[i].start.point.lng),
-                    new google.maps.LatLng(edges[i].dest.point.lat, edges[i].dest.point.lng)],
-                  strokeColor: this.colorsForType[edges[i].type],
-                  strokeWeight: this.thicknessesForType[edges[i].type]
-                });
-                google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
+                startPoint = edges[i].start.point;
+                destPoint = edges[i].dest.point;
 
             } else if (edges[i].start.cost < limit && edges[i].dest.cost > limit){
                 
                 // semi-distance at the end of a leaf
+                startPoint = edges[i].start.point;
                 var percent = (limit-edges[i].start.cost)/(edges[i].dest.cost - edges[i].start.cost);
-                var newPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
-
-                this.edges[i] = new google.maps.Polyline({
-                  path: [
-                    new google.maps.LatLng(edges[i].start.point.lat, edges[i].start.point.lng),
-                    new google.maps.LatLng(newPoint.lat, newPoint.lng)],
-                  strokeColor: this.colorsForType[edges[i].type],
-                  strokeWeight: this.thicknessesForType[edges[i].type]
-                });
+                destPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
                 
-            }
+            } else { continue; }
+
+            // Creation of the line
+            this.edges[i] = new google.maps.Polyline({
+              path: [
+                new google.maps.LatLng(startPoint.lat, startPoint.lng),
+                new google.maps.LatLng(destPoint.lat, destPoint.lng)],
+              strokeColor: this.colorsForType[edges[i].type],
+              strokeWeight: this.thicknessesForType[edges[i].type]
+            });
+            google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
+
         };
 
-        this.closestPoint = new google.maps.Marker();
-        this.closestPoint.setIcon(this.closestPointPinImage);
-        this.closestPoint.setPosition(new google.maps.LatLng(closestPoint.lat, closestPoint.lng));
+        if (display == true) this.displayDataOverlay();
+    };
 
-        this.displayDataOverlay();
+    this.setClosestOverlay = function(closestPoint, display){
+
+        var position = new google.maps.LatLng(closestPoint.lat, closestPoint.lng);
+
+        if (this.closestPoint != null && this.closestPoint.getPosition().equals(position)) {
+            return; // we will not display again
+        } else {
+            this.removeClosestOverlay();
+            this.closestPoint = new google.maps.Marker();
+            this.closestPoint.setIcon(this.closestPointPinImage);
+            this.closestPoint.setPosition(position);
+            if (display == true) this.displayClosestOverlay();
+        }
 
     };
 
@@ -194,9 +207,13 @@ var mapsWrapper = function(type) {
 
         if (this.edges) {
             for (i in this.edges) {
-              this.edges[i].setMap(this.map);
+                this.edges[i].setMap(this.map);
             }
         }
+    };
+
+    this.displayClosestOverlay = function(){
+
         if (this.closestPoint){
             this.closestPoint.setMap(this.map);
         }
@@ -210,6 +227,10 @@ var mapsWrapper = function(type) {
               this.edges[i].setMap(null);
             }
         }
+    };
+
+    this.removeClosestOverlay = function(){
+
         if (this.closestPoint){
             this.closestPoint.setMap(null);
         }

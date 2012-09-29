@@ -97,18 +97,16 @@ class Utils {
 	/*
 	 * Adds a BOUNDS restrict to a query
 	 */
-	public static function restrictForVertex($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng){
+	public static function restrictForVertex($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
-		$where_clause = sprintf(" WHERE Intersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F, %F %F))') )",
+		$where_clause = sprintf(" WHERE Intersects( v.`point`, Envelope(GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))')) )",
 								// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
 						mysql_real_escape_string($NW_lng),
 						mysql_real_escape_string($NW_lat),
 						mysql_real_escape_string($SE_lng),
-						mysql_real_escape_string($NW_lat),						
-						mysql_real_escape_string($SE_lng),
 						mysql_real_escape_string($SE_lat),
-						mysql_real_escape_string($NW_lng),
-						mysql_real_escape_string($SE_lat),
+						mysql_real_escape_string($POI_lng),
+						mysql_real_escape_string($POI_lat),
 						mysql_real_escape_string($NW_lng),
 						mysql_real_escape_string($NW_lat));
 
@@ -118,18 +116,16 @@ class Utils {
 	/*
 	 * Adds a BOUNDS restrict to a query
 	 */
-	public static function restrictForEdgeBBox($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng){
+	public static function restrictForEdgeBBox($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
-		$where_clause = sprintf(" WHERE Intersects( Envelope(LINESTRING(v.point,v_dest.point)), GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F, %F %F))') )",
+		$where_clause = sprintf(" WHERE Intersects( Envelope(LINESTRING(v.point,v_dest.point)), Envelope(GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))')) )",
 								// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
 						mysql_real_escape_string($NW_lng),
 						mysql_real_escape_string($NW_lat),
 						mysql_real_escape_string($SE_lng),
-						mysql_real_escape_string($NW_lat),						
-						mysql_real_escape_string($SE_lng),
 						mysql_real_escape_string($SE_lat),
-						mysql_real_escape_string($NW_lng),
-						mysql_real_escape_string($SE_lat),
+						mysql_real_escape_string($POI_lng),
+						mysql_real_escape_string($POI_lat),
 						mysql_real_escape_string($NW_lng),
 						mysql_real_escape_string($NW_lat));
 
@@ -139,11 +135,11 @@ class Utils {
 	/*
 	 * GET ALL THE VERTICES in given bounds expressed as two LAT / LNG couples for NW and SE
 	 */
-	public static function getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng){
+	public static function getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
 		$getVerticesIn_query = sprintf("SELECT `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `isocron`.`vertices` v");
 
-		$getVerticesIn_query = self::restrictForVertex($getVerticesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng);
+		$getVerticesIn_query = self::restrictForVertex($getVerticesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
 
 		$exe = mysql_query($getVerticesIn_query);
 
@@ -173,13 +169,13 @@ class Utils {
 	 * GET ALL THE VERTICES in given bounds expressed as two LAT / LNG couples for NW and SE
 	 * AND their 1th children
 	 */
-	public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng){
+	public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
 		$getVerticesAndChildrenIn_query = sprintf("SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
 										group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,'}')) AS children FROM `isocron`.`vertices` v
 										LEFT JOIN `isocron`.`edges` e ON e.`from_id` = v.`id`");
 
-		$getVerticesAndChildrenIn_query = self::restrictForVertex($getVerticesAndChildrenIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng);
+		$getVerticesAndChildrenIn_query = self::restrictForVertex($getVerticesAndChildrenIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
 		$getVerticesAndChildrenIn_query .= " GROUP BY v.`id`";
 
 		$exe = mysql_query($getVerticesAndChildrenIn_query);
@@ -217,7 +213,7 @@ class Utils {
 	/*
 	 * GET ALL THE EDGES in given bounds expressed as two LAT / LNG couples for NW and SE
 	 */
-	public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng){
+	public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
 		$getEdgesIn_query = "SELECT e.`id` AS id, Y(v.`point`) AS lat_start, X(v.`point`) AS lng_start, v.`elevation` AS alt_start, v.`id` AS id_start,
 									Y(v_dest.`point`) AS lat_dest, X(v_dest.`point`) AS lng_dest, v_dest.`elevation` AS alt_dest, v_dest.`id` AS id_dest,
@@ -226,7 +222,7 @@ class Utils {
 									INNER JOIN `isocron`.`vertices` v ON v.`id` = e.`from_id`
 									INNER JOIN `isocron`.`vertices` v_dest ON v_dest.`id` = e.`to_id`";
 
-		$getEdgesIn_query = self::restrictForEdgeBBox($getEdgesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng);
+		$getEdgesIn_query = self::restrictForEdgeBBox($getEdgesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
 
 		$exe = mysql_query($getEdgesIn_query);
 
@@ -299,7 +295,7 @@ class Utils {
 		$SE_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
 		$SE_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($SE_lat*pi()/180)))* 180 / pi();
 
-		$vertices = self::getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng);
+		$vertices = self::getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, null, null);
 
 		if (isset($vertices[0])){
 
