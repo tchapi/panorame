@@ -146,21 +146,40 @@ var mapsWrapper = function(type) {
 
     };
 
-    this.setDataOverlay = function(edges, closestPoint, count){
+    this.setDataOverlay = function(edges, closestPoint, limit){
 
         this.removeDataOverlay();
         this.edges.length = 0;
 
-        for(var i = 0; i < count; i++) {
-            this.edges[i] = new google.maps.Polyline({
-              path: [
-                new google.maps.LatLng(edges[i].start.point.lat, edges[i].start.point.lng),
-                new google.maps.LatLng(edges[i].dest.point.lat, edges[i].dest.point.lng)],
-              strokeColor: this.colorsForType[edges[i].type],
-              strokeWeight: this.thicknessesForType[edges[i].type]
-            });
-            google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
+        var count = edges.length;
 
+        for(var i = 0; i < count; i++) {
+            if (limit == null || (edges[i].start.cost < limit && edges[i].dest.cost < limit)){
+
+                this.edges[i] = new google.maps.Polyline({
+                  path: [
+                    new google.maps.LatLng(edges[i].start.point.lat, edges[i].start.point.lng),
+                    new google.maps.LatLng(edges[i].dest.point.lat, edges[i].dest.point.lng)],
+                  strokeColor: this.colorsForType[edges[i].type],
+                  strokeWeight: this.thicknessesForType[edges[i].type]
+                });
+                google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
+
+            } else if (edges[i].start.cost < limit && edges[i].dest.cost > limit){
+                
+                // semi-distance at the end of a leaf
+                var percent = (limit-edges[i].start.cost)/(edges[i].dest.cost - edges[i].start.cost);
+                var newPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
+
+                this.edges[i] = new google.maps.Polyline({
+                  path: [
+                    new google.maps.LatLng(edges[i].start.point.lat, edges[i].start.point.lng),
+                    new google.maps.LatLng(newPoint.lat, newPoint.lng)],
+                  strokeColor: this.colorsForType[edges[i].type],
+                  strokeWeight: this.thicknessesForType[edges[i].type]
+                });
+                
+            }
         };
 
         this.closestPoint = new google.maps.Marker();

@@ -46,23 +46,23 @@ var mapsWrapper = function(type) {
         
         switch(this.type){
             case 'gmaps-terrain':
-                var tiles = new OpenLayers.Layer.Google('', {type: google.maps.MapTypeId.TERRAIN});
+                var tiles = new OpenLayers.Layer.Google('base', {type: google.maps.MapTypeId.TERRAIN});
                 break;
             case 'gmaps-road':
-                var tiles = new OpenLayers.Layer.Google();
+                var tiles = new OpenLayers.Layer.Google('base');
                 break;
             case 'gmaps-hybrid':
-                var tiles = new OpenLayers.Layer.Google('', {type: google.maps.MapTypeId.HYBRID});
+                var tiles = new OpenLayers.Layer.Google('base', {type: google.maps.MapTypeId.HYBRID});
                 break;
             case 'bing-road':
-                var tiles = new OpenLayers.Layer.Bing({key: genericOptions.apiKeys.bing,type: "Road", wrapDateLine: true});
+                var tiles = new OpenLayers.Layer.Bing('base',{key: genericOptions.apiKeys.bing,type: "Road", wrapDateLine: true});
                 break;
             case 'bing-hybrid':
-                var tiles = new OpenLayers.Layer.Bing({key: genericOptions.apiKeys.bing,type: "AerialWithLabels", wrapDateLine: true});
+                var tiles = new OpenLayers.Layer.Bing('base',{key: genericOptions.apiKeys.bing,type: "AerialWithLabels", wrapDateLine: true});
                 break;
             case 'osmaps':
             default:
-                var tiles = new OpenLayers.Layer.OSM();
+                var tiles = new OpenLayers.Layer.OSM('base');
         }
 
         this.map.addLayer(tiles);
@@ -139,27 +139,24 @@ var mapsWrapper = function(type) {
     };
 
     this.inverseMercator = function(unproj_lat, unproj_lng){
-        
         lonlat = OpenLayers.Layer.SphericalMercator.inverseMercator(unproj_lng, unproj_lat);
         return {lat:lonlat.lat, lng:lonlat.lon};
     };
 
-    this.pointFromLonLat = function(lat, lon){
-        var convertedPoint = new OpenLayers.LonLat(lon, lat);
-        convertedPoint.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-        
-        return new OpenLayers.Geometry.Point(convertedPoint.lon, convertedPoint.lat);
-       
+    this.convertTo4326 = function(lat, lng){
+        return new OpenLayers.LonLat(lng, lat).transform(new OpenLayers.Projection("EPSG:4326"), this.map.getProjectionObject());
+    };
+
+    this.pointFromLonLat = function(lat, lng){
+        var convertedPoint = this.convertTo4326(lat, lng);
+        return new OpenLayers.Geometry.Point(convertedPoint.lon, convertedPoint.lat); 
     };
 
     this.setPosition = function(lat, lng, description){
 
         if (this.map && lat != null && lng != null) {
 
-            this.position = new OpenLayers.LonLat(lng, lat).transform(
-                new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-                this.map.getProjectionObject() // to Spherical Mercator Projection
-              );
+            this.position = this.convertTo4326(lat, lng);
 
             // Destroys the marker
             if (this.marker) {
@@ -201,29 +198,49 @@ var mapsWrapper = function(type) {
 
     };
       
-    this.setDataOverlay = function(edges, closestPoint, count){
+    this.setDataOverlay = function(edges, closestPoint, limit){
 
         this.removeDataOverlay();
         this.edges.length = 0;
 
+        var count = edges.length;
+
         this.edgesCollection = new OpenLayers.Layer.Vector("edges");
 
         for(var i = 0; i < count; i++) {
-            this.edges[i] = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([
-                this.pointFromLonLat(edges[i].start.point.lat, edges[i].start.point.lng),
-                this.pointFromLonLat(edges[i].dest.point.lat, edges[i].dest.point.lng)
-            ]));
-            this.edges[i].style = {
-                strokeColor: this.colorsForType[edges[i].type],
-                strokeWidth: this.thicknessesForType[edges[i].type]
-            };
+            
+            if (limit == null || (edges[i].start.cost < limit && edges[i].dest.cost < limit)){
+            
+                this.edges[i] = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([
+                    this.pointFromLonLat(edges[i].start.point.lat, edges[i].start.point.lng),
+                    this.pointFromLonLat(edges[i].dest.point.lat, edges[i].dest.point.lng)
+                ]));
+                this.edges[i].style = {
+                    strokeColor: this.colorsForType[edges[i].type],
+                    strokeWidth: this.thicknessesForType[edges[i].type]
+                };
+
+            } else if (edges[i].start.cost < limit && edges[i].dest.cost > limit){
+
+                 // semi-distance at the end of a leaf
+                var percent = (limit-edges[i].start.cost)/(edges[i].dest.cost - edges[i].start.cost);
+                var newPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
+                
+                this.edges[i] = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([
+                    this.pointFromLonLat(edges[i].start.point.lat, edges[i].start.point.lng),
+                    this.pointFromLonLat(newPoint.lat, newPoint.lng)
+                ]));
+                this.edges[i].style = {
+                    strokeColor: this.colorsForType[edges[i].type],
+                    strokeWidth: this.thicknessesForType[edges[i].type]
+                };
+
+            }
         };
 
         var size = new OpenLayers.Size(34,50);
-        this.closestPoint = new OpenLayers.Marker(new OpenLayers.LonLat(closestPoint.lng, closestPoint.lat).transform(
-                new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-                this.map.getProjectionObject() // to Spherical Mercator Projection
-              ), new OpenLayers.Icon(this.closestPointPinImage, size, new OpenLayers.Pixel(-size.w/2, -size.h*0.9)));
+        this.closestPoint = new OpenLayers.Marker(this.convertTo4326(closestPoint.lat, closestPoint.lng),
+            new OpenLayers.Icon(this.closestPointPinImage, size, new OpenLayers.Pixel(-size.w/2, -size.h*0.9)));
 
         this.edgesCollection.addFeatures(this.edges);
 

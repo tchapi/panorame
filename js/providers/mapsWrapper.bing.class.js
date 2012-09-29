@@ -178,22 +178,44 @@ var mapsWrapper = function(type) {
         
     };
     
-    this.setDataOverlay = function(edges, closestPoint, count){
+    this.setDataOverlay = function(edges, closestPoint, limit){
 
         this.removeDataOverlay();
         this.edges.length = 0;
 
+        var count = edges.length;
+
         this.edgesCollection = new Microsoft.Maps.EntityCollection();
 
         for(var i = 0; i < count; i++) {
-            this.edges[i] = new Microsoft.Maps.Polyline([
-                new Microsoft.Maps.Location(edges[i].start.point.lat, edges[i].start.point.lng),
-                new Microsoft.Maps.Location(edges[i].dest.point.lat, edges[i].dest.point.lng)
-            ], {
-                strokeColor:new Microsoft.Maps.Color.fromHex(this.colorsForType[edges[i].type]), 
-                strokeThickness: this.thicknessesForType[edges[i].type]
-            });
-            this.edgesCollection.push(this.edges[i]);
+
+            if (limit == null || (edges[i].start.cost < limit && edges[i].dest.cost < limit)){
+                
+                this.edges[i] = new Microsoft.Maps.Polyline([
+                    new Microsoft.Maps.Location(edges[i].start.point.lat, edges[i].start.point.lng),
+                    new Microsoft.Maps.Location(edges[i].dest.point.lat, edges[i].dest.point.lng)
+                ], {
+                    strokeColor:new Microsoft.Maps.Color.fromHex(this.colorsForType[edges[i].type]), 
+                    strokeThickness: this.thicknessesForType[edges[i].type]
+                });
+                this.edgesCollection.push(this.edges[i]);
+
+            } else if (edges[i].start.cost < limit && edges[i].dest.cost > limit){
+                
+                // semi-distance at the end of a leaf
+                var percent = (limit-edges[i].start.cost)/(edges[i].dest.cost - edges[i].start.cost);
+                var newPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
+
+                this.edges[i] = new Microsoft.Maps.Polyline([
+                    new Microsoft.Maps.Location(edges[i].start.point.lat, edges[i].start.point.lng),
+                    new Microsoft.Maps.Location(newPoint.lat, newPoint.lng)
+                ], {
+                    strokeColor:new Microsoft.Maps.Color.fromHex(this.colorsForType[edges[i].type]), 
+                    strokeThickness: this.thicknessesForType[edges[i].type]
+                });
+                this.edgesCollection.push(this.edges[i]);
+            }
+
         };
 
         this.closestPoint = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(closestPoint.lat, closestPoint.lng),{

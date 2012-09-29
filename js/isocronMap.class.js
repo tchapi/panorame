@@ -51,11 +51,11 @@ var isocronMap = function() {
             addPinButton: this.addPinButton,
             apiKeys: this.apiKeys,
             positionCallback: $.proxy(this.updateCurrentPosition, this),
-            updateOverlayCallback: $.proxy(this.getData, this),
+            updateOverlayCallback: $.proxy(this.updateOverlay, this),
             colorsForType: ['#FF0000','#0000FF','#000000'], // 0, 1, 2
             thicknessesForType: [4,4,4], // 0, 1, 2
             standardPinImage: '/img/pins/Blue/8.png',
-            closestPointPinImage: '/img/pins/Green/8.png',
+            closestPointPinImage: '/img/pins/Red/8.png',
             mapReadyCallback: $.proxy(this.mapIsReady, this),
             addEdgeCallback: $.proxy(this.addEdge, this)
         };
@@ -80,8 +80,10 @@ var isocronMap = function() {
 
     this.setupVisual = function(){
 
-        var addPinButton = $('#addPin');
+        var addPinButton  = $('#addPin');
         var addEdgeButton = $('#addEdge button');
+        this.limitSlider  = $('#limitSlider');
+        this.limitValue   = $('#limitValue');
 
         $('.radiusType').tooltip({placement: 'bottom'});
 
@@ -115,6 +117,20 @@ var isocronMap = function() {
 
         },this));
 
+        this.limitSlider.noUiSlider('init', {
+            knobs: 1,
+            connect: "lower",
+            scale: [0, 1000],
+            start: 300,
+            change:$.proxy(function(){
+                this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
+//            }, this),
+//            end: $.proxy(function(){
+                this.updateOverlay();
+            }, this)
+        });
+
+        this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
     };
 
     this.setToUserPositionIfAvailable = function(){
@@ -127,6 +143,12 @@ var isocronMap = function() {
 
         this.position = {lat: lat, lng: lng};
         $('#position span').html(Math.round(lat*this.digits)/this.digits + ' — ' + Math.round(lng*this.digits)/this.digits);
+
+    };
+
+    this.updateOverlay = function() {
+
+        this.getData(this.limitSlider.noUiSlider('value')[1]);
 
     };
 
@@ -144,7 +166,7 @@ var isocronMap = function() {
 
     };
 
-    this.getData = function(){
+    this.getData = function(limit){
 
         /* Vertices
         databaseWrapper.getObjectsIn(this.getBounds(), 'vertices', this.position, function(data){
@@ -153,18 +175,25 @@ var isocronMap = function() {
         });
         */
 
-        /* Edges */
+        /* Edges
         databaseWrapper.getObjectsIn(this.getBounds(), 'edges', this.position, function(data){
             $('#objects span').html(data.count);
-            mapsWrapper.setDataOverlay(data.edges, data.closest.point, data.count);
-        });
-
-        /* Vertices with Children
-        databaseWrapper.getObjectsIn(this.getBounds(), 'tree', this.position, function(data){
-            $('#objects span').html(data.count);
-            
+            if (data.count !=0 && data.poi != null) mapsWrapper.setDataOverlay(data.edges, data.closest.point, null);
         });
         */
+
+        /* Vertices with Children */
+        databaseWrapper.getObjectsIn(this.getBounds(), 'tree', this.position, $.proxy(function(data){
+            
+            $('#objects span').html(data.count);
+            
+            if (data.count != 0 && data.closest != null) {
+                var edges = this.dijkstra(data.tree, this.position, data.closest)
+                mapsWrapper.setDataOverlay(edges, data.closest.point, limit);
+            }
+
+        }, this));
+        
     };
 
     this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type){
@@ -173,19 +202,146 @@ var isocronMap = function() {
 
     };
 
-    this.displayOverlay = function(){
+    this.findMinimumCost = function(array){
 
-        mapsWrapper.displayOverlays();
+        var min = null;
+        var min_index = null;
+
+        for(i in array){
+            if (array[i] != null && array[i].out !== true && (array[i].cost < min || min == null) ) {
+                min = array[i].cost;
+                min_index = i;
+            }
+        }
+
+        return min_index;
     };
 
-    this.removeOverlay = function(){
+    this.dijkstra = function(tree, poi, closestPoint){
 
-        mapsWrapper.removeOverlays();
+        // init
+        // closest is in the tree <-- pas forcément vrai si le viewport ne contient pas notre poi !!!
+        
+        var nodeId = closestPoint.id;
+        var node = tree[nodeId];
 
-    };
+        
+        node.cost = closestPoint.distance;
+        node.path = [];
 
-    this.dijkstra = function(){
+        // Array of computed edges with 
+        var edges = [];
+        // The first edge is POI -> root node
+        edges.push({
+            //id: 0,
+            distance: closestPoint.distance,
+            // grade: closestPoint.grade,
+            type: -1,
+            start:{
+                //id: 0,
+                point:{
+                    lat: poi.lat,
+                    lng: poi.lng,
+                 //   alt: node.point.alt
+                },
+                cost: 0,
+            },
+            dest:{
+                id: nodeId,
+                point:{
+                    lat: closestPoint.point.lat,
+                    lng: closestPoint.point.lng,
+                    alt: closestPoint.point.alt
+                },
+                cost: closestPoint.distance
+            }
+        });
 
+        var idInTree = null;
+        var child = null;
+
+        // recur
+
+        while (node != null) {
+            
+            // node has no cost : it will never be reached 
+            if (node.cost == null) {
+
+                console.log('- found unreachable node : ' + nodeId);
+
+            } else {
+
+                console.log('- checking reached node : ' + nodeId);
+
+                // node has a cost : it has been reached, check his children
+                for(childIndex in node.children) {
+
+                    child = node.children[childIndex];
+                    idInTree = child.id;
+
+                    if (tree[idInTree] != null && typeof(tree[idInTree]) !== 'undefined'){
+
+                        childInTree = tree[idInTree];
+
+                        // We replace the cost if we reach him at a lesser cost
+                        if ( childInTree.out !== true && 
+                            (typeof(childInTree.cost) === 'undefined' || childInTree.cost == null || childInTree.cost > (node.cost + child.distance + 10*child.grade) )
+                        ){
+
+                            childInTree.cost = node.cost + child.distance + 10*child.grade;
+                            childInTree.path = node.path.slice(); // to make a copy
+                            childInTree.path.push(idInTree);
+
+                        }
+
+                        // now we construct the edge we're going to need for display between node and childInTree
+                        console.log('  + found edge : ' + nodeId + ' => ' + idInTree + '(cost=' + childInTree.cost + ')')
+                        
+                        edges.push({
+                            id: child.path_id,
+                            distance: child.distance,
+                            grade: child.grade,
+                            type: child.type,
+                            start:{
+                                id: nodeId,
+                                point:{
+                                    lat: node.point.lat,
+                                    lng: node.point.lng,
+                                    alt: node.point.alt
+                                },
+                                cost: node.cost,
+                            },
+                            dest:{
+                                id: idInTree,
+                                point:{
+                                    lat: childInTree.point.lat,
+                                    lng: childInTree.point.lng,
+                                    alt: childInTree.point.alt
+                                },
+                                cost: childInTree.cost
+                            }
+                        });
+
+                    }
+
+                }
+            }
+
+            tree[nodeId].out = true; // node is out
+
+            //finding the min from the rest :
+            nodeId = this.findMinimumCost(tree);
+            if (nodeId != null){
+                node = tree[nodeId];
+                if (node.path == null) node.path = [];
+            } else {
+                node = null; //exit
+            }
+
+        }
+
+        console.log('-------------- end --------------');
+        return edges;
     };
 
 }

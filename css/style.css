@@ -6,10 +6,12 @@ header {
 	padding: 10px 0;
 	border-bottom: 1px solid gray;
 }
-  header h1          { margin:0; line-height: 32px; }
-  header #logo       { padding: 0 0 0 10px; }
-  header #actionForm { padding: 0 10px 0 0; }
-    header #actionForm div{ padding: 0 5px; }
+  header h1          	{ margin:0; line-height: 32px; }
+  header #logo       	{ padding: 0 0 0 10px; }
+  header #actionForm 	{ padding: 0 10px 0 0; }
+   header #addPin		{ margin-left: 10px; }
+   header #limitDiv 	{ padding: 5px 0 5px 20px; height: 18px; width: 300px; margin-right: 10px;}
+   header #limitSlider  { margin: 4px 20px; }
 
 footer {
 	height: 30px;

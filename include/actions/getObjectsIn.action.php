@@ -38,14 +38,14 @@
 
 		} else {
 
-			$poi = null;
+		//	$poi = null;
 			$closestVertex = null;
 
 		}
 
 		$result = array(
-			'bounds' => $bounds,
-			'poi'	 => $poi,
+		//	'bounds' => $bounds,
+		//	'poi'	 => $poi,
 			'closest'=> $closestVertex,
 			'count'  => count($objects),
 			  $type  => $objects

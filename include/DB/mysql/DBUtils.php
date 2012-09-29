@@ -175,8 +175,9 @@ class Utils {
 	 */
 	public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng){
 
-		$getVerticesAndChildrenIn_query = sprintf("SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, group_concat(e.`to_id`) AS children FROM `isocron`.`vertices` v
-										INNER JOIN `isocron`.`edges` e ON e.`from_id` = v.`id`");
+		$getVerticesAndChildrenIn_query = sprintf("SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
+										group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,'}')) AS children FROM `isocron`.`vertices` v
+										LEFT JOIN `isocron`.`edges` e ON e.`from_id` = v.`id`");
 
 		$getVerticesAndChildrenIn_query = self::restrictForVertex($getVerticesAndChildrenIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng);
 		$getVerticesAndChildrenIn_query .= " GROUP BY v.`id`";
@@ -191,10 +192,13 @@ class Utils {
 		  $result = array();
 	      while ($row = mysql_fetch_array($exe, MYSQL_ASSOC)) {
 	      	
-	      	$childrenAsPHPArray = json_decode('['.$row["children"].']', true);
+	      	if ($row["children"] == null){
+	      		$childrenAsPHPArray = null;
+	      	} else {
+	      		$childrenAsPHPArray = json_decode('['.$row["children"].']');
+	      	}
 
-	        $result[] = array(
-					        	'id' => intval($row["id"]), 
+	        $result[intval($row["id"])] = array( 
 					        	'point' => array(
 					        		'lat' => floatval($row["lat"]),
 					        		'lng' => floatval($row["lng"]),
@@ -203,6 +207,7 @@ class Utils {
 					        	'children' => $childrenAsPHPArray
 					        );
 	      }
+
 	      return $result;
 
 		}
@@ -301,7 +306,10 @@ class Utils {
 			// Sort (quick sort)
 			usort($vertices, self::build_sorter($lat, $lng));
 			
-			return $vertices[0];
+			$closest = $vertices[0];
+			$closest['distance'] = self::haversine($lat, $lng, $closest['point']['lat'], $closest['point']['lng']);
+
+			return $closest;
 
 		} else {
 
