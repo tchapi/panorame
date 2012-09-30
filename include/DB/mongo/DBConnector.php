@@ -14,6 +14,8 @@ class DB {
   private $password;
   private $dbname;
 
+  private $db;
+
   public function __construct($server, $username, $password, $dbname) {
     $this->server = $server;
     $this->username = $username;
@@ -26,11 +28,12 @@ class DB {
   { 
     try {
 
-      $this->link = new Mongo("mongodb://".$this->username.":".$this->password."@".$this->server);
-      return true
+      $this->link = new Mongo("mongodb://".$this->username.":".$this->password."@".$this->server."/isocron");
+      return true;
     
     } catch ( MongoConnectionException $e ) {
-    
+      
+      var_dump($e);
       $this->error();
 
     }
@@ -40,7 +43,7 @@ class DB {
   { 
     try {
 
-      $success  = $this->link->selectDB($this->dbname); 
+      $this->db  = $this->link->selectDB($this->dbname); 
       return true;
     
     } catch ( MongoConnectionException $e ) {
@@ -53,9 +56,14 @@ class DB {
   public function error() 
   { 
       // Closes the current connection
-      // $this->link->lastError(); 
-      print "Mongo DB Error : "."(no code)";
+      print "Mongo DB Error : ".$this->link->getLastError();
       die(0);
+  }
+
+  public function getDB(){
+
+    return $this->db;
+  
   }
   
 }

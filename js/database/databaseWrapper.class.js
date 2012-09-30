@@ -8,6 +8,7 @@ var databaseWrapper = function() {
 
 	var actions = {
 		getObjectsIn: 		path + "getObjectsIn.action.php",
+		getTypes: 			path + "getTypes.action.php",
 		getClosestVertex: 	path + "getClosestVertex.action.php",
 		addEdge:   			path + "addEdge.action.php",
 	};
@@ -16,6 +17,12 @@ var databaseWrapper = function() {
 	this.getObjectsIn = function(bounds, type, poi, callback){
 
 		$.post(actions.getObjectsIn, {bounds: bounds, type: type, poi: poi}, callback);
+	};
+
+	this.getTypes = function(callback){
+
+		$.post(actions.getTypes, callback);
+
 	};
 
 	this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type, callback){

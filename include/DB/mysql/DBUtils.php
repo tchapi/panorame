@@ -99,16 +99,31 @@ class Utils {
 	 */
 	public static function restrictForVertex($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
-		$where_clause = sprintf(" WHERE Intersects( v.`point`, Envelope(GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))')) )",
-								// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
-						mysql_real_escape_string($NW_lng),
-						mysql_real_escape_string($NW_lat),
-						mysql_real_escape_string($SE_lng),
-						mysql_real_escape_string($SE_lat),
-						mysql_real_escape_string($POI_lng),
-						mysql_real_escape_string($POI_lat),
-						mysql_real_escape_string($NW_lng),
-						mysql_real_escape_string($NW_lat));
+		if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
+
+			$where_clause = sprintf(" WHERE MBRIntersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))') )",
+									// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
+							mysql_real_escape_string($NW_lng),
+							mysql_real_escape_string($NW_lat),
+							mysql_real_escape_string($SE_lng),
+							mysql_real_escape_string($SE_lat),
+							mysql_real_escape_string($POI_lng),
+							mysql_real_escape_string($POI_lat),
+							mysql_real_escape_string($NW_lng),
+							mysql_real_escape_string($NW_lat));
+
+		} else {
+
+			$where_clause = sprintf(" WHERE MBRIntersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F))') )",
+									// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
+							mysql_real_escape_string($NW_lng),
+							mysql_real_escape_string($NW_lat),
+							mysql_real_escape_string($SE_lng),
+							mysql_real_escape_string($SE_lat),
+							mysql_real_escape_string($NW_lng),
+							mysql_real_escape_string($NW_lat));
+			
+		}
 
 		return $query.$where_clause;
 	}
@@ -118,16 +133,32 @@ class Utils {
 	 */
 	public static function restrictForEdgeBBox($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
-		$where_clause = sprintf(" WHERE Intersects( Envelope(LINESTRING(v.point,v_dest.point)), Envelope(GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))')) )",
-								// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
-						mysql_real_escape_string($NW_lng),
-						mysql_real_escape_string($NW_lat),
-						mysql_real_escape_string($SE_lng),
-						mysql_real_escape_string($SE_lat),
-						mysql_real_escape_string($POI_lng),
-						mysql_real_escape_string($POI_lat),
-						mysql_real_escape_string($NW_lng),
-						mysql_real_escape_string($NW_lat));
+		if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
+
+			$where_clause = sprintf(" WHERE MBRIntersects( LINESTRING(v.point,v_dest.point), GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))') )",
+									// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
+							mysql_real_escape_string($NW_lng),
+							mysql_real_escape_string($NW_lat),
+							mysql_real_escape_string($SE_lng),
+							mysql_real_escape_string($SE_lat),
+							mysql_real_escape_string($POI_lng),
+							mysql_real_escape_string($POI_lat),
+							mysql_real_escape_string($NW_lng),
+							mysql_real_escape_string($NW_lat));
+
+		} else {
+
+			$where_clause = sprintf(" WHERE MBRIntersects( LINESTRING(v.point,v_dest.point), GeomFromText('POLYGON((%F %F, %F %F, %F %F))') )",
+									// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
+							mysql_real_escape_string($NW_lng),
+							mysql_real_escape_string($NW_lat),
+							mysql_real_escape_string($SE_lng),
+							mysql_real_escape_string($SE_lat),
+							mysql_real_escape_string($NW_lng),
+							mysql_real_escape_string($NW_lat));		
+
+
+		}
 
 		return $query.$where_clause;
 	}
@@ -312,6 +343,26 @@ class Utils {
 			return null;
 
 		}
+	}
+
+	public static function getTypes(){
+
+		$query = "SELECT `id`, `slug` from `isocron`.`types` where editable = 1;";
+		$exe = mysql_query($query);
+
+		// Returns true if the query was well executed
+		if (!$exe || $exe == false ) {
+		  return false;
+		} else {
+		  // Fetch the types
+		  $result = array();
+	      while ($row = mysql_fetch_array($exe, MYSQL_ASSOC)) {
+	      	array_push($result, array('id' => $row['id'], 'description' => $row['slug']));
+	      }
+	  	}
+
+	  	return $result;
+
 	}
 
 	/*

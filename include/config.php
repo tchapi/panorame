@@ -31,6 +31,8 @@
 
 		$engine = "mysql"; // OR mysql
 
+		global $DBConnection;
+
 		/* ----------------------------- */
 		/* ------- DO NOT MODIFY ------- */
 

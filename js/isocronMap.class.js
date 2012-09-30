@@ -55,10 +55,10 @@ var isocronMap = function() {
             apiKeys: this.apiKeys,
             positionCallback: $.proxy(this.updateCurrentPosition, this),
             boundsHaveChangedCallback : $.proxy(this.boundsHaveChanged, this),
-            colorsForType: ['#000000','#009900','#FF9933','#FF6666','#FF0000','#006699'], // 0, 1, 2
-            thicknessesForType: [1, 4, 4, 4, 4,4], // 0, 1, 2
+            colorsForType: ['', '#000000','#009900','#FF9933','#FF6666','#FF0000','#006699'], // 0, 1, 2
+            thicknessesForType: [4, 2, 4, 4, 4, 4,4], // 0, 1, 2
             standardPinImage: '/img/pins/Blue/8.png',
-            closestPointPinImage: '/img/pins/Red/8.png',
+            closestPointPinImage: '/img/pins/Green/8.png',
             mapReadyCallback: $.proxy(this.mapIsReady, this),
             addEdgeCallback: $.proxy(this.addEdge, this)
         };
@@ -78,7 +78,7 @@ var isocronMap = function() {
 
         // Finally, we center the map at the user's position
         this.setToUserPositionIfAvailable();
-        this.mapIsReady = true;
+
     };
 
     this.setupVisual = function(){
@@ -88,6 +88,7 @@ var isocronMap = function() {
         this.limitSlider  = $('#limitSlider');
         this.limitValue   = $('#limitValue');
         var toggleDataOverlay = $('#toggleDataOverlay');
+        this.typeSelect = $("#addEdge_type");
 
         $('.radiusType').tooltip({placement: 'bottom'});
         toggleDataOverlay.tooltip({placement: 'bottom'});
@@ -141,7 +142,7 @@ var isocronMap = function() {
         this.limitSlider.noUiSlider('init', {
             knobs: 1,
             connect: "lower",
-            scale: [0, 1000],
+            scale: [0, 2000],
             start: 300,
             change:$.proxy(function(){
                 this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
@@ -150,6 +151,20 @@ var isocronMap = function() {
         });
 
         this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
+
+        // Insert types in admin
+        databaseWrapper.getTypes($.proxy(function(data){
+
+            $.each(data, $.proxy(function(key, value) {   
+                 this.typeSelect
+                     .append($("<option></option>")
+                     .attr("value",key)
+                     .attr("rel", value.id)
+                     .text("(" + value.id + ") "+ value.description)); 
+            }, this));
+
+        }, this));
+
     };
 
     this.setToUserPositionIfAvailable = function(){
@@ -162,7 +177,6 @@ var isocronMap = function() {
 
         this.position = {lat: lat, lng: lng};
         $('#position span').html(Math.round(lat*this.digits)/this.digits + ' — ' + Math.round(lng*this.digits)/this.digits);
-        console.log(this.mapIsReady);
         this.poiHasChanged();
 
     };
@@ -217,9 +231,9 @@ var isocronMap = function() {
     };
 
     /* Event binding */
-    this.boundsHaveChanged = function() { console.log('bounds have changed'); this.getDataAndRecalculateGraph(); };
-    this.poiHasChanged = function()     { console.log('poi has changed'); this.getDataAndRecalculateGraph(); };
-    this.rangeHasChanged = function()   { console.log('range has changed'); this.recalculateGraph(); }
+    this.boundsHaveChanged = function() { this.getDataAndRecalculateGraph(); };
+    this.poiHasChanged = function()     { this.getDataAndRecalculateGraph(); };
+    this.rangeHasChanged = function()   { this.recalculateGraph(); }
 
     /* DIJKSTRA STUFF */
     this.findMinimumCost = function(array){
@@ -235,6 +249,12 @@ var isocronMap = function() {
         }
 
         return min_index;
+    };
+
+    this.calculateCost = function(startingCost, distance, grade, type){
+
+        return startingCost + distance + 10*grade;
+
     };
 
     this.dijkstra = function(tree, poi, closestPoint){
@@ -257,7 +277,7 @@ var isocronMap = function() {
             //id: 0,
             //distance: closestPoint.distance,
             // grade: closestPoint.grade,
-            type: 0,
+            type: 1,
             start:{
                 //id: 0,
                 point:{
@@ -272,7 +292,7 @@ var isocronMap = function() {
                 point:{
                     lat: closestPoint.point.lat,
                     lng: closestPoint.point.lng,
-                    alt: closestPoint.point.alt
+                    //alt: closestPoint.point.alt
                 },
                 cost: closestPoint.distance
             }
@@ -282,17 +302,18 @@ var isocronMap = function() {
 
         var idInTree = null;
         var child = null;
+        var newCost = 0;
 
         while (node != null) {
             
             // node has no cost : it will never be reached 
             if (node.cost == null) {
 
-                //console.log('- found unreachable node : ' + nodeId);
+                // console.log('- found unreachable node : ' + nodeId);
 
             } else {
 
-                //console.log('- checking reached node : ' + nodeId);
+                // console.log('- checking reached node : ' + nodeId);
 
                 // node has a cost : it has been reached, check his children
                 for(childIndex in node.children) {
@@ -305,11 +326,11 @@ var isocronMap = function() {
                         childInTree = treeCopy[idInTree];
 
                         // We replace the cost if we reach him at a lesser cost
+                        newCost  = this.calculateCost(node.cost, child.distance, child.grade);
                         if ( childInTree.out !== true && 
-                            (typeof(childInTree.cost) === 'undefined' || childInTree.cost == null || childInTree.cost > (node.cost + child.distance + 10*child.grade) )
+                            (typeof(childInTree.cost) === 'undefined' || childInTree.cost == null || childInTree.cost > newCost)
                         ){
-
-                            childInTree.cost = node.cost + child.distance + 10*child.grade;
+                            childInTree.cost = newCost;
                             childInTree.path = node.path.slice(); // to make a copy
                             childInTree.path.push(idInTree);
 
@@ -317,27 +338,26 @@ var isocronMap = function() {
 
                         // now we construct the edge we're going to need for display between node and childInTree
                         // console.log('  + found edge : ' + nodeId + ' => ' + idInTree + '(cost=' + childInTree.cost + ')')
-                        
                         edges.push({
-                            id: child.path_id,
+                            //id: child.path_id,
                             distance: child.distance,
                             grade: child.grade,
                             type: child.type,
                             start:{
-                                id: nodeId,
+                                //id: nodeId,
                                 point:{
                                     lat: node.point.lat,
                                     lng: node.point.lng,
-                                    alt: node.point.alt
+                                    //alt: node.point.alt
                                 },
                                 cost: node.cost,
                             },
                             dest:{
-                                id: idInTree,
+                                //id: idInTree,
                                 point:{
                                     lat: childInTree.point.lat,
                                     lng: childInTree.point.lng,
-                                    alt: childInTree.point.alt
+                                    //alt: childInTree.point.alt
                                 },
                                 cost: childInTree.cost
                             }
@@ -369,7 +389,7 @@ var isocronMap = function() {
     // ADMIN
     this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type){
 
-        var result = databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, $('#addEdge_type').val(), $.proxy(this.getData,this));
+        var result = databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, this.typeSelect.find('option:selected').attr('rel'), $.proxy(this.boundsHaveChanged,this));
 
     };
 

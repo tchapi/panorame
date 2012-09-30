@@ -76,9 +76,6 @@
       <div class="pull-right" id="objects"><b class="icon-th"></b> <span>0</span> Object(s)</div>
       <div class="pull-right" id="addEdge">
         <select id="addEdge_type">
-          <option value="0">(0) Road</option>
-          <option value="1">(1) Suburban</option>
-          <option value="2">(2) Other</option>
         </select>
         <button class="btn btn-danger" ><b class="icon-plus-sign icon-white"></b> Add edges</button>
       </div>
