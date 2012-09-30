@@ -7,6 +7,9 @@
   /* Closest function radius (in m) */
   define('_closestPointRadius_search', 200);
   define('_closestPointRadius_edit', 10);
+  define('_extendBoundsPointRadius', 1000);
+
+  define('_showAdmin', true);
 
 	if ($app == '_FRONTEND') {
 

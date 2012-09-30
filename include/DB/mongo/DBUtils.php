@@ -2,7 +2,7 @@
 
 class Utils {
 
-	const earth_radius = 6367500; // in m
+	const earth_radius = 6371030.0; // in m
 
 	/*
 	 * START -- FOR TESTING PURPOSES ONLY

@@ -140,7 +140,7 @@ var mapsWrapper = function(type) {
         var bounds = this.map.getBounds();
 
         if (!bounds) return null;
-        
+
             var NE = bounds.getNorthEast();
             var SW = bounds.getSouthWest();
 
@@ -178,7 +178,10 @@ var mapsWrapper = function(type) {
                 new google.maps.LatLng(startPoint.lat, startPoint.lng),
                 new google.maps.LatLng(destPoint.lat, destPoint.lng)],
               strokeColor: this.colorsForType[edges[i].type],
-              strokeWeight: this.thicknessesForType[edges[i].type]
+              strokeWeight: this.thicknessesForType[edges[i].type],
+              icons: [{icon:{path:"M -2,5 -2,-5 -3.5,-2",strokeOpacity:0.75, strokeWeight:3, strokeColor:"blue"},offset:"50%"},
+                      {icon:{path:"M 0,0 L 3.5,-3.5 Q 0,-6 -3.5,-3.5 z",strokeOpacity:0.75, strokeWeight:1, strokeColor:"red", fillColor:"orange", fillOpacity:0.75},offset:"0"}
+                        ] // ADMIN
             });
             google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
 

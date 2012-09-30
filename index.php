@@ -5,12 +5,15 @@
 ?><!DOCTYPE html>
 <html>
   <head>
-    <title>ISOCRON</title>
+    <title>Panorame</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/plugins/nouislider.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+<?php if (_showAdmin === true): ?>
+    <link href="css/admin.css" rel="stylesheet">  
+<?php endif ?>
     <?php echo $addedScript; ?>
     <script>
 
@@ -31,7 +34,7 @@
 
       <!-- navbar -->
       <div class="span2" id="logo">
-        <h1><a href="/">MSVKGFSR</a></h1>
+        <h1><a href="/">PANORA<span>ME</span></a></h1>
       </div>
 
       <div class="span5">
@@ -45,11 +48,12 @@
 
       <div class='span5' id="actionForm">
 
-          <div class="btn-group pull-right" data-toggle="buttons-radio">
+          <!--<div class="btn-group pull-right" data-toggle="buttons-radio">
             <button class="btn btn-success radiusType active" data-original-title="Basic radius" ><b class="icon-cog"></b></button>
             <button class="btn btn-warning radiusType" data-original-title="Road distance" ><b class="icon-road"></b></button>
             <button class="btn btn-info radiusType" data-original-title="Suburban transport" ><b class="icon-plane"></b></button>
-          </div>
+          </div>-->
+          <button id="adminMode" class="btn btn-warning pull-right"><b class="icon-pencil icon-white"></b> Edit mode</button>
           
           <div id="limitDiv" class="alert alert-info pull-right">
             <b id="toggleDataOverlay" data-original-title="Toggle overlays" class="icon-eye-open pull-left"></b>
@@ -61,7 +65,22 @@
       </div>
 
     </header>
-    
+
+<?php if (_showAdmin === true): ?>
+    <!-- ADMIN -->
+    <div id="admin" class="modal" style="display: none;">
+      <div class="form-inline">
+        <label for="addEdge_type">Type : </label> <select id="addEdge_type"></select>
+        <label class="checkbox">
+          <input type="checkbox" value="">
+          Automatically make both ways
+        </label>
+        <button id="addEdge" class="btn btn-info" ><b class="icon-plus-sign icon-white"></b> Add edges</button>
+        <button id="cancelLastEdge" class="btn btn-danger" ><b class="icon-minus-sign icon-white"></b> Cancel last edge</button>
+      </div>
+    </div>
+<?php endif ?>
+
     <!-- canvas -->
     <div id="mapCanvas">
       <div class="loader_back">
@@ -71,14 +90,9 @@
     
     <!-- footer -->
     <footer class='row-fluid'>
-      <div class="span6" id="copyright"><b class="icon-info-sign"></b> Copyright <a href="https://about.me/tchap">tchap</a></div>
+      <div class="span6" id="copyright"><b class="icon-info-sign"></b> Copyright <a href="https://about.me/tchap">tchap</a> & <a href="#">bowni</a></div>
       <div class="pull-right" id="position"><b class="icon-screenshot"></b> <span>Calculating ...</span></div>
       <div class="pull-right" id="objects"><b class="icon-th"></b> <span>0</span> Object(s)</div>
-      <div class="pull-right" id="addEdge">
-        <select id="addEdge_type">
-        </select>
-        <button class="btn btn-danger" ><b class="icon-plus-sign icon-white"></b> Add edges</button>
-      </div>
     </footer>
 
   </body>

@@ -84,11 +84,11 @@ var isocronMap = function() {
     this.setupVisual = function(){
 
         var addPinButton  = $('#addPin');
-        var addEdgeButton = $('#addEdge button');
+        this.limitDiv     = $("#limitDiv");
         this.limitSlider  = $('#limitSlider');
         this.limitValue   = $('#limitValue');
         var toggleDataOverlay = $('#toggleDataOverlay');
-        this.typeSelect = $("#addEdge_type");
+
 
         $('.radiusType').tooltip({placement: 'bottom'});
         toggleDataOverlay.tooltip({placement: 'bottom'});
@@ -123,8 +123,37 @@ var isocronMap = function() {
             }
 
         },this));
+        
+        this.limitSlider.noUiSlider('init', {
+            knobs: 1,
+            connect: "lower",
+            scale: [0, 2000],
+            start: 300,
+            change:$.proxy(function(){
+                this.limit = this.limitSlider.noUiSlider('value')[1];
+                this.limitValue.html(this.limit + 'm');
+                this.rangeHasChanged();
+            }, this)
+        });
 
-        addEdgeButton.popover({placement: 'bottom'});
+        this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
+
+        /* ------------------- ADMIN ------------------- */
+        var adminModeButton = $("#adminMode");
+        this.adminDiv        = $("#admin");
+        var addEdgeButton   = $('#addEdge');
+        var cancelLastEdgeButton   = $('#cancelLastEdge');
+        this.typeSelect     = $("#addEdge_type");
+
+        adminModeButton.click($.proxy(function(event){
+
+            this.limitDiv.toggle();
+            this.limit = null;
+            this.adminDiv.toggle();
+            $('footer, header').toggleClass('adminMode');
+
+        }, this));
+
         addEdgeButton.click($.proxy(function(event){
 
             if (addEdgeButton.hasClass('active')){
@@ -139,19 +168,6 @@ var isocronMap = function() {
 
         },this));
 
-        this.limitSlider.noUiSlider('init', {
-            knobs: 1,
-            connect: "lower",
-            scale: [0, 2000],
-            start: 300,
-            change:$.proxy(function(){
-                this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
-                this.rangeHasChanged();
-            }, this)
-        });
-
-        this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
-
         // Insert types in admin
         databaseWrapper.getTypes($.proxy(function(data){
 
@@ -164,6 +180,7 @@ var isocronMap = function() {
             }, this));
 
         }, this));
+        /* ------------------- ADMIN ------------------- */
 
     };
 
@@ -223,7 +240,7 @@ var isocronMap = function() {
 
         mapsWrapper.setDataOverlay(
             this.dijkstra(this.data.tree, this.position, this.data.closest),
-            this.limitSlider.noUiSlider('value')[1],
+            this.limit,
             this.displayData
         );
         mapsWrapper.setClosestOverlay(this.data.closest.point, this.displayData);

@@ -1,0 +1,17 @@
+header.adminMode,
+footer.adminMode{
+	background: lightGoldenrodYellow;
+}
+
+#admin{
+	position: absolute;
+	background: white;
+	right: 10px;
+	left: auto;
+	top: 63px;
+	z-index: 10;
+	width: 265px;
+	height: 100px;
+	padding: 10px;
+	margin: 0;
+}

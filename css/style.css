@@ -7,6 +7,7 @@ header {
 	border-bottom: 1px solid gray;
 }
   header h1          	{ margin:0; line-height: 32px; }
+  header h1 span		{ color: gray;}
   header #logo       	{ padding: 0 0 0 10px; }
   header #actionForm 	{ padding: 0 10px 0 0; }
    header #addPin		{ margin-left: 10px; }

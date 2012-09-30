@@ -2,7 +2,7 @@
 
 class Utils {
 
-	const earth_radius = 6367500.0; // in m
+	const earth_radius = 6371030.0; // in m
 	
 	/*
 	 * START -- FOR TESTING PURPOSES ONLY
@@ -97,6 +97,32 @@ class Utils {
 	/*
 	 * Adds a BOUNDS restrict to a query
 	 */
+
+	public static function extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng){
+
+		$ratio = _extendBoundsPointRadius/self::earth_radius;
+		$lat_rad = $NW_lat*pi()/180;
+		$lng_rad = $NW_lng*pi()/180;
+		$cos_lat_rad = cos($lat_rad);
+		$sin_lat_rad = sin($lat_rad);
+
+		$brng = (315/180)*pi();
+		$newNW_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
+		$newNW_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($newNW_lat*pi()/180)))* 180 / pi();
+
+		$lat_rad = $SE_lat*pi()/180;
+		$lng_rad = $SE_lng*pi()/180;
+		$cos_lat_rad = cos($lat_rad);
+		$sin_lat_rad = sin($lat_rad);
+
+		$brng = 135/180*pi();
+		$newSE_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
+		$newSE_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($newSE_lat*pi()/180)))* 180 / pi();
+
+		return array('NW_lat' => $newNW_lat, 'NW_lng' => $newNW_lng, 'SE_lat' => $newSE_lat, 'SE_lng' => $newSE_lng);
+
+	}
+
 	public static function restrictForVertex($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
 		if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
@@ -202,11 +228,13 @@ class Utils {
 	 */
 	public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
+		$b = self::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
+
 		$getVerticesAndChildrenIn_query = sprintf("SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
 										group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,'}')) AS children FROM `isocron`.`vertices` v
 										LEFT JOIN `isocron`.`edges` e ON e.`from_id` = v.`id`");
 
-		$getVerticesAndChildrenIn_query = self::restrictForVertex($getVerticesAndChildrenIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
+		$getVerticesAndChildrenIn_query = self::restrictForVertex($getVerticesAndChildrenIn_query, $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
 		$getVerticesAndChildrenIn_query .= " GROUP BY v.`id`";
 
 		$exe = mysql_query($getVerticesAndChildrenIn_query);
