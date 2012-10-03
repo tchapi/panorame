@@ -80,6 +80,10 @@ var mapsWrapper = function(type) {
           genericOptions.boundsHaveChangedCallback();
         });
 
+        // ADMIN ----------------------------------
+        // Create an ElevationService
+        this.elevator = new google.maps.ElevationService();
+
     };
 
     this.setAddPin = function(booleanValue){
@@ -92,16 +96,32 @@ var mapsWrapper = function(type) {
 
     this.clickListener = function(event){
         if (this.addPin == true) this.setPosition(event.latLng.lat(), event.latLng.lng(), null);
+
+        // ADMIN ---------------------------------------
         if (this.addEdge === true) {
-            this.addEdge = {lat:event.latLng.lat(), lng:event.latLng.lng()};
+
+            this.addEdge = event.latLng;
             this.addEdgeEnd = true;
-            console.log('Point A (start) :' + this.addEdge.lat + ' - ' + this.addEdge.lng + ' | Waiting for point B ...');
+            console.log('Point A (start) :' + this.addEdge.lat() + ' - ' + this.addEdge.lng() + ' | Waiting for point B ...');
+
         } else if (this.addEdgeEnd === true) {
-            this.addEdgeCallback(this.addEdge.lat, this.addEdge.lng, 0,event.latLng.lat(), event.latLng.lng(), 0, 0);
-            this.addEdge = true;
-            this.addEdgeEnd = false;
-            console.log('Point B (dest) :' + event.latLng.lat() + ' - ' + event.latLng.lng() + ' | Adding the edge now.');
+
+            this.elevator.getElevationForLocations({locations:[this.addEdge, event.latLng]}, $.proxy(function(results, status) {
+                var alt = [0,0];
+                if (status == google.maps.ElevationStatus.OK && results[0] && results[1]) {
+                    alt[0] = results[0].elevation;
+                    alt[1] = results[1].elevation;
+                }
+
+                this.addEdgeCallback(this.addEdge.lat(), this.addEdge.lng(), alt[0],event.latLng.lat(), event.latLng.lng(), alt[1]);
+                this.addEdge = true;
+                this.addEdgeEnd = false;
+                console.log('Point B (dest) :' + event.latLng.lat() + ' - ' + event.latLng.lng() + ' | Adding the edge now.');
+
+            }, this));
         }
+        // ADMIN ----------------------------------------
+
     };
 
     this.setPosition = function(lat, lng, description){
@@ -179,12 +199,25 @@ var mapsWrapper = function(type) {
                 new google.maps.LatLng(destPoint.lat, destPoint.lng)],
               strokeColor: this.colorsForType[edges[i].type],
               strokeWeight: this.thicknessesForType[edges[i].type],
-              icons: [{icon:{path:"M -2,5 -2,-5 -3.5,-2",strokeOpacity:0.75, strokeWeight:3, strokeColor:"blue"},offset:"50%"},
-                      {icon:{path:"M 0,0 L 3.5,-3.5 Q 0,-6 -3.5,-3.5 z",strokeOpacity:0.75, strokeWeight:1, strokeColor:"red", fillColor:"orange", fillOpacity:0.75},offset:"0"}
-                        ] // ADMIN
+              // ADMIN ------------------------------------------------------------------------------------------------------------
+              editable: true,
+              icons: [{icon:{path:"M -2,5 -2,-5 -3.5,-2",strokeOpacity:0.75, strokeWeight:3, strokeColor: this.colorsForType[edges[i].type]},offset:"50%"}]
+              // ADMIN ------------------------------------------------------------------------------------------------------------
             });
-            google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
 
+            // ADMIN ------------------------------------------------------------------------------------------------------------
+            google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
+            google.maps.event.addListener(this.edges[i].getPath(), 'set_at', (function(indexes) {
+              return function() {
+                databaseWrapper.updateVertexCouple(indexes[0], this.getAt(0).lat(), this.getAt(0).lng(), 0, indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], null);
+              }
+            })([edges[i].start.id, edges[i].dest.id, edges[i].id]));
+            google.maps.event.addListener(this.edges[i].getPath(), 'insert_at', (function(indexes) {
+              return function() {
+                databaseWrapper.cutEdge(indexes[0], indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], null);
+              }
+            })([edges[i].start.id, edges[i].dest.id, edges[i].id]));
+            // ADMIN ------------------------------------------------------------------------------------------------------------
         };
 
         if (display == true) this.displayDataOverlay();

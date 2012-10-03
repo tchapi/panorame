@@ -1,3 +1,4 @@
+<?php if(isset($_GET['edit']) && $_GET['edit'] == 1) $editMode = true; ?>
 /* isocronMap
  *
  */
@@ -60,7 +61,9 @@ var isocronMap = function() {
             standardPinImage: '/img/pins/Blue/8.png',
             closestPointPinImage: '/img/pins/Green/8.png',
             mapReadyCallback: $.proxy(this.mapIsReady, this),
+<?php if ($editMode === true): ?>
             addEdgeCallback: $.proxy(this.addEdge, this)
+<?php endif ?>
         };
 
         mapsWrapper.createMap(this.options);
@@ -84,11 +87,7 @@ var isocronMap = function() {
     this.setupVisual = function(){
 
         var addPinButton  = $('#addPin');
-        this.limitDiv     = $("#limitDiv");
-        this.limitSlider  = $('#limitSlider');
-        this.limitValue   = $('#limitValue');
         var toggleDataOverlay = $('#toggleDataOverlay');
-
 
         $('.radiusType').tooltip({placement: 'bottom'});
         toggleDataOverlay.tooltip({placement: 'bottom'});
@@ -123,36 +122,13 @@ var isocronMap = function() {
             }
 
         },this));
-        
-        this.limitSlider.noUiSlider('init', {
-            knobs: 1,
-            connect: "lower",
-            scale: [0, 2000],
-            start: 300,
-            change:$.proxy(function(){
-                this.limit = this.limitSlider.noUiSlider('value')[1];
-                this.limitValue.html(this.limit + 'm');
-                this.rangeHasChanged();
-            }, this)
-        });
 
-        this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
-
+<?php if ($editMode === true): ?>
         /* ------------------- ADMIN ------------------- */
-        var adminModeButton = $("#adminMode");
-        this.adminDiv        = $("#admin");
+
         var addEdgeButton   = $('#addEdge');
-        var cancelLastEdgeButton   = $('#cancelLastEdge');
+        var cancelLastEdgeButton   = $('#cancelLastEdge'); // TODO
         this.typeSelect     = $("#addEdge_type");
-
-        adminModeButton.click($.proxy(function(event){
-
-            this.limitDiv.toggle();
-            this.limit = null;
-            this.adminDiv.toggle();
-            $('footer, header').toggleClass('adminMode');
-
-        }, this));
 
         addEdgeButton.click($.proxy(function(event){
 
@@ -181,6 +157,26 @@ var isocronMap = function() {
 
         }, this));
         /* ------------------- ADMIN ------------------- */
+<?php else: ?>
+        this.limitDiv     = $("#limitDiv");
+        this.limitSlider  = $('#limitSlider');
+        this.limitValue   = $('#limitValue');
+        
+        this.limitSlider.noUiSlider('init', {
+            knobs: 1,
+            connect: "lower",
+            scale: [0, 2000],
+            start: 300,
+            change:$.proxy(function(){
+                this.limit = this.limitSlider.noUiSlider('value')[1];
+                this.limitValue.html(this.limit + 'm');
+                this.rangeHasChanged();
+            }, this)
+        });
+
+        this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
+
+<?php endif ?>
 
     };
 
@@ -198,13 +194,12 @@ var isocronMap = function() {
 
     };
 
-    this.getBounds = function(includePoi){
+    this.getBounds = function(){
 
         var bounds = mapsWrapper.getBoundsAsLatLng();
 
         if (bounds == null) return null;
 
-        //$('#position b').popover('destroy')
         $('#position b').popover({placement: 'top', trigger: 'click', title:"Actual bounds",
             content: 'NW : (' + Math.round(bounds.NW_lat*this.digits)/this.digits + ', ' + Math.round(bounds.NW_lng*this.digits)/this.digits + ')<br/>' +
                      'SE : (' + Math.round(bounds.SE_lat*this.digits)/this.digits + ', ' + Math.round(bounds.SE_lng*this.digits)/this.digits + ')<br/>'
@@ -216,8 +211,11 @@ var isocronMap = function() {
 
     this.getDataAndRecalculateGraph = function(){
 
+<?php if ($editMode === true): ?>
+        databaseWrapper.getObjectsIn(this.getBounds(), 'edges', this.position, $.proxy(function(data){
+<?php else: ?>
         databaseWrapper.getObjectsIn(this.getBounds(), 'tree', this.position, $.proxy(function(data){
-            
+<?php endif ?>            
             $('#objects span').html(data.count);
             
             if (data.count != 0 && data.closest != null) {
@@ -237,12 +235,19 @@ var isocronMap = function() {
             this.getData();
             return;
         }
-
+<?php if ($editMode === true): ?>
+        mapsWrapper.setDataOverlay(
+            this.data.edges,
+            null,
+            this.displayData
+        );
+<?php else: ?>
         mapsWrapper.setDataOverlay(
             this.dijkstra(this.data.tree, this.position, this.data.closest),
             this.limit,
             this.displayData
         );
+<?php endif ?>
         mapsWrapper.setClosestOverlay(this.data.closest.point, this.displayData);
 
     };
@@ -291,12 +296,12 @@ var isocronMap = function() {
 
         // The first edge is POI -> root node
         edges.push({
-            //id: 0,
+            id: 0,
             //distance: closestPoint.distance,
             // grade: closestPoint.grade,
             type: 1,
             start:{
-                //id: 0,
+                id: 0,
                 point:{
                     lat: poi.lat,
                     lng: poi.lng,
@@ -356,12 +361,12 @@ var isocronMap = function() {
                         // now we construct the edge we're going to need for display between node and childInTree
                         // console.log('  + found edge : ' + nodeId + ' => ' + idInTree + '(cost=' + childInTree.cost + ')')
                         edges.push({
-                            //id: child.path_id,
+                            id: child.path_id,
                             distance: child.distance,
                             grade: child.grade,
                             type: child.type,
                             start:{
-                                //id: nodeId,
+                                id: nodeId,
                                 point:{
                                     lat: node.point.lat,
                                     lng: node.point.lng,
@@ -370,7 +375,7 @@ var isocronMap = function() {
                                 cost: node.cost,
                             },
                             dest:{
-                                //id: idInTree,
+                                id: idInTree,
                                 point:{
                                     lat: childInTree.point.lat,
                                     lng: childInTree.point.lng,
@@ -402,14 +407,14 @@ var isocronMap = function() {
         return edges;
     };
 
-
-    // ADMIN
-    this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type){
+<?php if ($editMode === true): ?>
+    // ADMIN ---------------------
+    this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt){
 
         var result = databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, this.typeSelect.find('option:selected').attr('rel'), $.proxy(this.boundsHaveChanged,this));
 
     };
-
+<?php endif ?>
 }
 
 /* Instanciates

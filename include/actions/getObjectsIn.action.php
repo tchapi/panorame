@@ -22,7 +22,7 @@
 		$poi = array('lat' => $_POST['poi']['lat'], 'lng' => $_POST['poi']['lng']);
 		$closestVertex = Utils::getClosestVertex($poi['lat'], $poi['lng'], _closestPointRadius_search);
 
-		// GEt objects
+		// Get objects
 		if ($type == 'vertices'){
 
 			$objects = Utils::getVerticesIn($bounds["NW_lat"], $bounds["NW_lng"], $bounds["SE_lat"], $bounds["SE_lng"], $closestVertex['point']['lat'], $closestVertex['point']['lng']);

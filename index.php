@@ -9,12 +9,12 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/plugins/nouislider.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-<?php if (_showAdmin === true): ?>
+<?php if ($editMode === true): ?>
     <link href="css/admin.css" rel="stylesheet">  
+<?php else: ?>
+    <link href="css/plugins/nouislider.css" rel="stylesheet">
 <?php endif ?>
-    <?php echo $addedScript; ?>
     <script>
 
       // Wraps all that and fires
@@ -48,35 +48,31 @@
 
       <div class='span5' id="actionForm">
 
-          <!--<div class="btn-group pull-right" data-toggle="buttons-radio">
-            <button class="btn btn-success radiusType active" data-original-title="Basic radius" ><b class="icon-cog"></b></button>
-            <button class="btn btn-warning radiusType" data-original-title="Road distance" ><b class="icon-road"></b></button>
-            <button class="btn btn-info radiusType" data-original-title="Suburban transport" ><b class="icon-plane"></b></button>
-          </div>-->
-          <button id="adminMode" class="btn btn-warning pull-right"><b class="icon-pencil icon-white"></b> Edit mode</button>
-          
+<?php if ($editMode === true): ?> 
+          <div id="editMode" class="alert alert-warning pull-right"><strong>Editing mode</strong></div> 
+<?php else: ?>
           <div id="limitDiv" class="alert alert-info pull-right">
             <b id="toggleDataOverlay" data-original-title="Toggle overlays" class="icon-eye-open pull-left"></b>
             <div id="limitSlider" class="noUiSlider pull-right"></div>
             <div id="limitValue"></div>
           </div>
-
+<?php endif ?>
         </div>
       </div>
 
     </header>
 
-<?php if (_showAdmin === true): ?>
+<?php if ($editMode === true): ?>
     <!-- ADMIN -->
-    <div id="admin" class="modal" style="display: none;">
+    <div id="admin" class="modal">
       <div class="form-inline">
-        <label for="addEdge_type">Type : </label> <select id="addEdge_type"></select>
-        <label class="checkbox">
-          <input type="checkbox" value="">
-          Automatically make both ways
-        </label>
+        <div class="form-line">
+          <label for="addEdge_type">Type : </label> <select id="addEdge_type"></select>
+        </div>
+        <div class="form-line">
+          <label class="checkbox">Automatically make both ways : </label> <input type="checkbox" value="">
+        </div>  
         <button id="addEdge" class="btn btn-info" ><b class="icon-plus-sign icon-white"></b> Add edges</button>
-        <button id="cancelLastEdge" class="btn btn-danger" ><b class="icon-minus-sign icon-white"></b> Cancel last edge</button>
       </div>
     </div>
 <?php endif ?>
@@ -98,10 +94,13 @@
   </body>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js" type="text/javascript"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
+<?php if ($editMode !== true): ?>
   <script src="js/plugins/jquery.nouislider.min.js"></script>
+  <?php echo $addedScript; ?>
+<?php endif ?>
   <script src="js/helpers/userPositionHelper.js" type="text/javascript"></script>
-  <script src="js/isocronMap.class.js" type="text/javascript"></script>
-  <script src="js/providers/mapsWrapper.<?php echo $framework; ?>.class.js" type="text/javascript"></script>
+  <script src="js/isocronMap.class.js.php<?php if ($editMode === true) echo '?edit=1'; ?>" type="text/javascript"></script>
+  <script src="js/providers/mapsWrapper.<?php echo $framework; ?>.class.js<?php if ($editMode === true) echo '?edit=1'; ?>" type="text/javascript"></script>
   <script>
     /* Instanciates the MAPS API wrapper
      */

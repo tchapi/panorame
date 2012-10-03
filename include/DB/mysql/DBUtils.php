@@ -394,6 +394,119 @@ class Utils {
 	}
 
 	/*
+	 * Updating a vertex
+	 */
+
+	public static function updateVertexCouple($start_id, $start_lat, $start_lng, $start_alt, $dest_id, $dest_lat, $dest_lng, $dest_alt, $edge_id){
+
+		$query1 = sprintf("UPDATE `isocron`.`vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
+							mysql_real_escape_string($start_lng),
+							mysql_real_escape_string($start_lat),
+							mysql_real_escape_string($start_alt),
+							mysql_real_escape_string($start_id));
+
+		$exe1 = mysql_query($query1);
+
+		$query2 = sprintf("UPDATE `isocron`.`vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
+							mysql_real_escape_string($dest_lng),
+							mysql_real_escape_string($dest_lat),
+							mysql_real_escape_string($dest_alt),
+							mysql_real_escape_string($dest_id));
+
+		$exe2 = mysql_query($query2);
+
+		$distance = self::haversine($start_lat, $start_lng, $dest_lat, $dest_lng);
+		$grade = $dest_alt - $start_alt;
+
+		$query3 = sprintf("UPDATE `isocron`.`edges` SET `distance` = %F, `grade`= %d WHERE `id` = %d;",
+							mysql_real_escape_string($distance),
+							mysql_real_escape_string($grade),
+							mysql_real_escape_string($edge_id));
+
+		$exe2 = mysql_query($query3);
+
+		return $query1.$query2.$query3;
+	}
+
+	/*
+	 * Cutting a vertex
+	 */
+
+	public static function cutEdge($start_id, $dest_id, $new_lat, $new_lng, $new_alt, $edge_id){
+
+		$query = sprintf("INSERT INTO `isocron`.`vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), %d);",
+							mysql_real_escape_string($new_lng),
+							mysql_real_escape_string($new_lat),
+							mysql_real_escape_string($new_alt));
+		$query_fetch = sprintf("SELECT id FROM `isocron`.`vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
+						mysql_real_escape_string($new_lng),
+						mysql_real_escape_string($new_lat));
+		mysql_query('BEGIN');
+		mysql_query($query);
+		$exe = mysql_query($query_fetch);
+		mysql_query('COMMIT');
+
+		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
+		$new_id = intval($row['id']);
+
+		$query2 = sprintf("SELECT Y(`point`) as lat, X(`point`) as lng, elevation as alt FROM `isocron`.`vertices` WHERE `id` = %d;",
+							mysql_real_escape_string($start_id));
+
+		$exe = mysql_query($query2);		
+		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
+		$start_lat = intval($row['lat']);
+		$start_lng = intval($row['lng']);
+		$start_alt = intval($row['alt']);
+
+
+		$query2b = sprintf("SELECT Y(`point`) as lat, X(`point`) as lng, elevation as alt FROM `isocron`.`vertices` WHERE `id` = %d;",
+							mysql_real_escape_string($dest_id));
+
+		$exe = mysql_query($query2b);		
+		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
+		$dest_lat = intval($row['lat']);
+		$dest_lng = intval($row['lng']);
+		$dest_alt = intval($row['alt']);
+
+		// update 1
+
+		$distance = self::haversine($start_lat, $start_lng, $new_lat, $new_lng);
+		$grade = $new_alt - $start_alt;
+
+		$query3 = sprintf("UPDATE `isocron`.`edges` SET `distance` = %F, `grade`= %d, `to_id`= %d WHERE `id` = %d;",
+							mysql_real_escape_string($distance),
+							mysql_real_escape_string($grade),
+							mysql_real_escape_string($new_id),
+							mysql_real_escape_string($edge_id));
+
+		mysql_query($query3);
+
+		$query3b = sprintf("SELECT type FROM `isocron`.`edges` WHERE `id` = %d;",
+							mysql_real_escape_string($edge_id));
+
+		$exe = mysql_query($query3b);		
+		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
+		$type = intval($row['type']);
+
+		// create 2
+
+		$distance = self::haversine($new_lat, $new_lng, $dest_lat, $dest_lng);
+		$grade = $dest_alt - $new_alt;
+
+		$query4 = sprintf("INSERT INTO `isocron`.`edges` (`from_id`, `to_id`, `distance`, `grade`, `type`) 
+							   VALUES ('%d', '%d', '%F', '%d', '%d');",
+						mysql_real_escape_string($new_id),
+						mysql_real_escape_string($dest_id),
+						mysql_real_escape_string($distance),
+						mysql_real_escape_string($grade),
+						mysql_real_escape_string($type));
+
+		mysql_query($query4);
+
+		return $query.$query_fetch.$query2.$query2b.$query3.$query3b.$query4;
+	}
+
+	/*
 	 * Adding an edge
 	 */
 	

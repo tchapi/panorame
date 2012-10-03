@@ -16,7 +16,7 @@ if (isset($_GET['framework'])){
       $framework = $_GET['framework'];
       break;
     default:
-      $framework = "openlayers";
+      $framework = "gmaps";
       break;
   }
 
@@ -39,5 +39,19 @@ if (isset($_GET['provider'])){
       $provider = $_GET['provider'];
       break;
   }
+
+}
+
+/*
+ * EDIT Mode
+ */ 
+
+if (isset($_GET['edit']) && $_GET['edit'] == 1) {
+
+  $framework = 'gmaps';
+  $provider  = 'gmaps-road';
+  $addedScript == '';
+
+  $editMode = true;
 
 }

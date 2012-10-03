@@ -7,9 +7,7 @@
   /* Closest function radius (in m) */
   define('_closestPointRadius_search', 200);
   define('_closestPointRadius_edit', 10);
-  define('_extendBoundsPointRadius', 1000);
-
-  define('_showAdmin', true);
+  define('_extendBoundsPointRadius', 500);
 
 	if ($app == '_FRONTEND') {
 
@@ -20,6 +18,7 @@
 		$addedScript = "";
 		$framework   = "gmaps";
 		$provider    = "";
+		$editMode    = false;
 
 	} elseif ($app == '_BACKEND') {
 		
@@ -27,12 +26,12 @@
 		 * BACKEND Defaults
 		 */
 
-		$server = "localhost";
-		$user = "isocron";
-		$password = "isocron";
-		$database = "isocron";
+		$server   = "localhost";
+		$user     = "isocron"; // tchap_panorame
+		$password = "isocron"; // 8y3nP9922z6tu2en
+		$database = "isocron"; // tchap_panorame
 
-		$engine = "mysql"; // OR mysql
+		$engine   = "mysql"; // OR mysql
 
 		global $DBConnection;
 

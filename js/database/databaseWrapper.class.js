@@ -11,6 +11,8 @@ var databaseWrapper = function() {
 		getTypes: 			path + "getTypes.action.php",
 		getClosestVertex: 	path + "getClosestVertex.action.php",
 		addEdge:   			path + "addEdge.action.php",
+		updateVertex: 		path + "updateVertexCouple.action.php",
+		cutEdge: 			path + "cutEdge.action.php"
 	};
 	/* ---------------------------------------- */
 
@@ -24,6 +26,20 @@ var databaseWrapper = function() {
 		$.post(actions.getTypes, callback);
 
 	};
+
+	this.getClosestVertex = function(lat, lng, radius, callback){
+
+		var data = {
+			lat: lat, 
+			lng: lng,
+			radius: radius 
+		};
+
+		$.post(actions.getClosestVertex, data,callback);
+	};
+
+
+	// ADMIN ------------------------------------------
 
 	this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type, callback){
 
@@ -40,15 +56,36 @@ var databaseWrapper = function() {
 		$.post(actions.addEdge, data, callback);
 	};
 
-	this.getClosestVertex = function(lat, lng, radius, callback){
+	this.updateVertexCouple = function(start_id, start_lat, start_lng, start_alt, dest_id, dest_lat, dest_lng, dest_alt, edge_id, callback){
 
 		var data = {
-			lat: lat, 
-			lng: lng,
-			radius: radius 
+			start_id: start_id,
+			start_lat: start_lat, 
+			start_lng: start_lng, 
+			start_alt: start_alt,
+			dest_id: dest_id,
+			dest_lat: dest_lat, 
+			dest_lng: dest_lng, 
+			dest_alt: dest_alt,
+			edge_id: edge_id
 		};
 
-		$.post(actions.getClosestVertex, data,callback);
+		$.post(actions.updateVertex, data, callback)
+
 	};
 
+	this.cutEdge = function(start_id, dest_id, new_lat, new_lng, new_alt, edge_id, callback){
+
+		var data = {
+			start_id: start_id,
+			dest_id: dest_id,
+			new_lat: new_lat, 
+			new_lng: new_lng, 
+			new_alt: new_alt,
+			edge_id: edge_id
+		};
+
+		$.post(actions.cutEdge, data, callback)
+
+	};
 }
