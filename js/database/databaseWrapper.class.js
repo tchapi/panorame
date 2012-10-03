@@ -10,9 +10,9 @@ var databaseWrapper = function() {
 		getObjectsIn: 		path + "getObjectsIn.action.php",
 		getTypes: 			path + "getTypes.action.php",
 		getClosestVertex: 	path + "getClosestVertex.action.php",
-		addEdge:   			path + "addEdge.action.php",
-		updateVertex: 		path + "updateVertexCouple.action.php",
-		cutEdge: 			path + "cutEdge.action.php"
+		addEdge:   			path + "edit/addEdge.action.php",
+		updateVertex: 		path + "edit/updateVertexCouple.action.php",
+		cutEdge: 			path + "edit/cutEdge.action.php"
 	};
 	/* ---------------------------------------- */
 
