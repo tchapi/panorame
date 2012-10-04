@@ -11,6 +11,7 @@ var databaseWrapper = function() {
 		getTypes: 			path + "getTypes.action.php",
 		getClosestVertex: 	path + "getClosestVertex.action.php",
 		addEdge:   			path + "edit/addEdge.action.php",
+		deleteEdge:   		path + "edit/deleteEdge.action.php",
 		updateVertex: 		path + "edit/updateVertexCouple.action.php",
 		cutEdge: 			path + "edit/cutEdge.action.php"
 	};
@@ -54,6 +55,11 @@ var databaseWrapper = function() {
 		};
 
 		$.post(actions.addEdge, data, callback);
+	};
+
+	this.deleteEdge = function(edge_id, callback){
+
+		$.post(actions.deleteEdge, {edge_id: edge_id}, callback);
 	};
 
 	this.updateVertexCouple = function(start_id, start_lat, start_lng, start_alt, dest_id, dest_lat, dest_lng, dest_alt, edge_id, callback){

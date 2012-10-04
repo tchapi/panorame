@@ -72,6 +72,7 @@
         <div class="form-line">
           <label class="checkbox">Automatically make both ways : </label> <input type="checkbox" value="">
         </div>  
+        <p class="text-info"><em>To delete an edge, right-click on it.</em></p>
         <button id="addEdge" class="btn btn-info" ><b class="icon-plus-sign icon-white"></b> Add edges</button>
       </div>
     </div>

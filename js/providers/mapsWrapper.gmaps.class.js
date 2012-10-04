@@ -207,14 +207,19 @@ var mapsWrapper = function(type) {
 
             // ADMIN ------------------------------------------------------------------------------------------------------------
             google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
+            google.maps.event.addListener(this.edges[i], 'rightclick', (function(index) {
+              return function() {
+                databaseWrapper.deleteEdge(index, $.proxy(this.boundsHaveChanged, isocronMap));
+              }
+            })(edges[i].id));
             google.maps.event.addListener(this.edges[i].getPath(), 'set_at', (function(indexes) {
               return function() {
-                databaseWrapper.updateVertexCouple(indexes[0], this.getAt(0).lat(), this.getAt(0).lng(), 0, indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], null);
+                databaseWrapper.updateVertexCouple(indexes[0], this.getAt(0).lat(), this.getAt(0).lng(), 0, indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(this.boundsHaveChanged, isocronMap));
               }
             })([edges[i].start.id, edges[i].dest.id, edges[i].id]));
             google.maps.event.addListener(this.edges[i].getPath(), 'insert_at', (function(indexes) {
               return function() {
-                databaseWrapper.cutEdge(indexes[0], indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], null);
+                databaseWrapper.cutEdge(indexes[0], indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(this.boundsHaveChanged, isocronMap));
               }
             })([edges[i].start.id, edges[i].dest.id, edges[i].id]));
             // ADMIN ------------------------------------------------------------------------------------------------------------

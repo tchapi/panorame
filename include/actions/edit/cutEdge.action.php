@@ -1,7 +1,7 @@
 <?php
 
 	$app = '_BACKEND';
-	include_once('../config.php');
+	include_once('../../config.php');
 
 	if (isset($_POST['start_id']) && isset($_POST['dest_id']) && isset($_POST['new_lat']) && isset($_POST['new_lng']) && isset($_POST['new_alt']) && isset($_POST['edge_id'])  &&  0 != $_POST['edge_id']){
 

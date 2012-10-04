@@ -232,7 +232,7 @@ class Utils {
 
 		$getVerticesAndChildrenIn_query = sprintf("SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
 										group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,'}')) AS children FROM `isocron`.`vertices` v
-										LEFT JOIN `isocron`.`edges` e ON e.`from_id` = v.`id`");
+										LEFT JOIN `isocron`.`edges` e ON (e.`from_id` = v.`id` AND e.`is_deleted` =0)");
 
 		$getVerticesAndChildrenIn_query = self::restrictForVertex($getVerticesAndChildrenIn_query, $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
 		$getVerticesAndChildrenIn_query .= " GROUP BY v.`id`";
@@ -282,7 +282,8 @@ class Utils {
 									INNER JOIN `isocron`.`vertices` v_dest ON v_dest.`id` = e.`to_id`";
 
 		$getEdgesIn_query = self::restrictForEdgeBBox($getEdgesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
-
+		$getEdgesIn_query .= " AND e.`is_deleted` = 0";
+		
 		$exe = mysql_query($getEdgesIn_query);
 
 		// Returns true if the query was well executed
@@ -426,6 +427,61 @@ class Utils {
 		$exe2 = mysql_query($query3);
 
 		return $query1.$query2.$query3;
+	}
+
+	/*
+	 * Deleting an edge
+	 */
+
+	public static function deleteEdge($edge_id){
+
+		$query = sprintf("SELECT from_id, to_id FROM `isocron`.`edges` WHERE `id` = %d;",
+							mysql_real_escape_string($edge_id));
+
+		$exe = mysql_query($query);
+
+		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
+		$from_id = intval($row['from_id']);
+		$to_id = intval($row['to_id']);
+
+		$query2 = sprintf("UPDATE `isocron`.`edges` SET is_deleted = 1 WHERE `id` = %d;",
+							mysql_real_escape_string($edge_id));
+
+		$exe2 = mysql_query($query2);
+
+		// if form_id remaining
+		$query3 = sprintf("SELECT id FROM `isocron`.`edges` WHERE is_deleted = 0 AND (`from_id` = %d OR `to_id`= %d);",
+							mysql_real_escape_string($from_id),
+							mysql_real_escape_string($from_id));
+
+		$exe2 = mysql_query($query3);
+
+		if (mysql_num_rows($exe2) === 0){
+
+		 	$query = sprintf("UPDATE `isocron`.`vertices` SET is_deleted = 1 WHERE `id` = %d;",
+						mysql_real_escape_string($from_id));
+
+			mysql_query($query);
+
+		}
+
+		// if to_id remaining
+		$query3 = sprintf("SELECT id FROM `isocron`.`edges` WHERE is_deleted = 0 AND (`from_id` = %d OR `to_id`= %d);",
+							mysql_real_escape_string($to_id),
+							mysql_real_escape_string($to_id));
+
+		$exe2 = mysql_query($query3);
+
+		if (mysql_num_rows($exe2) === 0){
+
+		 	$query = sprintf("UPDATE `isocron`.`vertices` SET is_deleted = 1 WHERE `id` = %d;",
+						mysql_real_escape_string($to_id));
+
+			mysql_query($query);
+
+		}
+
+		return true;
 	}
 
 	/*

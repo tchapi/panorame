@@ -1,7 +1,7 @@
 <?php
 
 	$app = '_BACKEND';
-	include_once('../config.php');
+	include_once('../../config.php');
 
 	$numberOfEdgesToInsert = isset($_GET['n'])?intval($_GET['n']):0;
 
