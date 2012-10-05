@@ -436,8 +436,10 @@ class Utils {
     return array(
       '1_select_vertices' => ($vertices!==false)?true:false,
       '2_delete_edge' => $delete_result,
-      '3_delete_fromId_vertex' => $deleteFromId_result,
-      '4_delete_toId_vertex' => $deleteToId_result
+      '3_formId_check' => $fromIdCheck_result,
+      '4_delete_fromId_vertex' => $deleteFromId_result,
+      '5_toId_check' => $toIdCheck_result,
+      '6_delete_toId_vertex' => $deleteToId_result
       );
   }
 
