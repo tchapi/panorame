@@ -50,7 +50,7 @@ if (isset($_GET['edit']) && $_GET['edit'] == 1) {
 
   $framework = 'gmaps';
   $provider  = 'gmaps-road';
-  $addedScript == '';
+  $addedScript = '';
 
   $editMode = true;
 
