@@ -2,8 +2,6 @@
 
 class Utils {
 
-	const earth_radius = 6371030.0; // in m
-
 	/*
 	 * START -- FOR TESTING PURPOSES ONLY
 	 */ 
@@ -77,7 +75,7 @@ class Utils {
 		 
 		$sqrt      = sqrt($sin2_lat + ($cos_lat_1 * $cos_lat_2 * $sin2_long));
 		 
-		$distance  = 2.0 * self::earth_radius * asin($sqrt);
+		$distance  = 2.0 * _earth_radius * asin($sqrt);
 		 
 		return $distance;
 
