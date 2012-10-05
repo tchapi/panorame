@@ -5,88 +5,20 @@ class Utils {
 	const earth_radius = 6371030.0; // in m
 	
 	/*
-	 * START -- FOR TESTING PURPOSES ONLY
-	 */ 
-	public static function fillWithRandomStuff($limit){
-
-		// LAST ID
-		$lastId_query = "SELECT `id` FROM  `vertices` ORDER BY `id` DESC LIMIT 1";
-		$exe = mysql_query($lastId_query);
-		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
-
-		$availableFromId = $row['id'] + 1;
-
-		$vertices = "INSERT INTO  `isocron`.`vertices` (`id`, `point` ,`elevation`) VALUES ";
-		$edges = "INSERT INTO  `isocron`.`edges` (`from_id` ,`to_id`,`distance` ,`grade`, `type`) VALUES ";
-
-		$currentId = $availableFromId;
-		$currentNextId = $availableFromId + 1;
-
-		for($i = $availableFromId; $i < $limit + $availableFromId; $i++){
-
-			$randomLat_start = 48.830000 + mt_rand(0,50000) / 1000000;
-			$randomLng_start = 2.280000 + mt_rand(0,130000) / 1000000;
-			$randomAlt_start = mt_rand(-300,300);
-
-			$randomLat_dest = 48.830000 + mt_rand(0,50000) / 1000000;
-			$randomLng_dest = 2.280000 + mt_rand(0,130000) / 1000000;
-			$randomAlt_dest = mt_rand(-300,300);
-
-			$distance = self::haversine($randomLat_start, $randomLng_start, $randomLat_dest, $randomLng_dest);
-			$grade = $randomAlt_dest - $randomAlt_start;
-
-			if ($i != $availableFromId) $vertices .= ", ";
-			$vertices .= sprintf("( %d, GEOMFROMTEXT(  'POINT(%F %F)', 4326 ) ,  '%d' ), ( %d, GEOMFROMTEXT(  'POINT(%F %F)', 4326 ) ,  '%d' )",
-						mysql_real_escape_string($currentId),
-						mysql_real_escape_string($randomLng_start),
-						mysql_real_escape_string($randomLat_start),
-						mysql_real_escape_string($randomAlt_start),
-						mysql_real_escape_string($currentNextId),
-						mysql_real_escape_string($randomLng_dest),
-						mysql_real_escape_string($randomLat_dest),
-						mysql_real_escape_string($randomAlt_dest));
-
-			if ($i != $availableFromId) $edges .= ", ";
-			$edges .= sprintf("( '%d', '%d', '%F', '%d', 0 )",
-							mysql_real_escape_string($currentId),
-							mysql_real_escape_string($currentNextId),
-							mysql_real_escape_string($distance),
-							mysql_real_escape_string($grade));
-
-			$currentId += 2;
-			$currentNextId += 2;
-		}
-
-		$exe = mysql_query($vertices);
-		$error = !(mysql_errno() == 0);
-
-		$exe = mysql_query($edges);
-		$error = $error && !(mysql_errno() == 0);
-
-		$description = ($error?mysql_error():"OK");
-
-		return array('success' => !$error, 'description' => $description );
-
-	}
-	/*
-	 * END -- FOR TESTING PURPOSES ONLY
-	 */ 
-
-	/*
 	 * HAVERSINE function for distance between two points on Earth
 	 */
-	public static function haversine($lat_1,$long_1,$lat_2,$long_2) {
+	public static function haversine($lat_1,$lng_1,$lat_2,$lng_2) {
 
 		$sin_lat   = sin(deg2rad($lat_2  - $lat_1)  / 2.0);
 		$sin2_lat  = $sin_lat * $sin_lat;
 
-		$sin_long  = sin(deg2rad($long_2 - $long_1) / 2.0);
-		$sin2_long = $sin_long * $sin_long;
+		$sin_lng  = sin(deg2rad($lng_2 - $lng_1) / 2.0);
+		$sin2_lng = $sin_lng * $sin_lng;
 
 		$cos_lat_1 = cos($lat_1);
 		$cos_lat_2 = cos($lat_2);
 		 
-		$sqrt      = sqrt($sin2_lat + ($cos_lat_1 * $cos_lat_2 * $sin2_long));
+		$sqrt      = sqrt($sin2_lat + ($cos_lat_1 * $cos_lat_2 * $sin2_lng));
 		
 		$distance  = 2.0 * self::earth_radius * asin($sqrt);
 		 
@@ -94,95 +26,126 @@ class Utils {
 
 	}
 
-	/*
-	 * Adds a BOUNDS restrict to a query
-	 */
 
+  /*
+   * GET The types availables
+	 */
+	public static function getTypes(){
+
+		$getTypes_query = "SELECT `id`, `description`, `slug` from `isocron`.`types` where `editable` = 1;";
+		$queryResult = mysql_query($getTypes_query);
+
+		// Returns true if the query was well executed
+		if (!$queryResult || $queryResult == false ) {
+		  return false;
+		} else {
+		  // Fetch the types
+		  $types = array();
+	      while ($row = mysql_fetch_array($queryResult, MYSQL_ASSOC)) {
+	      	array_push($types, array('id' => $row['id'], 'description' => $row['description'], 'slug' => $row['slug']));
+	      }
+	  	}
+
+	  	return $types;
+
+	}
+  
+	/*
+	 * Extends the given bounding box by _extendBoundsPointRadius, to allow for more smooth panning in the view
+   * Allows to have more routes in the view as well, by capilarity
+	 */
 	public static function extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng){
 
 		$ratio = _extendBoundsPointRadius/self::earth_radius;
+    
+    // Calculating new NW point
 		$lat_rad = $NW_lat*pi()/180;
 		$lng_rad = $NW_lng*pi()/180;
 		$cos_lat_rad = cos($lat_rad);
 		$sin_lat_rad = sin($lat_rad);
 
-		$brng = (315/180)*pi();
+		$brng = (315/180)*pi(); // bearing is -45°
 		$newNW_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
 		$newNW_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($newNW_lat*pi()/180)))* 180 / pi();
 
+    // Calculating new SE point
 		$lat_rad = $SE_lat*pi()/180;
 		$lng_rad = $SE_lng*pi()/180;
 		$cos_lat_rad = cos($lat_rad);
 		$sin_lat_rad = sin($lat_rad);
 
-		$brng = 135/180*pi();
+		$brng = 135/180*pi(); // Bearing is 135°
 		$newSE_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
 		$newSE_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($newSE_lat*pi()/180)))* 180 / pi();
 
 		return array('NW_lat' => $newNW_lat, 'NW_lng' => $newNW_lng, 'SE_lat' => $newSE_lat, 'SE_lng' => $newSE_lng);
 
 	}
-
+  
+  /*
+	 * Restricts a query for a vertex (of table v) for a bounding box
+   * Takes the POI into account if existing
+	 */
 	public static function restrictForVertex($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
 		if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
 
+      // Poi should be included
 			$where_clause = sprintf(" WHERE MBRIntersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))') )",
-									// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
-							mysql_real_escape_string($NW_lng),
-							mysql_real_escape_string($NW_lat),
-							mysql_real_escape_string($SE_lng),
-							mysql_real_escape_string($SE_lat),
-							mysql_real_escape_string($POI_lng),
-							mysql_real_escape_string($POI_lat),
-							mysql_real_escape_string($NW_lng),
-							mysql_real_escape_string($NW_lat));
+						mysql_real_escape_string($NW_lng),
+						mysql_real_escape_string($NW_lat),
+						mysql_real_escape_string($SE_lng),
+						mysql_real_escape_string($SE_lat),
+						mysql_real_escape_string($POI_lng),
+						mysql_real_escape_string($POI_lat),
+						mysql_real_escape_string($NW_lng),
+						mysql_real_escape_string($NW_lat));
 
 		} else {
 
+      // Just a polyline without the POI
 			$where_clause = sprintf(" WHERE MBRIntersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F))') )",
-									// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
-							mysql_real_escape_string($NW_lng),
-							mysql_real_escape_string($NW_lat),
-							mysql_real_escape_string($SE_lng),
-							mysql_real_escape_string($SE_lat),
-							mysql_real_escape_string($NW_lng),
-							mysql_real_escape_string($NW_lat));
+						mysql_real_escape_string($NW_lng),
+						mysql_real_escape_string($NW_lat),
+						mysql_real_escape_string($SE_lng),
+						mysql_real_escape_string($SE_lat),
+						mysql_real_escape_string($NW_lng),
+						mysql_real_escape_string($NW_lat));
 			
 		}
 
 		return $query.$where_clause;
 	}
 
-	/*
-	 * Adds a BOUNDS restrict to a query
+  /*
+   * Restricts a query for an edge (of table v and v_dest) for a bounding box
+   * Takes the POI into account if existing
 	 */
 	public static function restrictForEdgeBBox($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
 		if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
 
+      // Poi should be included
 			$where_clause = sprintf(" WHERE MBRIntersects( LINESTRING(v.point,v_dest.point), GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))') )",
-									// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
-							mysql_real_escape_string($NW_lng),
-							mysql_real_escape_string($NW_lat),
-							mysql_real_escape_string($SE_lng),
-							mysql_real_escape_string($SE_lat),
-							mysql_real_escape_string($POI_lng),
-							mysql_real_escape_string($POI_lat),
-							mysql_real_escape_string($NW_lng),
-							mysql_real_escape_string($NW_lat));
+						mysql_real_escape_string($NW_lng),
+						mysql_real_escape_string($NW_lat),
+						mysql_real_escape_string($SE_lng),
+						mysql_real_escape_string($SE_lat),
+						mysql_real_escape_string($POI_lng),
+						mysql_real_escape_string($POI_lat),
+						mysql_real_escape_string($NW_lng),
+						mysql_real_escape_string($NW_lat));
 
 		} else {
 
+      // Just a polygon without the POI
 			$where_clause = sprintf(" WHERE MBRIntersects( LINESTRING(v.point,v_dest.point), GeomFromText('POLYGON((%F %F, %F %F, %F %F))') )",
-									// plus simple de faire x < x_bounds and y < y_bounds ? meilleur temps d'éxécution ? a tester
-							mysql_real_escape_string($NW_lng),
-							mysql_real_escape_string($NW_lat),
-							mysql_real_escape_string($SE_lng),
-							mysql_real_escape_string($SE_lat),
-							mysql_real_escape_string($NW_lng),
-							mysql_real_escape_string($NW_lat));		
-
+						mysql_real_escape_string($NW_lng),
+						mysql_real_escape_string($NW_lat),
+						mysql_real_escape_string($SE_lng),
+						mysql_real_escape_string($SE_lat),
+						mysql_real_escape_string($NW_lng),
+						mysql_real_escape_string($NW_lat));		
 
 		}
 
@@ -198,26 +161,25 @@ class Utils {
 
 		$getVerticesIn_query = self::restrictForVertex($getVerticesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
 
-		$exe = mysql_query($getVerticesIn_query);
+		$queryResult = mysql_query($getVerticesIn_query);
 
 		// Returns true if the query was well executed
-		if (!$exe || $exe == false ) {
+		if (!$queryResult || $queryResult == false ) {
 		  return false;
 		} else {
-		  // Fetch the points
-		  $result = array();
-	      while ($row = mysql_fetch_array($exe, MYSQL_ASSOC)) {
-	        $result[] = array(
-					        	'id' => intval($row["id"]), 
-					        	'point' => array(
-					        		'lat' => floatval($row["lat"]),
-					        		'lng' => floatval($row["lng"]),
-					        		'alt' => floatval($row["alt"])
-					        	)
-					        );
-	      }
-	      return $result;
-
+		  // Fetch the vertices
+		  $verticesArray = array();
+			while ($row = mysql_fetch_array($queryResult, MYSQL_ASSOC)) {
+			$verticesArray[] = array(
+                  	'id' => intval($row["id"]), 
+                  	'point' => array(
+                  		'lat' => floatval($row["lat"]),
+                  		'lng' => floatval($row["lng"]),
+                  		'alt' => intval($row["alt"])
+                  	)
+                  );
+			}
+			return $verticesArray;
 		}
 
 	}
@@ -228,43 +190,43 @@ class Utils {
 	 */
 	public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
+    // Extends the bounds
 		$b = self::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
 
 		$getVerticesAndChildrenIn_query = sprintf("SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
 										group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,'}')) AS children FROM `isocron`.`vertices` v
 										LEFT JOIN `isocron`.`edges` e ON (e.`from_id` = v.`id` AND e.`is_deleted` =0)");
 
-		$getVerticesAndChildrenIn_query = self::restrictForVertex($getVerticesAndChildrenIn_query, $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
+		$getVerticesAndChildrenIn_query  = self::restrictForVertex($getVerticesAndChildrenIn_query, $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
 		$getVerticesAndChildrenIn_query .= " GROUP BY v.`id`";
 
-		$exe = mysql_query($getVerticesAndChildrenIn_query);
+		$queryResult = mysql_query($getVerticesAndChildrenIn_query);
 
 		// Returns true if the query was well executed
-		if (!$exe || $exe == false ) {
+		if (!$queryResult || $queryResult == false ) {
 		  return false;
 		} else {
-		  // Fetch the points
-		  $result = array();
-	      while ($row = mysql_fetch_array($exe, MYSQL_ASSOC)) {
-	      	
-	      	if ($row["children"] == null){
-	      		$childrenAsPHPArray = null;
-	      	} else {
-	      		$childrenAsPHPArray = json_decode('['.$row["children"].']');
-	      	}
+		  // Fetch the vertices
+		  $vertices = array();
+      while ($row = mysql_fetch_array($queryResult, MYSQL_ASSOC)) {
+      	
+      	if ($row["children"] == null){
+      		$childrenAsPHPArray = null;
+      	} else {
+      		$childrenAsPHPArray = json_decode('['.$row["children"].']');
+      	}
 
-	        $result[intval($row["id"])] = array( 
-					        	'point' => array(
-					        		'lat' => floatval($row["lat"]),
-					        		'lng' => floatval($row["lng"]),
-					        		'alt' => floatval($row["alt"])
-					        	),
-					        	'children' => $childrenAsPHPArray
-					        );
-	      }
+        $vertices[intval($row["id"])] = array( 
+				        	'point' => array(
+				        		'lat' => floatval($row["lat"]),
+				        		'lng' => floatval($row["lng"]),
+				        		'alt' => intval($row["alt"])
+				        	),
+				        	'children' => $childrenAsPHPArray
+				        );
+      }
 
-	      return $result;
-
+      return $vertices;
 		}
 
 	}
@@ -281,43 +243,42 @@ class Utils {
 									INNER JOIN `isocron`.`vertices` v ON v.`id` = e.`from_id`
 									INNER JOIN `isocron`.`vertices` v_dest ON v_dest.`id` = e.`to_id`";
 
-		$getEdgesIn_query = self::restrictForEdgeBBox($getEdgesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
+		$getEdgesIn_query  = self::restrictForEdgeBBox($getEdgesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
 		$getEdgesIn_query .= " AND e.`is_deleted` = 0";
 		
-		$exe = mysql_query($getEdgesIn_query);
+		$queryResult = mysql_query($getEdgesIn_query);
 
 		// Returns true if the query was well executed
-		if (!$exe || $exe == false ) {
+		if (!$queryResult || $queryResult == false ) {
 		  return false;
 		} else {
 		  // Fetch the edges
-		  $result = array();
-	      while ($row = mysql_fetch_array($exe, MYSQL_ASSOC)) {
-	        $result[] = array(
-					        	'id' => intval($row["id"]), 
-					        	'start' => array(
-					        		'id' => floatval($row["id_start"]),
-					        		'point' => array(
-						        		'lat' => floatval($row["lat_start"]),
-						        		'lng' => floatval($row['lng_start']),
-						        		'alt' => intval($row["alt_start"])
-						        	)
-					        	),
-					        	'dest' => array(
-					        		'id' => floatval($row["id_dest"]),
-					        		'point' => array(
-						        		'lat' => floatval($row["lat_dest"]),
-						        		'lng' => floatval($row['lng_dest']),
-						        		'alt' => intval($row["alt_dest"])
-						        	)
-					        	),
-					        	'distance' => floatval($row['distance']),
-					        	'grade' => intval($row['grade']),
-					        	'type' => intval($row['type'])
-					        );
-	      }
-	      return $result;
-
+		  $edges = array();
+      while ($row = mysql_fetch_array($queryResult, MYSQL_ASSOC)) {
+        $edges[] = array(
+				        	'id' => intval($row["id"]), 
+				        	'start' => array(
+				        		'id' => intval($row["id_start"]),
+				        		'point' => array(
+					        		'lat' => floatval($row["lat_start"]),
+					        		'lng' => floatval($row['lng_start']),
+					        		'alt' => intval($row["alt_start"])
+					        	)
+				        	),
+				        	'dest' => array(
+				        		'id' => intval($row["id_dest"]),
+				        		'point' => array(
+					        		'lat' => floatval($row["lat_dest"]),
+					        		'lng' => floatval($row['lng_dest']),
+					        		'alt' => intval($row["alt_dest"])
+					        	)
+				        	),
+				        	'distance' => floatval($row['distance']),
+				        	'grade' => intval($row['grade']),
+				        	'type' => intval($row['type'])
+				        );
+      }
+      return $edges;
 		}
 
 	}
@@ -328,14 +289,11 @@ class Utils {
 	public static function build_sorter($lat, $lng) {
 		return function ($a, $b) use ($lat, $lng)
 		{
-
 			$a_ = Utils::haversine($a['point']['lat'], $a['point']['lng'], $lat, $lng);
 			$b_ = Utils::haversine($b['point']['lat'], $b['point']['lng'], $lat, $lng);
 
-		    if ($a_ == $b_) {
-		        return 0;
-		    }
-		    return ($a_ < $b_) ? -1 : 1;
+	    if ($a_ == $b_) { return 0; }
+	    return ($a_ < $b_) ? -1 : 1;
 		};
 	}
 
@@ -347,16 +305,17 @@ class Utils {
 		$cos_lat_rad = cos($lat_rad);
 		$sin_lat_rad = sin($lat_rad);
 
-		$brng = (315/180)*pi();
+		$brng = (315/180)*pi(); // bearing is -45°
 		$NW_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
 		$NW_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($NW_lat*pi()/180)))* 180 / pi();
 
-		$brng = 135/180*pi();
+		$brng = 135/180*pi(); // bearing is 135°
 		$SE_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
 		$SE_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($SE_lat*pi()/180)))* 180 / pi();
 
 		$vertices = self::getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, null, null);
 
+    // If we have results
 		if (isset($vertices[0])){
 
 			// Sort (quick sort)
@@ -374,289 +333,298 @@ class Utils {
 		}
 	}
 
-	public static function getTypes(){
 
-		$query = "SELECT `id`, `slug` from `isocron`.`types` where editable = 1;";
-		$exe = mysql_query($query);
 
-		// Returns true if the query was well executed
-		if (!$exe || $exe == false ) {
-		  return false;
-		} else {
-		  // Fetch the types
-		  $result = array();
-	      while ($row = mysql_fetch_array($exe, MYSQL_ASSOC)) {
-	      	array_push($result, array('id' => $row['id'], 'description' => $row['slug']));
-	      }
-	  	}
+/* ======================================================================== *
+ *                                                                          *
+ *                            ADMIN FUNCTIONS                               *
+ *                                                                          *
+ * ======================================================================== */ 
 
-	  	return $result;
-
-	}
 
 	/*
-	 * Updating a vertex
+	 * Updating a vertex couple
 	 */
-
 	public static function updateVertexCouple($start_id, $start_lat, $start_lng, $start_alt, $dest_id, $dest_lat, $dest_lng, $dest_alt, $edge_id){
 
-		$query1 = sprintf("UPDATE `isocron`.`vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
+    // Updating start vertex
+		$updateVertex1_query = sprintf("UPDATE `isocron`.`vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
 							mysql_real_escape_string($start_lng),
 							mysql_real_escape_string($start_lat),
 							mysql_real_escape_string($start_alt),
 							mysql_real_escape_string($start_id));
 
-		$exe1 = mysql_query($query1);
+		$updateVertex1_result = mysql_query($updateVertex1_query);
 
-		$query2 = sprintf("UPDATE `isocron`.`vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
+    // Updating destination vertex
+		$updateVertex2_query = sprintf("UPDATE `isocron`.`vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
 							mysql_real_escape_string($dest_lng),
 							mysql_real_escape_string($dest_lat),
 							mysql_real_escape_string($dest_alt),
 							mysql_real_escape_string($dest_id));
 
-		$exe2 = mysql_query($query2);
+		$updateVertex2_result = mysql_query($updateVertex2_query);
 
-		$distance = self::haversine($start_lat, $start_lng, $dest_lat, $dest_lng);
-		$grade = $dest_alt - $start_alt;
+    // We should tag the edges containing these points as 'dirty'
+		$tagEdgesAsDirty_query = sprintf("UPDATE `isocron`.`edges` SET `is_dirty` = 1, WHERE `from_id` IN (%d,%d) OR `to_id` IN (%d,%d);",
+							mysql_real_escape_string($start_id),
+              mysql_real_escape_string($dest_id),
+              mysql_real_escape_string($start_id),
+              mysql_real_escape_string($dest_id));
 
-		$query3 = sprintf("UPDATE `isocron`.`edges` SET `distance` = %F, `grade`= %d WHERE `id` = %d;",
-							mysql_real_escape_string($distance),
-							mysql_real_escape_string($grade),
-							mysql_real_escape_string($edge_id));
+		$result = mysql_query($tagEdgesAsDirty_query);
 
-		$exe2 = mysql_query($query3);
-
-		return $query1.$query2.$query3;
+		return array(
+      '1_updating_first_vertex' => $updateVertex1_result,
+      '2_updating_second_vertex' => $updateVertex2_result,
+      '3_tagging_edges_as_dirty' => $result
+      );
 	}
 
 	/*
 	 * Deleting an edge
 	 */
-
 	public static function deleteEdge($edge_id){
 
-		$query = sprintf("SELECT from_id, to_id FROM `isocron`.`edges` WHERE `id` = %d;",
+    // Get the two vertices of the edge
+		$selectVertices = sprintf("SELECT `from_id`, `to_id` FROM `isocron`.`edges` WHERE `id` = %d;",
+							        mysql_real_escape_string($edge_id));
+
+		$vertices = mysql_query($selectVertices);
+
+    if ($vertices != false) {
+  		$row = mysql_fetch_array($vertices, MYSQL_ASSOC);
+  		$from_id = intval($row['from_id']);
+  		$to_id = intval($row['to_id']);
+    } else {
+      return false;
+    }
+    
+    // Deletes the edge
+		$deleteEdge_query = sprintf("UPDATE `isocron`.`edges` SET `is_deleted` = 1, `is_dirty`= 1 WHERE `id` = %d;",
 							mysql_real_escape_string($edge_id));
-
-		$exe = mysql_query($query);
-
-		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
-		$from_id = intval($row['from_id']);
-		$to_id = intval($row['to_id']);
-
-		$query2 = sprintf("UPDATE `isocron`.`edges` SET is_deleted = 1 WHERE `id` = %d;",
-							mysql_real_escape_string($edge_id));
-
-		$exe2 = mysql_query($query2);
-
-		// if form_id remaining
-		$query3 = sprintf("SELECT id FROM `isocron`.`edges` WHERE is_deleted = 0 AND (`from_id` = %d OR `to_id`= %d);",
+		$delete_result = mysql_query($deleteEdge_query);
+    
+		// Checks if any edge still uses vertex with id 'from_id'
+		$fromIdCheck_query = sprintf("SELECT `id` FROM `isocron`.`edges` WHERE `is_deleted` = 0 AND (`from_id` = %d OR `to_id`= %d);",
 							mysql_real_escape_string($from_id),
 							mysql_real_escape_string($from_id));
+		$fromIdCheck_result = mysql_query($fromIdCheck_query);
 
-		$exe2 = mysql_query($query3);
+		if (mysql_num_rows($fromIdCheck_result) === 0){
 
-		if (mysql_num_rows($exe2) === 0){
-
-		 	$query = sprintf("UPDATE `isocron`.`vertices` SET is_deleted = 1 WHERE `id` = %d;",
+      // the vertex is not used anymore
+		 	$deleteFromId_query = sprintf("UPDATE `isocron`.`vertices` SET `is_deleted` = 1 WHERE `id` = %d;",
 						mysql_real_escape_string($from_id));
-
-			mysql_query($query);
+			$deleteFromId_result = mysql_query($deleteFromId_query);
 
 		}
 
-		// if to_id remaining
-		$query3 = sprintf("SELECT id FROM `isocron`.`edges` WHERE is_deleted = 0 AND (`from_id` = %d OR `to_id`= %d);",
+  	// Checks if any edge still uses vertex with id 'to_id'
+		$toIdCheck_query = sprintf("SELECT `id` FROM `isocron`.`edges` WHERE `is_deleted` = 0 AND (`from_id` = %d OR `to_id`= %d);",
 							mysql_real_escape_string($to_id),
 							mysql_real_escape_string($to_id));
+		$toIdCheck_result = mysql_query($toIdCheck_query);
 
-		$exe2 = mysql_query($query3);
+		if (mysql_num_rows($toIdCheck_result) === 0){
 
-		if (mysql_num_rows($exe2) === 0){
-
-		 	$query = sprintf("UPDATE `isocron`.`vertices` SET is_deleted = 1 WHERE `id` = %d;",
+      // the vertex is not used anymore
+		 	$deleteToId_query = sprintf("UPDATE `isocron`.`vertices` SET `is_deleted` = 1 WHERE `id` = %d;",
 						mysql_real_escape_string($to_id));
-
-			mysql_query($query);
+			$deleteToId_result = mysql_query($deleteToId_query);
 
 		}
 
-		return true;
+		return array(
+      '1_select_vertices' => ($vertices!==false)?true:false,
+      '2_delete_edge' => $delete_result,
+      '3_delete_fromId_vertex' => $deleteFromId_result,
+      '4_delete_toId_vertex' => $deleteToId_result
+      );
 	}
 
 	/*
-	 * Cutting a vertex
+	 * Cutting an edge into two edges
 	 */
-
 	public static function cutEdge($start_id, $dest_id, $new_lat, $new_lng, $new_alt, $edge_id){
 
-		$query = sprintf("INSERT INTO `isocron`.`vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), %d);",
+    // Creates the new vertex and retrieves its id
+		$newVertex_query = sprintf("INSERT INTO `isocron`.`vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), %d);",
 							mysql_real_escape_string($new_lng),
 							mysql_real_escape_string($new_lat),
 							mysql_real_escape_string($new_alt));
-		$query_fetch = sprintf("SELECT id FROM `isocron`.`vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
+		$newVertex_query_fetch = sprintf("SELECT `id` FROM `isocron`.`vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
 						mysql_real_escape_string($new_lng),
 						mysql_real_escape_string($new_lat));
-		mysql_query('BEGIN');
-		mysql_query($query);
-		$exe = mysql_query($query_fetch);
+		
+    mysql_query('BEGIN');
+		$newVertex_insert_result = mysql_query($newVertex_query);
+		$newVertex_fetch_result  = mysql_query($newVertex_query_fetch);
 		mysql_query('COMMIT');
 
-		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
-		$new_id = intval($row['id']);
+    if( $newVertex_fetch_result !== false){
+  		$row = mysql_fetch_array($newVertex_fetch_result, MYSQL_ASSOC);
+  		$newVertex_id = intval($row['id']);
+    } else {
+      return false;
+    }
+    
+    // Gets the two previous vertices
+		$getStartVertex_query = sprintf("SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `isocron`.`vertices` WHERE `id` = %d;",
+							              mysql_real_escape_string($start_id));
+		$getStartVertex_result = mysql_query($getStartVertex_query);
+    
+    if ($getStartVertex_result !== false){
+  		$row = mysql_fetch_array($getStartVertex_result, MYSQL_ASSOC);
+  		$start_lat = intval($row['lat']);
+  		$start_lng = intval($row['lng']);
+  		$start_alt = intval($row['alt']);
+    } else { return false; }
 
-		$query2 = sprintf("SELECT Y(`point`) as lat, X(`point`) as lng, elevation as alt FROM `isocron`.`vertices` WHERE `id` = %d;",
-							mysql_real_escape_string($start_id));
-
-		$exe = mysql_query($query2);		
-		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
-		$start_lat = intval($row['lat']);
-		$start_lng = intval($row['lng']);
-		$start_alt = intval($row['alt']);
-
-
-		$query2b = sprintf("SELECT Y(`point`) as lat, X(`point`) as lng, elevation as alt FROM `isocron`.`vertices` WHERE `id` = %d;",
+		$getDestVertex_query = sprintf("SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `isocron`.`vertices` WHERE `id` = %d;",
 							mysql_real_escape_string($dest_id));
+		$getDestVertex_result = mysql_query($getDestVertex_query);
+    
+		if ($getDestVertex_result !== false){
+      $row = mysql_fetch_array($getDestVertex_result, MYSQL_ASSOC);
+  		$dest_lat = intval($row['lat']);
+  		$dest_lng = intval($row['lng']);
+  		$dest_alt = intval($row['alt']);
+		} else { return false; }
+    
+    
+    // -------------------------------
+    // Update edge from start ---> new 
+		$startNew_distance = self::haversine($start_lat, $start_lng, $new_lat, $new_lng);
+		$startNew_grade = $new_alt - $start_alt;
 
-		$exe = mysql_query($query2b);		
-		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
-		$dest_lat = intval($row['lat']);
-		$dest_lng = intval($row['lng']);
-		$dest_alt = intval($row['alt']);
-
-		// update 1
-
-		$distance = self::haversine($start_lat, $start_lng, $new_lat, $new_lng);
-		$grade = $new_alt - $start_alt;
-
-		$query3 = sprintf("UPDATE `isocron`.`edges` SET `distance` = %F, `grade`= %d, `to_id`= %d WHERE `id` = %d;",
-							mysql_real_escape_string($distance),
-							mysql_real_escape_string($grade),
-							mysql_real_escape_string($new_id),
+		$startNew_query = sprintf("UPDATE `isocron`.`edges` SET `distance` = %F, `grade`= %d, `to_id`= %d, `is_dirty`= 0 WHERE `id` = %d;",
+							mysql_real_escape_string($startNew_distance),
+							mysql_real_escape_string($startNew_grade),
+							mysql_real_escape_string($newVertex_id),
 							mysql_real_escape_string($edge_id));
 
-		mysql_query($query3);
+		$startNew_result = mysql_query($startNew_query);
 
-		$query3b = sprintf("SELECT type FROM `isocron`.`edges` WHERE `id` = %d;",
-							mysql_real_escape_string($edge_id));
+    // Retrieves type that we are going to use for the new edge
+		$getType_query = sprintf("SELECT `type` FROM `isocron`.`edges` WHERE `id` = %d;",
+							  mysql_real_escape_string($edge_id));
+		$getType_result = mysql_query($getType_query);
+    
+    if ($getType_result !== false){
+  		$row = mysql_fetch_array($getType_result, MYSQL_ASSOC);
+  		$type = intval($row['type']);
+    } else { return false; }
+    
+    // -------------------------------
+    // Update edge from new ---> dest 
+		$newDest_distance = self::haversine($new_lat, $new_lng, $dest_lat, $dest_lng);
+		$newDest_grade = $dest_alt - $new_alt;
 
-		$exe = mysql_query($query3b);		
-		$row = mysql_fetch_array($exe, MYSQL_ASSOC);
-		$type = intval($row['type']);
-
-		// create 2
-
-		$distance = self::haversine($new_lat, $new_lng, $dest_lat, $dest_lng);
-		$grade = $dest_alt - $new_alt;
-
-		$query4 = sprintf("INSERT INTO `isocron`.`edges` (`from_id`, `to_id`, `distance`, `grade`, `type`) 
-							   VALUES ('%d', '%d', '%F', '%d', '%d');",
-						mysql_real_escape_string($new_id),
+		$newDest_query = sprintf("INSERT INTO `isocron`.`edges` (`from_id`, `to_id`, `distance`, `grade`, `type`, `is_dirty`) 
+							   VALUES ('%d', '%d', '%F', '%d', '%d', 0);",
+						mysql_real_escape_string($newVertex_id),
 						mysql_real_escape_string($dest_id),
-						mysql_real_escape_string($distance),
-						mysql_real_escape_string($grade),
+						mysql_real_escape_string($newDest_distance),
+						mysql_real_escape_string($newDest_grade),
 						mysql_real_escape_string($type));
 
-		mysql_query($query4);
+		$newDest_result = mysql_query($newDest_query);
 
-		return $query.$query_fetch.$query2.$query2b.$query3.$query3b.$query4;
+		return array(
+      '1_insert_new_vertex' => $newVertex_insert_result,
+      '2_fetch_new_vertex' => ($newVertex_fetch_result!==false)?true:false,
+      '3_get_start_vertex' => ($getStartVertex_result!==false)?true:false,
+      '4_get_dest_vertex' => ($getDestVertex_result!==false)?true:false,
+      '5_start_new' => $startNew_result,
+      '6_getType' => ($getType_result!==false)?true:false,
+      '7_new_dest' => $newDest_result
+      );
 	}
+
 
 	/*
 	 * Adding an edge
 	 */
-	
 	public static function addEdge($start_lat, $start_lng, $start_alt, $dest_lat, $dest_lng, $dest_alt, $type){
 
 		$startExistsAlready = self::getClosestVertex($start_lat, $start_lng, _closestPointRadius_edit);
 		$destExistsAlready = self::getClosestVertex($dest_lat, $dest_lng, _closestPointRadius_edit);
 
+    // Create start vertex if it doesn't exist
 		if ($startExistsAlready == null) {
-			$start_point_query = sprintf("INSERT INTO `isocron`.`vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
+			$startVertex_query = sprintf("INSERT INTO `isocron`.`vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
 							mysql_real_escape_string($start_lng),
 							mysql_real_escape_string($start_lat),
 							mysql_real_escape_string($start_alt));
-			$start_point_query_fetch = sprintf("SELECT id FROM `isocron`.`vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
+			$startVertex_query_fetch = sprintf("SELECT `id` FROM `isocron`.`vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
 							mysql_real_escape_string($start_lng),
 							mysql_real_escape_string($start_lat));
+              
 			mysql_query('BEGIN');
-			mysql_query($start_point_query);
-			$exe = mysql_query($start_point_query_fetch);
+			$startVertex_insert_result = mysql_query($startVertex_query);
+			$startVertex_fetch_result  = mysql_query($startVertex_query_fetch);
 			mysql_query('COMMIT');
 
-			$row = mysql_fetch_array($exe, MYSQL_ASSOC);
-			$start_id = intval($row['id']);
+      if ($startVertex_fetch_result !== false){
+  			$row = mysql_fetch_array($startVertex_fetch_result, MYSQL_ASSOC);
+  			$startVertex_id = intval($row['id']);
+      } else { return false; }
+      
 		} else {
-			$start_id = intval($startExistsAlready['id']);
+			$startVertex_id = intval($startExistsAlready['id']);
 		}
 
+    // Create dest vertex if it doesn't exist
 		if ($destExistsAlready == null) {
 
-			$dest_point_query = sprintf("INSERT INTO `isocron`.`vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
+			$destVertex_query = sprintf("INSERT INTO `isocron`.`vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
 						mysql_real_escape_string($dest_lng),
 						mysql_real_escape_string($dest_lat),
 						mysql_real_escape_string($dest_alt));
-			$dest_point_query_fetch = sprintf("SELECT id FROM `isocron`.`vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
+			$destVertex_query_fetch = sprintf("SELECT `id` FROM `isocron`.`vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
 							mysql_real_escape_string($dest_lng),
 							mysql_real_escape_string($dest_lat));
+              
 			mysql_query('BEGIN');
-			mysql_query($dest_point_query);
-			$exe = mysql_query($dest_point_query_fetch);
+			$destVertex_insert_result = mysql_query($destVertex_query);
+			$destVertex_fetch_result  = mysql_query($destVertex_query_fetch);
 			mysql_query('COMMIT');
 
-			$row = mysql_fetch_array($exe, MYSQL_ASSOC);
-			$dest_id = intval($row['id']);
+      if ($destVertex_fetch_result !== false){
+  			$row = mysql_fetch_array($destVertex_fetch_result, MYSQL_ASSOC);
+  			$destVertex_id = intval($row['id']);
+      } else { return false;}
+      
 		} else {
-			$dest_id = intval($destExistsAlready['id']);
+			$destVertex_id = intval($destExistsAlready['id']);
 		}
 
+    // Creates the edge
 		$distance = self::haversine($start_lat, $start_lng, $dest_lat, $dest_lng);
 		$grade = $dest_alt - $start_alt;
 
-		$edge_query = sprintf("INSERT INTO `isocron`.`edges` (`from_id`, `to_id`, `distance`, `grade`, `type`) 
+		$createEdge_query = sprintf("INSERT INTO `isocron`.`edges` (`from_id`, `to_id`, `distance`, `grade`, `type`) 
 							   VALUES ('%d', '%d', '%F', '%d', '%d');",
-						mysql_real_escape_string($start_id),
-						mysql_real_escape_string($dest_id),
+						mysql_real_escape_string($startVertex_id),
+						mysql_real_escape_string($destVertex_id),
 						mysql_real_escape_string($distance),
 						mysql_real_escape_string($grade),
 						mysql_real_escape_string($type));
 
-		// Executes the query for the starting point
-		mysql_query('BEGIN');
-		$exe = mysql_query($edge_query);
-		$lastId = mysql_query("SELECT last_insert_id() AS id;");
-		mysql_query('COMMIT');
+		// Executes the query
+		$createEdge_result = mysql_query($createEdge_query);
 
-		// Returns true if the query was well executed
-		if (!$exe || $exe == false ) {
-		  return false;
-		} else {
-
-		  $row_lastId = mysql_fetch_array($lastId, MYSQL_ASSOC);
-		  // Fetch the info
-		  return array(
-		  	'start' => array(
-		  		'alreadyExisted' => !empty($startExistsAlready)?true:false,
-		  		'id' => $start_id,
-		  		'lat' => $start_lat,
-				'lng' => $start_lng,
-				'alt' => $start_alt
-		  		),
-		  	'dest' => array(
-		  		'alreadyExisted' => !empty($destExistsAlready)?true:false,
-		  		'id' => $dest_id,
-		  		'lat' => $dest_lat,
-				'lng' => $dest_lng,
-				'alt' => $dest_alt
-		  		),
-		  	'edge' => array(
-		  		'id' => intval($row_lastId['id']),
-			  	'type' => $type,
-			  	'distance' => $distance,
-			  	'grade' => $grade
-		  		)
-		  );
-		}
+	  // Fetch the info
+	  return array(
+	  	'1_start_alreadyExisted' => !empty($startExistsAlready)?true:false,
+	  	'2_dest_alreadyExisted' => !empty($destExistsAlready)?true:false,
+      '3_start_insert' => $startVertex_insert_result,
+      '4_start_fetch' => ($startVertex_fetch_result!==false)?true:false,
+      '5_dest_insert' => $destVertex_insert_result,
+      '6_dest_fetch' => ($destVertex_fetch_result!==false)?true:false,
+      '7_create_edge' => $createEdge_result
+	  );
 
 	}
 	
