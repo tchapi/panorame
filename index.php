@@ -70,7 +70,7 @@
           <label for="addEdge_type">Type : </label> <select id="addEdge_type"></select>
         </div>
         <div class="form-line">
-          <label class="checkbox">Automatically make both ways : </label> <input type="checkbox" value="">
+          <label class="checkbox">Automatically make both ways : </label> <input id="addEdge_autoReverse" type="checkbox" value="">
         </div>  
         <p class="text-info"><em>To delete an edge, right-click on it.</em></p>
         <button id="addEdge" class="btn btn-info" ><b class="icon-plus-sign icon-white"></b> Add edges</button>
@@ -101,7 +101,7 @@
 <?php endif ?>
   <script src="js/helpers/userPositionHelper.js" type="text/javascript"></script>
   <script src="js/isocronMap.class.js.php<?php if ($editMode === true) echo '?edit=1'; ?>" type="text/javascript"></script>
-  <script src="js/providers/mapsWrapper.<?php echo $framework; ?>.class.js<?php if ($editMode === true) echo '?edit=1'; ?>" type="text/javascript"></script>
+  <script src="js/providers/mapsWrapper.<?php echo $framework; ?>.class.js.php<?php if ($editMode === true) echo '?edit=1'; ?>" type="text/javascript"></script>
   <script>
     /* Instanciates the MAPS API wrapper
      */

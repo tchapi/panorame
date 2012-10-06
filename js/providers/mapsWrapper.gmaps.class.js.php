@@ -1,3 +1,4 @@
+<?php if(isset($_GET['edit']) && $_GET['edit'] == 1) $editMode = true; ?>
 /* Maps Wrapper
  * Google Maps
  */
@@ -52,7 +53,6 @@ var mapsWrapper = function(type) {
         this.infoWindow = new google.maps.InfoWindow();
 
         this.positionCallback = genericOptions.positionCallback;
-        this.addEdgeCallback = genericOptions.addEdgeCallback;
 
         this.colorsForType = genericOptions.colorsForType;
         this.thicknessesForType = genericOptions.thicknessesForType;
@@ -60,6 +60,9 @@ var mapsWrapper = function(type) {
         this.closestPointPinImage = genericOptions.closestPointPinImage;
 
         genericOptions.mapReadyCallback();
+<?php if ($editMode === true): ?>
+        this.addEdgeCallback = genericOptions.addEdgeCallback;
+<?php endif ?>
     };
 
 
@@ -79,10 +82,11 @@ var mapsWrapper = function(type) {
         google.maps.event.addListener(this.map, 'idle', function(event) {
           genericOptions.boundsHaveChangedCallback();
         });
-
+<?php if ($editMode === true): ?>
         // ADMIN ----------------------------------
         // Create an ElevationService
         this.elevator = new google.maps.ElevationService();
+<?php endif ?>
 
     };
 
@@ -90,13 +94,16 @@ var mapsWrapper = function(type) {
         this.addPin = booleanValue;
     };
 
+<?php if ($editMode === true): ?>
     this.setAddEdge = function(booleanValue){
         this.addEdge = booleanValue;
     };
+<?php endif ?>
 
     this.clickListener = function(event){
         if (this.addPin == true) this.setPosition(event.latLng.lat(), event.latLng.lng(), null);
 
+<?php if ($editMode === true): ?>
         // ADMIN ---------------------------------------
         if (this.addEdge === true) {
 
@@ -121,7 +128,7 @@ var mapsWrapper = function(type) {
             }, this));
         }
         // ADMIN ----------------------------------------
-
+<?php endif ?>
     };
 
     this.setPosition = function(lat, lng, description){
@@ -199,14 +206,18 @@ var mapsWrapper = function(type) {
                 new google.maps.LatLng(destPoint.lat, destPoint.lng)],
               strokeColor: this.colorsForType[edges[i].type],
               strokeWeight: this.thicknessesForType[edges[i].type],
+<?php if ($editMode === true): ?>
               // ADMIN ------------------------------------------------------------------------------------------------------------
               editable: true,
               icons: [{icon:{path:"M -2,5 -2,-5 -3.5,-2",strokeOpacity:0.75, strokeWeight:3, strokeColor: this.colorsForType[edges[i].type]},offset:"50%"}]
               // ADMIN ------------------------------------------------------------------------------------------------------------
+<?php endif ?>
             });
 
-            // ADMIN ------------------------------------------------------------------------------------------------------------
             google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
+
+<?php if ($editMode === true): ?>
+            // ADMIN ------------------------------------------------------------------------------------------------------------
             google.maps.event.addListener(this.edges[i], 'rightclick', (function(index, iM) {
               return function() {
                 databaseWrapper.deleteEdge(index, $.proxy(iM.boundsHaveChanged, iM));
@@ -223,6 +234,7 @@ var mapsWrapper = function(type) {
               }
             })([edges[i].start.id, edges[i].dest.id, edges[i].id], isocronMap));
             // ADMIN ------------------------------------------------------------------------------------------------------------
+<?php endif ?>
         };
 
         if (display == true) this.displayDataOverlay();

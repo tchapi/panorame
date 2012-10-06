@@ -25,6 +25,8 @@ var isocronMap = function() {
 
     // Display
     this.displayData = true;
+    // Initial limit 
+    this.limit = 300;
 
     this.insertScript = function(canvas, searchInput, addPinButton){
 
@@ -129,6 +131,7 @@ var isocronMap = function() {
         var addEdgeButton   = $('#addEdge');
         var cancelLastEdgeButton   = $('#cancelLastEdge'); // TODO
         this.typeSelect     = $("#addEdge_type");
+        this.autoReverse    = $('#addEdge_autoReverse');
 
         addEdgeButton.click($.proxy(function(event){
 
@@ -161,12 +164,12 @@ var isocronMap = function() {
         this.limitDiv     = $("#limitDiv");
         this.limitSlider  = $('#limitSlider');
         this.limitValue   = $('#limitValue');
-        
+
         this.limitSlider.noUiSlider('init', {
             knobs: 1,
             connect: "lower",
             scale: [0, 2000],
-            start: 300,
+            start: this.limit,
             change:$.proxy(function(){
                 this.limit = this.limitSlider.noUiSlider('value')[1];
                 this.limitValue.html(this.limit + 'm');
@@ -411,8 +414,11 @@ var isocronMap = function() {
     // ADMIN ---------------------
     this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt){
 
-        var result = databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, this.typeSelect.find('option:selected').attr('rel'), $.proxy(this.boundsHaveChanged,this));
+        databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, this.typeSelect.find('option:selected').attr('rel'), $.proxy(this.boundsHaveChanged,this));
 
+        if (this.autoReverse.is(':checked')) {
+            databaseWrapper.addEdge(dest_lat, dest_lng, dest_alt, start_lat, start_lng, start_alt, this.typeSelect.find('option:selected').attr('rel'), $.proxy(this.boundsHaveChanged,this));
+        }
     };
 <?php endif ?>
 }
