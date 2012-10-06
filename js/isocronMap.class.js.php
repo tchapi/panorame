@@ -152,7 +152,7 @@ var isocronMap = function() {
                      .append($("<option></option>")
                      .attr("value",key)
                      .attr("rel", value.id)
-                     .text("(" + value.id + ") "+ value.description)); 
+                     .text("(" + value.id + ") "+ value.slug)); 
             }, this));
 
         }, this));

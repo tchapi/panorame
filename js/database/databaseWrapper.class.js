@@ -36,7 +36,7 @@ var databaseWrapper = function() {
 			radius: radius 
 		};
 
-		$.post(actions.getClosestVertex, data,callback);
+		$.post(actions.getClosestVertex, data, callback);
 	};
 
 

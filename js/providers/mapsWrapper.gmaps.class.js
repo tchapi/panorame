@@ -207,21 +207,21 @@ var mapsWrapper = function(type) {
 
             // ADMIN ------------------------------------------------------------------------------------------------------------
             google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
-            google.maps.event.addListener(this.edges[i], 'rightclick', (function(index) {
+            google.maps.event.addListener(this.edges[i], 'rightclick', (function(index, iM) {
               return function() {
-                databaseWrapper.deleteEdge(index, $.proxy(this.boundsHaveChanged, isocronMap));
+                databaseWrapper.deleteEdge(index, $.proxy(iM.boundsHaveChanged, iM));
               }
-            })(edges[i].id));
-            google.maps.event.addListener(this.edges[i].getPath(), 'set_at', (function(indexes) {
+            })(edges[i].id, isocronMap));
+            google.maps.event.addListener(this.edges[i].getPath(), 'set_at', (function(indexes, iM) {
               return function() {
-                databaseWrapper.updateVertexCouple(indexes[0], this.getAt(0).lat(), this.getAt(0).lng(), 0, indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(this.boundsHaveChanged, isocronMap));
+                databaseWrapper.updateVertexCouple(indexes[0], this.getAt(0).lat(), this.getAt(0).lng(), 0, indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(iM.boundsHaveChanged, iM));
               }
-            })([edges[i].start.id, edges[i].dest.id, edges[i].id]));
-            google.maps.event.addListener(this.edges[i].getPath(), 'insert_at', (function(indexes) {
+            })([edges[i].start.id, edges[i].dest.id, edges[i].id],isocronMap));
+            google.maps.event.addListener(this.edges[i].getPath(), 'insert_at', (function(indexes, iM) {
               return function() {
-                databaseWrapper.cutEdge(indexes[0], indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(this.boundsHaveChanged, isocronMap));
+                databaseWrapper.cutEdge(indexes[0], indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(iM.boundsHaveChanged, iM));
               }
-            })([edges[i].start.id, edges[i].dest.id, edges[i].id]));
+            })([edges[i].start.id, edges[i].dest.id, edges[i].id], isocronMap));
             // ADMIN ------------------------------------------------------------------------------------------------------------
         };
 
