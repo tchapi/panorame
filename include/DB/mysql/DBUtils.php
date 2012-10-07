@@ -476,8 +476,8 @@ class Utils {
     
     if ($getStartVertex_result !== false){
       $row = mysql_fetch_array($getStartVertex_result, MYSQL_ASSOC);
-      $start_lat = intval($row['lat']);
-      $start_lng = intval($row['lng']);
+      $start_lat = floatval($row['lat']);
+      $start_lng = floatval($row['lng']);
       $start_alt = intval($row['alt']);
     } else { return false; }
 
@@ -487,8 +487,8 @@ class Utils {
     
     if ($getDestVertex_result !== false){
       $row = mysql_fetch_array($getDestVertex_result, MYSQL_ASSOC);
-      $dest_lat = intval($row['lat']);
-      $dest_lng = intval($row['lng']);
+      $dest_lat = floatval($row['lat']);
+      $dest_lng = floatval($row['lng']);
       $dest_alt = intval($row['alt']);
     } else { return false; }
     
@@ -527,7 +527,7 @@ class Utils {
             mysql_real_escape_string($dest_id),
             mysql_real_escape_string($newDest_distance),
             mysql_real_escape_string($newDest_grade),
-            mysql_real_escape_string($type));
+            mysql_real_escape_string($type), 0);
 
     $newDest_result = mysql_query($newDest_query);
 
