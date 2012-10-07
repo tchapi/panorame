@@ -1,0 +1,14 @@
+# exclude.rsync
+.svn
+*.swp
+svn-commit*
+.DS_Store
+.gitignore
+.git
+htaccess
+.htaccess
+deploy.sh
+test*
+exclude.rsync
+TODO*
+_INFO
