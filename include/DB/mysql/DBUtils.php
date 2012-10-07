@@ -615,7 +615,6 @@ class Utils {
     // Executes the query
     $createEdge_result = mysql_query($createEdge_query);
 
-    // Fetch the info
     return array(
       '1_start_alreadyExisted' => !empty($startExistsAlready)?true:false,
       '2_dest_alreadyExisted' => !empty($destExistsAlready)?true:false,
@@ -626,6 +625,35 @@ class Utils {
       '7_create_edge' => $createEdge_result
     );
 
+  }
+
+  /*
+   * Consolidate the database
+   */
+  public static function consolidate(){
+
+    // Finds orphan vertices and deletes them
+    $findOrphans_query = "UPDATE `isocron`.`vertices` SET `is_deleted` = 1 WHERE `id` NOT IN 
+              (SELECT `from_id` AS `id` FROM `isocron`.`edges` UNION
+                SELECT `to_id` AS `id` FROM `isocron`.`edges`)";
+
+    // Executes the query
+    $findOrphans_result = mysql_query($findOrphans_query);
+
+    $updateDistances_query = "SELECT consolidate() AS nb;";
+    
+    // Executes the query
+    $updateDistances_result = mysql_query($updateDistances_query);
+
+    if ($updateDistances_result !== false) {
+      $row = mysql_fetch_array($updateDistances_result, MYSQL_ASSOC);
+      $updateDistances_result_nb = $row['nb'];
+    } else $updateDistances_result_nb = false;
+
+    return array(
+      '1_find_orphans' => $findOrphans_result,
+      '2_update_distances_and_grades' => $updateDistances_result_nb
+    );
   }
   
 }

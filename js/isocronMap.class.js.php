@@ -128,10 +128,10 @@ var isocronMap = function() {
 <?php if ($editMode === true): ?>
         /* ------------------- ADMIN ------------------- */
 
-        var addEdgeButton   = $('#addEdge');
-        var cancelLastEdgeButton   = $('#cancelLastEdge'); // TODO
-        this.typeSelect     = $("#addEdge_type");
-        this.autoReverse    = $('#addEdge_autoReverse');
+        var addEdgeButton     = $('#addEdge');
+        var consolidateButton = $('#consolidate');
+        this.typeSelect       = $("#addEdge_type");
+        this.autoReverse      = $('input[type=radio][name=addEdge_autoReverse]');
 
         addEdgeButton.click($.proxy(function(event){
 
@@ -144,6 +144,12 @@ var isocronMap = function() {
                 addEdgeButton.html('<b class="icon-ok icon-white"></b> Finish');
                 addEdgeButton.addClass('active');
             }
+
+        },this));
+
+        consolidateButton.click($.proxy(function(event){
+
+            databaseWrapper.consolidate();
 
         },this));
 
@@ -416,8 +422,10 @@ var isocronMap = function() {
 
         databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, this.typeSelect.find('option:selected').attr('rel'), $.proxy(this.boundsHaveChanged,this));
 
-        if (this.autoReverse.is(':checked')) {
-            databaseWrapper.addEdge(dest_lat, dest_lng, dest_alt, start_lat, start_lng, start_alt, this.typeSelect.find('option:selected').attr('rel'), $.proxy(this.boundsHaveChanged,this));
+        var autoReserve_value = this.autoReverse.filter(':checked').val();
+        if (autoReserve_value != "0" ) {
+            var type = (autoReserve_value == "same")?this.typeSelect.find('option:selected').attr('rel'):autoReserve_value;
+            databaseWrapper.addEdge(dest_lat, dest_lng, dest_alt, start_lat, start_lng, start_alt, type, $.proxy(this.boundsHaveChanged,this));
         }
     };
 <?php endif ?>

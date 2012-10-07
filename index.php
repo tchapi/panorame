@@ -65,14 +65,24 @@
 <?php if ($editMode === true): ?>
     <!-- ADMIN -->
     <div id="admin" class="modal">
-      <div class="form-inline">
+      <div class="modal-header">
+        <h3>Edition</h3>
+      </div>
+      <div class="form-inline modal-body">
         <div class="form-line">
-          <label for="addEdge_type">Type : </label> <select id="addEdge_type"></select>
+          <label for="addEdge_type"><strong>Type</strong> : </label> <select id="addEdge_type"></select>
         </div>
         <div class="form-line">
-          <label class="checkbox">Automatically make both ways : </label> <input id="addEdge_autoReverse" type="checkbox" value="">
+          <strong>Automatically make both ways :</strong><br />
+          <input name="addEdge_autoReverse" type="radio" value="0" checked><label class="radio" for="addEdge_autoReverse">None</label>
+          <input name="addEdge_autoReverse" type="radio" value="same"><label class="radio text-success" for="addEdge_autoReverse">Same</label>
+          <input name="addEdge_autoReverse" type="radio" value="3"><label class="radio text-warning" for="addEdge_autoReverse">Walk</label>
+          <input name="addEdge_autoReverse" type="radio" value="4"><label class="radio text-error" for="addEdge_autoReverse">Cycles</label>
         </div>  
         <p class="text-info"><em>To delete an edge, right-click on it.</em></p>
+      </div>
+      <div class="modal-footer">
+        <button id="consolidate" class="btn btn-warning" ><b class="icon-random icon-white"></b> Consolidate</button>
         <button id="addEdge" class="btn btn-info" ><b class="icon-plus-sign icon-white"></b> Add edges</button>
       </div>
     </div>

@@ -8,12 +8,13 @@ var databaseWrapper = function() {
 
 	var actions = {
 		getObjectsIn: 		path + "getObjectsIn.action.php",
-		getTypes: 			path + "getTypes.action.php",
-		getClosestVertex: 	path + "getClosestVertex.action.php",
-		addEdge:   			path + "edit/addEdge.action.php",
+		getTypes: 				path + "getTypes.action.php",
+		getClosestVertex: path + "getClosestVertex.action.php",
+		addEdge:   				path + "edit/addEdge.action.php",
 		deleteEdge:   		path + "edit/deleteEdge.action.php",
 		updateVertex: 		path + "edit/updateVertexCouple.action.php",
-		cutEdge: 			path + "edit/cutEdge.action.php"
+		cutEdge: 					path + "edit/cutEdge.action.php",
+		consolidate: 			path + "edit/consolidate.action.php"
 	};
 	/* ---------------------------------------- */
 
@@ -92,6 +93,12 @@ var databaseWrapper = function() {
 		};
 
 		$.post(actions.cutEdge, data, callback)
+
+	};
+
+	this.consolidate = function(callback){
+
+		$.post(actions.consolidate, null, callback);
 
 	};
 }

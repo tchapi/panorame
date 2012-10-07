@@ -11,12 +11,15 @@ header #editMode { padding: 5px 10px 5px 10px; height: 18px; margin-right: 10px;
 	left: auto;
 	top: 63px;
 	z-index: 10;
-	width: 265px;
-	height: 130px;
-	padding: 10px;
+	width: 300px;
 	margin: 0;
 }
 
 #admin div.form-line {
-	height: 35px;
+	margin: 5px 0;
+}
+
+#admin .radio{
+	margin: 5px;
+	padding-top: 4px;
 }
