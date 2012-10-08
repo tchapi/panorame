@@ -12,3 +12,4 @@ test*
 exclude.rsync
 TODO*
 _INFO
+include/config.php
