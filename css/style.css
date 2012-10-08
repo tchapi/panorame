@@ -25,7 +25,6 @@ footer {
 }
   footer #copyright  { padding: 5px 0 0 10px; }
   footer #position, footer #objects { padding: 5px 5px 0 5px; cursor: pointer;}
-  footer #addEdge .btn {margin-bottom: 9px;}
 
 #mapCanvas { position:absolute; width: 100%; top:51px; bottom: 41px; background: url("/img/bg_tile.jpg"); box-shadow: 0 0 10px black inset;}
   #mapCanvas img { max-width: none; } /* Twitter bootstrap fails with GMAPS */
@@ -34,7 +33,7 @@ footer {
 #multipleChoices{
 	width: 262px;
 	top: 39px;
-	left: 329px;
+	left: 324px;
 	padding: 10px;
 }
   #multipleChoices li { cursor: pointer; }

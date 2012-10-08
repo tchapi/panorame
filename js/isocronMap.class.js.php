@@ -284,7 +284,7 @@ var isocronMap = function() {
 
     this.calculateCost = function(startingCost, distance, grade, type){
 
-        return startingCost + distance + Math.max(0, 10*grade); // in case grade is negative
+        return startingCost + distance + Math.max(0, 10*grade); // QUICK FIX in case grade is negative for the moment
 
     };
 
@@ -309,6 +309,7 @@ var isocronMap = function() {
             //distance: closestPoint.distance,
             // grade: closestPoint.grade,
             type: 1,
+            secable: 0,
             start:{
                 id: 0,
                 point:{
@@ -374,6 +375,7 @@ var isocronMap = function() {
                             distance: child.distance,
                             grade: child.grade,
                             type: child.type,
+                            secable: child.secable,
                             start:{
                                 id: nodeId,
                                 point:{

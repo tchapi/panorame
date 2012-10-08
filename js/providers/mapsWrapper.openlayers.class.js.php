@@ -215,7 +215,7 @@ var mapsWrapper = function(type) {
                 startPoint = edges[i].start.point;
                 destPoint = edges[i].dest.point;
 
-            } else if (edges[i].start.cost < limit && edges[i].dest.cost > limit){
+            } else if (edges[i].start.cost < limit && edges[i].dest.cost > limit && edges[i].secable == 1){
                 
                 // semi-distance at the end of a leaf
                 startPoint = edges[i].start.point;
