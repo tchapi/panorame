@@ -30,7 +30,7 @@ class Utils {
    */
   public static function getTypes(){
 
-    $getTypes_query = "SELECT `id`, `description`, `slug` from `isocron`.`types` where `editable` = 1;";
+    $getTypes_query = "SELECT `id`, `description`, `slug` from `types` where `editable` = 1;";
     $queryResult = mysql_query($getTypes_query);
 
     // Returns true if the query was well executed
@@ -155,7 +155,7 @@ class Utils {
    */
   public static function getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
-    $getVerticesIn_query = sprintf("SELECT `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `isocron`.`vertices` v");
+    $getVerticesIn_query = sprintf("SELECT `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` v");
 
     $getVerticesIn_query = self::restrictForVertex($getVerticesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
 
@@ -192,8 +192,8 @@ class Utils {
     $b = self::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
 
     $getVerticesAndChildrenIn_query = sprintf("SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
-                    group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,'}')) AS children FROM `isocron`.`vertices` v
-                    LEFT JOIN `isocron`.`edges` e ON (e.`from_id` = v.`id` AND e.`is_deleted` =0)");
+                    group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,'}')) AS children FROM `vertices` v
+                    LEFT JOIN `edges` e ON (e.`from_id` = v.`id` AND e.`is_deleted` =0)");
 
     $getVerticesAndChildrenIn_query  = self::restrictForVertex($getVerticesAndChildrenIn_query, $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
     $getVerticesAndChildrenIn_query .= " GROUP BY v.`id`";
@@ -237,9 +237,9 @@ class Utils {
     $getEdgesIn_query = "SELECT e.`id` AS id, Y(v.`point`) AS lat_start, X(v.`point`) AS lng_start, v.`elevation` AS alt_start, v.`id` AS id_start,
                   Y(v_dest.`point`) AS lat_dest, X(v_dest.`point`) AS lng_dest, v_dest.`elevation` AS alt_dest, v_dest.`id` AS id_dest,
                   e.`distance` AS distance, e.`grade` AS grade, e.`type` AS type
-                  FROM `isocron`.`edges` e
-                  INNER JOIN `isocron`.`vertices` v ON v.`id` = e.`from_id`
-                  INNER JOIN `isocron`.`vertices` v_dest ON v_dest.`id` = e.`to_id`";
+                  FROM `edges` e
+                  INNER JOIN `vertices` v ON v.`id` = e.`from_id`
+                  INNER JOIN `vertices` v_dest ON v_dest.`id` = e.`to_id`";
 
     $getEdgesIn_query  = self::restrictForEdgeBBox($getEdgesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
     $getEdgesIn_query .= " AND e.`is_deleted` = 0";
@@ -346,7 +346,7 @@ class Utils {
   public static function updateVertexCouple($start_id, $start_lat, $start_lng, $start_alt, $dest_id, $dest_lat, $dest_lng, $dest_alt, $edge_id){
 
     // Updating start vertex
-    $updateVertex1_query = sprintf("UPDATE `isocron`.`vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
+    $updateVertex1_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
               mysql_real_escape_string($start_lng),
               mysql_real_escape_string($start_lat),
               mysql_real_escape_string($start_alt),
@@ -355,7 +355,7 @@ class Utils {
     $updateVertex1_result = mysql_query($updateVertex1_query);
 
     // Updating destination vertex
-    $updateVertex2_query = sprintf("UPDATE `isocron`.`vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
+    $updateVertex2_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
               mysql_real_escape_string($dest_lng),
               mysql_real_escape_string($dest_lat),
               mysql_real_escape_string($dest_alt),
@@ -364,7 +364,7 @@ class Utils {
     $updateVertex2_result = mysql_query($updateVertex2_query);
 
     // We should tag the edges containing these points as 'dirty'
-    $tagEdgesAsDirty_query = sprintf("UPDATE `isocron`.`edges` SET `is_dirty` = 1, WHERE `from_id` IN (%d,%d) OR `to_id` IN (%d,%d);",
+    $tagEdgesAsDirty_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, WHERE `from_id` IN (%d,%d) OR `to_id` IN (%d,%d);",
               mysql_real_escape_string($start_id),
               mysql_real_escape_string($dest_id),
               mysql_real_escape_string($start_id),
@@ -385,7 +385,7 @@ class Utils {
   public static function deleteEdge($edge_id){
 
     // Get the two vertices of the edge
-    $selectVertices = sprintf("SELECT `from_id`, `to_id` FROM `isocron`.`edges` WHERE `id` = %d;",
+    $selectVertices = sprintf("SELECT `from_id`, `to_id` FROM `edges` WHERE `id` = %d;",
                       mysql_real_escape_string($edge_id));
 
     $vertices = mysql_query($selectVertices);
@@ -399,12 +399,12 @@ class Utils {
     }
     
     // Deletes the edge
-    $deleteEdge_query = sprintf("UPDATE `isocron`.`edges` SET `is_deleted` = 1, `is_dirty`= 1 WHERE `id` = %d;",
+    $deleteEdge_query = sprintf("UPDATE `edges` SET `is_deleted` = 1, `is_dirty`= 1 WHERE `id` = %d;",
               mysql_real_escape_string($edge_id));
     $delete_result = mysql_query($deleteEdge_query);
     
     // Checks if any edge still uses vertex with id 'from_id'
-    $fromIdCheck_query = sprintf("SELECT `id` FROM `isocron`.`edges` WHERE `is_deleted` = 0 AND (`from_id` = %d OR `to_id`= %d);",
+    $fromIdCheck_query = sprintf("SELECT `id` FROM `edges` WHERE `is_deleted` = 0 AND (`from_id` = %d OR `to_id`= %d);",
               mysql_real_escape_string($from_id),
               mysql_real_escape_string($from_id));
     $fromIdCheck_result = mysql_query($fromIdCheck_query);
@@ -412,14 +412,14 @@ class Utils {
     if (mysql_num_rows($fromIdCheck_result) === 0){
 
       // the vertex is not used anymore
-      $deleteFromId_query = sprintf("UPDATE `isocron`.`vertices` SET `is_deleted` = 1 WHERE `id` = %d;",
+      $deleteFromId_query = sprintf("UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` = %d;",
             mysql_real_escape_string($from_id));
       $deleteFromId_result = mysql_query($deleteFromId_query);
 
     }
 
     // Checks if any edge still uses vertex with id 'to_id'
-    $toIdCheck_query = sprintf("SELECT `id` FROM `isocron`.`edges` WHERE `is_deleted` = 0 AND (`from_id` = %d OR `to_id`= %d);",
+    $toIdCheck_query = sprintf("SELECT `id` FROM `edges` WHERE `is_deleted` = 0 AND (`from_id` = %d OR `to_id`= %d);",
               mysql_real_escape_string($to_id),
               mysql_real_escape_string($to_id));
     $toIdCheck_result = mysql_query($toIdCheck_query);
@@ -427,7 +427,7 @@ class Utils {
     if (mysql_num_rows($toIdCheck_result) === 0){
 
       // the vertex is not used anymore
-      $deleteToId_query = sprintf("UPDATE `isocron`.`vertices` SET `is_deleted` = 1 WHERE `id` = %d;",
+      $deleteToId_query = sprintf("UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` = %d;",
             mysql_real_escape_string($to_id));
       $deleteToId_result = mysql_query($deleteToId_query);
 
@@ -449,11 +449,11 @@ class Utils {
   public static function cutEdge($start_id, $dest_id, $new_lat, $new_lng, $new_alt, $edge_id){
 
     // Creates the new vertex and retrieves its id
-    $newVertex_query = sprintf("INSERT INTO `isocron`.`vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), %d);",
+    $newVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), %d);",
               mysql_real_escape_string($new_lng),
               mysql_real_escape_string($new_lat),
               mysql_real_escape_string($new_alt));
-    $newVertex_query_fetch = sprintf("SELECT `id` FROM `isocron`.`vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
+    $newVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
             mysql_real_escape_string($new_lng),
             mysql_real_escape_string($new_lat));
     
@@ -470,7 +470,7 @@ class Utils {
     }
     
     // Gets the two previous vertices
-    $getStartVertex_query = sprintf("SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `isocron`.`vertices` WHERE `id` = %d;",
+    $getStartVertex_query = sprintf("SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` WHERE `id` = %d;",
                             mysql_real_escape_string($start_id));
     $getStartVertex_result = mysql_query($getStartVertex_query);
     
@@ -481,7 +481,7 @@ class Utils {
       $start_alt = intval($row['alt']);
     } else { return false; }
 
-    $getDestVertex_query = sprintf("SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `isocron`.`vertices` WHERE `id` = %d;",
+    $getDestVertex_query = sprintf("SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` WHERE `id` = %d;",
               mysql_real_escape_string($dest_id));
     $getDestVertex_result = mysql_query($getDestVertex_query);
     
@@ -498,7 +498,7 @@ class Utils {
     $startNew_distance = self::haversine($start_lat, $start_lng, $new_lat, $new_lng);
     $startNew_grade = $new_alt - $start_alt;
 
-    $startNew_query = sprintf("UPDATE `isocron`.`edges` SET `distance` = %F, `grade`= %d, `to_id`= %d, `is_dirty`= 0 WHERE `id` = %d;",
+    $startNew_query = sprintf("UPDATE `edges` SET `distance` = %F, `grade`= %d, `to_id`= %d, `is_dirty`= 0 WHERE `id` = %d;",
               mysql_real_escape_string($startNew_distance),
               mysql_real_escape_string($startNew_grade),
               mysql_real_escape_string($newVertex_id),
@@ -507,7 +507,7 @@ class Utils {
     $startNew_result = mysql_query($startNew_query);
 
     // Retrieves type that we are going to use for the new edge
-    $getType_query = sprintf("SELECT `type` FROM `isocron`.`edges` WHERE `id` = %d;",
+    $getType_query = sprintf("SELECT `type` FROM `edges` WHERE `id` = %d;",
                 mysql_real_escape_string($edge_id));
     $getType_result = mysql_query($getType_query);
     
@@ -521,7 +521,7 @@ class Utils {
     $newDest_distance = self::haversine($new_lat, $new_lng, $dest_lat, $dest_lng);
     $newDest_grade = $dest_alt - $new_alt;
 
-    $newDest_query = sprintf("INSERT INTO `isocron`.`edges` (`from_id`, `to_id`, `distance`, `grade`, `type`, `is_dirty`) 
+    $newDest_query = sprintf("INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`, `is_dirty`) 
                  VALUES ('%d', '%d', '%F', '%d', '%d', 0);",
             mysql_real_escape_string($newVertex_id),
             mysql_real_escape_string($dest_id),
@@ -553,11 +553,11 @@ class Utils {
 
     // Create start vertex if it doesn't exist
     if ($startExistsAlready == null) {
-      $startVertex_query = sprintf("INSERT INTO `isocron`.`vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
+      $startVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
               mysql_real_escape_string($start_lng),
               mysql_real_escape_string($start_lat),
               mysql_real_escape_string($start_alt));
-      $startVertex_query_fetch = sprintf("SELECT `id` FROM `isocron`.`vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
+      $startVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
               mysql_real_escape_string($start_lng),
               mysql_real_escape_string($start_lat));
               
@@ -578,11 +578,11 @@ class Utils {
     // Create dest vertex if it doesn't exist
     if ($destExistsAlready == null) {
 
-      $destVertex_query = sprintf("INSERT INTO `isocron`.`vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
+      $destVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
             mysql_real_escape_string($dest_lng),
             mysql_real_escape_string($dest_lat),
             mysql_real_escape_string($dest_alt));
-      $destVertex_query_fetch = sprintf("SELECT `id` FROM `isocron`.`vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
+      $destVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
               mysql_real_escape_string($dest_lng),
               mysql_real_escape_string($dest_lat));
               
@@ -604,7 +604,7 @@ class Utils {
     $distance = self::haversine($start_lat, $start_lng, $dest_lat, $dest_lng);
     $grade = $dest_alt - $start_alt;
 
-    $createEdge_query = sprintf("INSERT INTO `isocron`.`edges` (`from_id`, `to_id`, `distance`, `grade`, `type`) 
+    $createEdge_query = sprintf("INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`) 
                  VALUES ('%d', '%d', '%F', '%d', '%d');",
             mysql_real_escape_string($startVertex_id),
             mysql_real_escape_string($destVertex_id),
@@ -633,9 +633,9 @@ class Utils {
   public static function consolidate(){
 
     // Finds orphan vertices and deletes them
-    $findOrphans_query = "UPDATE `isocron`.`vertices` SET `is_deleted` = 1 WHERE `id` NOT IN 
-              (SELECT `from_id` AS `id` FROM `isocron`.`edges` UNION
-                SELECT `to_id` AS `id` FROM `isocron`.`edges`)";
+    $findOrphans_query = "UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` NOT IN 
+              (SELECT `from_id` AS `id` FROM `edges` UNION
+                SELECT `to_id` AS `id` FROM `edges`)";
 
     // Executes the query
     $findOrphans_result = mysql_query($findOrphans_query);

@@ -1,4 +1,4 @@
-<?php if(isset($_GET['edit']) && $_GET['edit'] == 1) $editMode = true; ?>
+<?php if(isset($_GET['edit']) && $_GET['edit'] == 1) $editMode = true; else $editMode = false; ?>
 /* isocronMap
  *
  */
@@ -241,7 +241,7 @@ var isocronMap = function() {
     this.recalculateGraph = function(){
 
         if (this.data == null) {
-            this.getData();
+            this.getDataAndRecalculateGraph();
             return;
         }
 <?php if ($editMode === true): ?>

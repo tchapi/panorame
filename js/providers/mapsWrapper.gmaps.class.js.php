@@ -1,4 +1,4 @@
-<?php if(isset($_GET['edit']) && $_GET['edit'] == 1) $editMode = true; ?>
+<?php if(isset($_GET['edit']) && $_GET['edit'] == 1) $editMode = true; else $editMode = false; ?>
 /* Maps Wrapper
  * Google Maps
  */

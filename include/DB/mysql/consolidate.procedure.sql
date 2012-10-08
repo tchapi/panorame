@@ -13,7 +13,7 @@ BEGIN
 
   SET @count := 0;
 
-  WHILE EXISTS(SELECT e.`id` FROM `isocron`.`edges` e WHERE e.`is_dirty` = 1 AND e.`is_deleted` = 0) DO
+  WHILE EXISTS(SELECT e.`id` FROM `edges` e WHERE e.`is_dirty` = 1 AND e.`is_deleted` = 0) DO
 
     SELECT e.`id`, Y(vf.`point`), X(vf.`point`), vf.`elevation`, 
            Y(vt.`point`), X(vt.`point`), vt.`elevation`, 
@@ -21,9 +21,9 @@ BEGIN
     INTO @id, @start_lat, @start_lng, @start_alt, 
            @dest_lat, @dest_lng, @dest_alt, 
            @distance, @grade
-    FROM `isocron`.`edges` e
-      JOIN `isocron`.`vertices` vf ON (e.`from_id` = vf.`id`)
-      JOIN `isocron`.`vertices` vt ON (e.`to_id` = vt.`id`)
+    FROM `edges` e
+      JOIN `vertices` vf ON (e.`from_id` = vf.`id`)
+      JOIN `vertices` vt ON (e.`to_id` = vt.`id`)
       WHERE e.`is_dirty` = 1 AND e.`is_deleted` = 0 LIMIT 1;
 
     SET @new_distance := 6371030 * acos( 
@@ -36,7 +36,7 @@ BEGIN
 
     SET @new_grade := CAST(@dest_alt AS SIGNED) - CAST(@start_alt AS SIGNED);
 
-    UPDATE `isocron`.`edges` SET `distance` = @new_distance, `grade` = @new_grade, `is_dirty` = 0 WHERE `id` = @id;
+    UPDATE `edges` SET `distance` = @new_distance, `grade` = @new_grade, `is_dirty` = 0 WHERE `id` = @id;
 
     SET @count := @count + 1;
 
