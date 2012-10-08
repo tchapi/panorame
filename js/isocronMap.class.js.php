@@ -284,7 +284,7 @@ var isocronMap = function() {
 
     this.calculateCost = function(startingCost, distance, grade, type){
 
-        return startingCost + distance + 10*grade;
+        return startingCost + distance + Math.max(0, 10*grade); // in case grade is negative
 
     };
 

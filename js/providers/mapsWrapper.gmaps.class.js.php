@@ -208,8 +208,12 @@ var mapsWrapper = function(type) {
               strokeWeight: this.thicknessesForType[edges[i].type],
 <?php if ($editMode === true): ?>
               // ADMIN ------------------------------------------------------------------------------------------------------------
+              strokeOpacity: 0,
               editable: true,
-              icons: [{icon:{path:"M -2,5 -2,-5 -3.5,-2",strokeOpacity:0.75, strokeWeight:3, strokeColor: this.colorsForType[edges[i].type]},offset:"50%"}]
+              icons: [
+                {icon:{path:"M 2,5 2,-5 3.5,-2",strokeOpacity:0.75, strokeWeight:3, strokeColor: this.colorsForType[edges[i].type]},offset:"50%"},
+                {icon: {path: "M 0.5,0 0.5,1", strokeOpacity: 1, strokeWeight: 4 }, offset: '1', repeat: '3px'}
+              ]
               // ADMIN ------------------------------------------------------------------------------------------------------------
 <?php endif ?>
             });
