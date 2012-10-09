@@ -251,7 +251,7 @@ CREATE TABLE IF NOT EXISTS `means` (
   `speed` float NOT NULL,
   `grade_modifier` float NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
 
 --
 -- Dumping data for table `means`
