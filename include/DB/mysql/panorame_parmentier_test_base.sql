@@ -237,13 +237,66 @@ INSERT INTO `edges` (`id`, `from_id`, `to_id`, `distance`, `grade`, `type`, `is_
 (185, 135, 9, 5.103159, 0, 2, 0, 0),
 (197, 152, 7, 21.010544, 0, 2, 0, 0);
 
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `means`
+--
+
+CREATE TABLE IF NOT EXISTS `means` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `slug` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `speed` float NOT NULL,
+  `grade_modifier` float NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
+
+--
+-- Dumping data for table `means`
+--
+
+INSERT INTO `means` (`id`, `slug`, `description`, `speed`, `grade_modifier`) VALUES
+(1, 'walking', 'Walking', 1.38, 0.17),
+(2, 'cycling', 'Cycling', 8.33, 0.83),
+(3, 'driving', 'Driving', 11.12, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `speeds`
+--
+
+CREATE TABLE IF NOT EXISTS `speeds` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `mean_id` bigint(20) unsigned NOT NULL,
+  `type_id` bigint(20) unsigned NOT NULL,
+  `flat_speed` float DEFAULT NULL,
+  `grade_speed` float DEFAULT NULL,
+  UNIQUE KEY `id` (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
+
+--
+-- Dumping data for table `speeds`
+--
+
+INSERT INTO `speeds` (`id`, `mean_id`, `type_id`, `flat_speed`, `grade_speed`) VALUES
+(1, 1, 2, 0.7246, 5.8823),
+(2, 1, 3, 0.7246, 5.8823),
+(3, 1, 4, 0.7246, 5.8823),
+(5, 1, 6, 0.0899, 0),
+(6, 2, 2, 0.12, 1.2048),
+(7, 2, 3, 0.12, 1.2048),
+(8, 3, 2, 0.0899, 0),
+(9, 3, 5, 0.0899, 0);
+
 -- --------------------------------------------------------
 
 --
 -- Table structure for table `types`
 --
 
-DROP TABLE IF EXISTS `types`;
 CREATE TABLE IF NOT EXISTS `types` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `description` varchar(255) DEFAULT NULL,
