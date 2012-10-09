@@ -8,8 +8,10 @@ var databaseWrapper = function() {
 
 	var actions = {
 		getObjectsIn: 		path + "getObjectsIn.action.php",
-		getTypes: 				path + "getTypes.action.php",
 		getClosestVertex: path + "getClosestVertex.action.php",
+		getMeansAndSpeeds:path + "getMeansAndSpeeds.action.php",
+		/* ADMIN */
+		getTypes: 				path + "edit/getTypes.action.php",
 		addEdge:   				path + "edit/addEdge.action.php",
 		deleteEdge:   		path + "edit/deleteEdge.action.php",
 		updateVertex: 		path + "edit/updateVertexCouple.action.php",
@@ -23,9 +25,9 @@ var databaseWrapper = function() {
 		$.post(actions.getObjectsIn, {bounds: bounds, type: type, poi: poi}, callback);
 	};
 
-	this.getTypes = function(callback){
+	this.getMeansAndSpeeds = function(callback){
 
-		$.post(actions.getTypes, callback);
+		$.post(actions.getMeansAndSpeeds, callback);
 
 	};
 
@@ -42,6 +44,12 @@ var databaseWrapper = function() {
 
 
 	// ADMIN ------------------------------------------
+
+	this.getTypes = function(callback){
+
+		$.post(actions.getTypes, callback);
+
+	};
 
 	this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, type, callback){
 

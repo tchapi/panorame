@@ -26,25 +26,42 @@ class Utils {
 
 
   /*
-   * GET The types availables
+   * GET The means availables and their respective speeds
    */
-  public static function getTypes(){
+  public static function getMeansAndSpeeds(){
 
-    $getTypes_query = "SELECT `id`, `description`, `slug` from `types` where `editable` = 1;";
-    $queryResult = mysql_query($getTypes_query);
+    $getMeansAndSpeeds_query = "SELECT m.`id` AS id, m.`description` AS description, GROUP_CONCAT(CONCAT('{\"type_id\":', s.`type_id`, ', \"speeds\": [', s.`flat_speed`, ',', s.`grade_speed`, ']}')) AS explorables
+                       FROM `means` m
+                       LEFT JOIN `speeds` s ON (m.`id`= s.`mean_id`)
+                       GROUP BY mean_id ";
+
+    $getMeansAndSpeeds_result = mysql_query($getMeansAndSpeeds_query);
 
     // Returns true if the query was well executed
-    if (!$queryResult || $queryResult == false ) {
+    if (!$getMeansAndSpeeds_result || $getMeansAndSpeeds_result == false ) {
       return false;
     } else {
       // Fetch the types
-      $types = array();
-        while ($row = mysql_fetch_array($queryResult, MYSQL_ASSOC)) {
-          array_push($types, array('id' => $row['id'], 'description' => $row['description'], 'slug' => $row['slug']));
+      $means = array();
+        while ($row = mysql_fetch_array($getMeansAndSpeeds_result, MYSQL_ASSOC)) {
+          
+          $explorables = array();
+
+          if ($row["explorables"] == null){
+            $explorables = null;
+          } else {
+            $explorablesAsPHPArray = json_decode('['.$row["explorables"].']');
+            foreach ($explorablesAsPHPArray as $explorable){
+              $explorables[$explorable->type_id] = $explorable->speeds;
+            }
+          }
+
+          array_push($means, array('id' => $row['id'], 'description' => $row['description'], 'explorables' => $explorables));
+        
         }
       }
 
-      return $types;
+      return $means;
 
   }
   
@@ -342,28 +359,85 @@ class Utils {
 
 
   /*
+   * GET The types availables
+   */
+  public static function getTypes(){
+
+    $getTypes_query = "SELECT `id`, `description`, `slug` from `types` where `editable` = 1;";
+    $queryResult = mysql_query($getTypes_query);
+
+    // Returns true if the query was well executed
+    if (!$queryResult || $queryResult == false ) {
+      return false;
+    } else {
+      // Fetch the types
+      $types = array();
+        while ($row = mysql_fetch_array($queryResult, MYSQL_ASSOC)) {
+          array_push($types, array('id' => $row['id'], 'description' => $row['description'], 'slug' => $row['slug']));
+        }
+      }
+
+      return $types;
+
+  }
+  
+
+  /*
    * Updating a vertex couple
    */
   public static function updateVertexCouple($start_id, $start_lat, $start_lng, $start_alt, $dest_id, $dest_lat, $dest_lng, $dest_alt, $edge_id){
 
-    // Updating start vertex
-    $updateVertex1_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
-              mysql_real_escape_string($start_lng),
-              mysql_real_escape_string($start_lat),
-              mysql_real_escape_string($start_alt),
+    $startExistsAlready = self::getClosestVertex($start_lat, $start_lng, _closestPointRadius_edit);
+    $destExistsAlready = self::getClosestVertex($dest_lat, $dest_lng, _closestPointRadius_edit);
+
+    if ($startExistsAlready == null || intval($startExistsAlready['id']) == $start_id) {
+      // Updating start vertex
+      $updateVertex1_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
+                mysql_real_escape_string($start_lng),
+                mysql_real_escape_string($start_lat),
+                mysql_real_escape_string($start_alt),
+                mysql_real_escape_string($start_id));
+
+      $updateVertex1_result = mysql_query($updateVertex1_query);
+    } else {
+      // We must update all the edges that use this id with the new start_id
+      $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `from_id` = %d WHERE `from_id` = %d;",
+              mysql_real_escape_string(intval($startExistsAlready['id'])),
               mysql_real_escape_string($start_id));
 
-    $updateVertex1_result = mysql_query($updateVertex1_query);
+      $changeEdge_result = mysql_query($changeEdge_query);
 
-    // Updating destination vertex
-    $updateVertex2_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
-              mysql_real_escape_string($dest_lng),
-              mysql_real_escape_string($dest_lat),
-              mysql_real_escape_string($dest_alt),
+      $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `to_id` = %d WHERE `to_id` = %d;",
+              mysql_real_escape_string(intval($startExistsAlready['id'])),
+              mysql_real_escape_string($start_id));
+
+      $changeEdge_result = mysql_query($changeEdge_query);
+    }
+
+    if ($destExistsAlready == null || intval($destExistsAlready['id']) == $dest_id) {
+      // Updating destination vertex
+      $updateVertex2_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
+                mysql_real_escape_string($dest_lng),
+                mysql_real_escape_string($dest_lat),
+                mysql_real_escape_string($dest_alt),
+                mysql_real_escape_string($dest_id));
+
+      $updateVertex2_result = mysql_query($updateVertex2_query);
+    } else {
+      // We must update all the edges that use this id with the new dest_id
+      $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `from_id` = %d WHERE `from_id` = %d;",
+              mysql_real_escape_string(intval($destExistsAlready['id'])),
               mysql_real_escape_string($dest_id));
 
-    $updateVertex2_result = mysql_query($updateVertex2_query);
+      $changeEdge_result = mysql_query($changeEdge_query);
 
+      $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `to_id` = %d WHERE `to_id` = %d;",
+              mysql_real_escape_string(intval($destExistsAlready['id'])),
+              mysql_real_escape_string($dest_id));
+
+      $changeEdge_result = mysql_query($changeEdge_query);
+    }
+    
     // We should tag the edges containing these points as 'dirty'
     $tagEdgesAsDirty_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, WHERE `from_id` IN (%d,%d) OR `to_id` IN (%d,%d);",
               mysql_real_escape_string($start_id),
@@ -449,25 +523,33 @@ class Utils {
    */
   public static function cutEdge($start_id, $dest_id, $new_lat, $new_lng, $new_alt, $edge_id){
 
-    // Creates the new vertex and retrieves its id
-    $newVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), %d);",
-              mysql_real_escape_string($new_lng),
-              mysql_real_escape_string($new_lat),
-              mysql_real_escape_string($new_alt));
-    $newVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
-            mysql_real_escape_string($new_lng),
-            mysql_real_escape_string($new_lat));
-    
-    mysql_query('BEGIN');
-    $newVertex_insert_result = mysql_query($newVertex_query);
-    $newVertex_fetch_result  = mysql_query($newVertex_query_fetch);
-    mysql_query('COMMIT');
+    $newVertexAlreadyExists = self::getClosestVertex($new_lat, $new_lng, _closestPointRadius_edit);
 
-    if( $newVertex_fetch_result !== false){
-      $row = mysql_fetch_array($newVertex_fetch_result, MYSQL_ASSOC);
-      $newVertex_id = intval($row['id']);
+    if ($newVertexAlreadyExists == null) {
+
+      // Creates the new vertex and retrieves its id
+      $newVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), %d);",
+                mysql_real_escape_string($new_lng),
+                mysql_real_escape_string($new_lat),
+                mysql_real_escape_string($new_alt));
+      $newVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
+              mysql_real_escape_string($new_lng),
+              mysql_real_escape_string($new_lat));
+      
+      mysql_query('BEGIN');
+      $newVertex_insert_result = mysql_query($newVertex_query);
+      $newVertex_fetch_result  = mysql_query($newVertex_query_fetch);
+      mysql_query('COMMIT');
+
+      if( $newVertex_fetch_result !== false){
+        $row = mysql_fetch_array($newVertex_fetch_result, MYSQL_ASSOC);
+        $newVertex_id = intval($row['id']);
+      } else {
+        return false;
+      }
+      
     } else {
-      return false;
+      $newVertex_id = intval($newVertexAlreadyExists['id']);
     }
     
     // Gets the two previous vertices

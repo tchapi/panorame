@@ -130,7 +130,7 @@ var isocronMap = function() {
 
         var addEdgeButton     = $('#addEdge');
         var consolidateButton = $('#consolidate');
-        this.typeSelect       = $("#addEdge_type");
+        this.typeSelect       = $('#addEdge_type');
         this.autoReverse      = $('input[type=radio][name=addEdge_autoReverse]');
 
         addEdgeButton.click($.proxy(function(event){
@@ -167,23 +167,42 @@ var isocronMap = function() {
         }, this));
         /* ------------------- ADMIN ------------------- */
 <?php else: ?>
-        this.limitDiv     = $("#limitDiv");
+        this.limitDiv     = $('#limitDiv');
         this.limitSlider  = $('#limitSlider');
         this.limitValue   = $('#limitValue');
 
         this.limitSlider.noUiSlider('init', {
             knobs: 1,
             connect: "lower",
-            scale: [0, 2000],
+            scale: [0, 600],
             start: this.limit,
             change:$.proxy(function(){
                 this.limit = this.limitSlider.noUiSlider('value')[1];
-                this.limitValue.html(this.limit + 'm');
+                this.limitValue.html(this.limit + ' s');
                 this.rangeHasChanged();
             }, this)
         });
 
-        this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + 'm');
+        this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + ' s');
+
+        this.meanSelect = $('#meanSelector');
+        this.meansAndSpeeds = [];
+
+        // Insert means and speed values
+        databaseWrapper.getMeansAndSpeeds($.proxy(function(data){
+
+            $.each(data, $.proxy(function(key, value) {   
+                
+                this.meanSelect
+                     .append($("<option></option>")
+                     .attr("value",value.id)
+                     .text(value.description)); 
+
+                this.meansAndSpeeds[value.id] = value.explorables;
+
+            }, this));
+
+        }, this));
 
 <?php endif ?>
 
@@ -284,7 +303,15 @@ var isocronMap = function() {
 
     this.calculateCost = function(startingCost, distance, grade, type){
 
-        return startingCost + distance + Math.max(0, 10*grade); // QUICK FIX in case grade is negative for the moment
+        var speeds = this.meansAndSpeeds[this.meanSelect.find(':selected').val()][type];
+
+        return startingCost + (distance*speeds[0] + grade*speeds[1]);
+       
+    };
+
+    this.isExplorable = function(type){
+
+        return (this.meansAndSpeeds[this.meanSelect.find(':selected').val()][type] != null);
 
     };
 
@@ -353,12 +380,12 @@ var isocronMap = function() {
                     child = node.children[childIndex];
                     idInTree = child.id;
 
-                    if (treeCopy[idInTree] != null && typeof(treeCopy[idInTree]) !== 'undefined'){
+                    if (treeCopy[idInTree] != null && typeof(treeCopy[idInTree]) !== 'undefined' && this.isExplorable(child.type)){
 
                         childInTree = treeCopy[idInTree];
 
                         // We replace the cost if we reach him at a lesser cost
-                        newCost  = this.calculateCost(node.cost, child.distance, child.grade);
+                        newCost  = this.calculateCost(node.cost, child.distance, child.grade, child.type);
                         if ( childInTree.out !== true && 
                             (typeof(childInTree.cost) === 'undefined' || childInTree.cost == null || childInTree.cost > newCost)
                         ){

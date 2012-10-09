@@ -56,6 +56,9 @@
             <div id="limitSlider" class="noUiSlider pull-right"></div>
             <div id="limitValue"></div>
           </div>
+          <div id="mean">
+            <select id="meanSelector"></select>
+          </div>
 <?php endif ?>
         </div>
       </div>
