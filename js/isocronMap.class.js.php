@@ -149,7 +149,7 @@ var isocronMap = function() {
 
         consolidateButton.click($.proxy(function(event){
 
-            databaseWrapper.consolidate();
+            databaseWrapper.consolidate($.proxy(function(data){this.boundsHaveChanged();}, this));
 
         },this));
 

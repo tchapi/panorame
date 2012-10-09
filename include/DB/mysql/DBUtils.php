@@ -437,7 +437,7 @@ class Utils {
 
       $changeEdge_result = mysql_query($changeEdge_query);
     }
-    
+
     // We should tag the edges containing these points as 'dirty'
     $tagEdgesAsDirty_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, WHERE `from_id` IN (%d,%d) OR `to_id` IN (%d,%d);",
               mysql_real_escape_string($start_id),
@@ -723,6 +723,12 @@ class Utils {
     // Executes the query
     $findOrphans_result = mysql_query($findOrphans_query);
 
+    // Finds edges of zero distance
+    $zeroDistance_query = "UPDATE `edges` SET `is_deleted` = 1 WHERE `from_id` = `to_id`;";
+
+    // Executes the query
+    $zeroDistance_result = mysql_query($zeroDistance_query);
+
     $updateDistances_query = "SELECT consolidate() AS nb;";
     
     // Executes the query
@@ -735,7 +741,8 @@ class Utils {
 
     return array(
       '1_find_orphans' => $findOrphans_result,
-      '2_update_distances_and_grades' => $updateDistances_result_nb
+      '2_zero_distance' => $zeroDistance_result,
+      '3_update_distances_and_grades' => $updateDistances_result_nb
     );
   }
   
