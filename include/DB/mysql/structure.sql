@@ -124,8 +124,6 @@ CREATE TABLE IF NOT EXISTS `means` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `slug` varchar(255) NOT NULL,
   `description` varchar(255) NOT NULL,
-  `speed` float NOT NULL,
-  `grade_modifier` float NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 

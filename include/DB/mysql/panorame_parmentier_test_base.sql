@@ -248,8 +248,6 @@ CREATE TABLE IF NOT EXISTS `means` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `slug` varchar(255) NOT NULL,
   `description` varchar(255) NOT NULL,
-  `speed` float NOT NULL,
-  `grade_modifier` float NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
 
@@ -257,10 +255,10 @@ CREATE TABLE IF NOT EXISTS `means` (
 -- Dumping data for table `means`
 --
 
-INSERT INTO `means` (`id`, `slug`, `description`, `speed`, `grade_modifier`) VALUES
-(1, 'walking', 'Walking', 1.38, 0.17),
-(2, 'cycling', 'Cycling', 8.33, 0.83),
-(3, 'driving', 'Driving', 11.12, 0);
+INSERT INTO `means` (`id`, `slug`, `description`) VALUES
+(1, 'walking', 'Walking'),
+(2, 'cycling', 'Cycling'),
+(3, 'driving', 'Driving';
 
 -- --------------------------------------------------------
 
