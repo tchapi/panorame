@@ -205,6 +205,7 @@ var mapsWrapper = function(type) {
 
         var count = edges.length;
         var startPoint = null, destPoint = null;
+        var currentLine = null;
 
         this.edgesCollection = new OpenLayers.Layer.Vector("edges");
 
@@ -224,14 +225,16 @@ var mapsWrapper = function(type) {
                 
             } else { continue; }
 
-            this.edges[i] = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([
+            currentLine = new OpenLayers.Feature.Vector(new OpenLayers.Geometry.LineString([
                 this.pointFromLonLat(startPoint.lat, startPoint.lng),
                 this.pointFromLonLat(destPoint.lat, destPoint.lng)
             ]));
-            this.edges[i].style = {
+            currentLine.style = {
                 strokeColor: this.colorsForType[edges[i].type],
                 strokeWidth: this.thicknessesForType[edges[i].type]
             };
+
+            this.edges.push(currentLine);
 
         };
 

@@ -37,7 +37,7 @@ BEGIN
 
   SET @count := 0;
 
-  WHILE EXISTS(SELECT e.id FROM panorame.edges e WHERE e.is_dirty = 1 AND e.is_deleted = 0) DO
+  WHILE EXISTS(SELECT e.id FROM edges e WHERE e.is_dirty = 1 AND e.is_deleted = 0) DO
 
     SELECT e.id, Y(vf.point), X(vf.point), vf.elevation , 
            Y(vt.point), X(vt.point), vt.elevation, 
@@ -45,7 +45,7 @@ BEGIN
     INTO @id, @start_lat, @start_lng, @start_alt, 
            @dest_lat, @dest_lng, @dest_alt, 
            @distance, @grade
-    FROM panorame.edges e
+    FROM edges e
       JOIN vertices vf ON (e.from_id = vf.id)
       JOIN vertices vt ON (e.to_id = vt.id)
       WHERE e.is_dirty = 1 AND e.is_deleted = 0 LIMIT 1;

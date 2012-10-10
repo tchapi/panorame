@@ -170,6 +170,7 @@ var mapsWrapper = function(type) {
 
         var count = edges.length;
         var startPoint = null, destPoint = null;
+        var currentLine = null;
 
         this.edgesCollection = new MQA.ShapeCollection();
         this.edgesCollection.collectionName = 'edges';
@@ -190,11 +191,11 @@ var mapsWrapper = function(type) {
                 
             } else { continue; }
 
-            this.edges[i] = new MQA.LineOverlay();
-            this.edges[i].setShapePoints([startPoint.lat, startPoint.lng, destPoint.lat, destPoint.lng]);
-            this.edgesCollection.add(this.edges[i]);
-            this.edges[i].color = this.colorsForType[edges[i].type];
-            this.edges[i].borderWith = this.thicknessesForType[edges[i].type];
+            currentLine = new MQA.LineOverlay();
+            currentLine.setShapePoints([startPoint.lat, startPoint.lng, destPoint.lat, destPoint.lng]);
+            this.edgesCollection.add(currentLine);
+            currentLine.color = this.colorsForType[edges[i].type];
+            currentLine.borderWith = this.thicknessesForType[edges[i].type];
 
         };
 

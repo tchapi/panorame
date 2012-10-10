@@ -182,6 +182,7 @@ var mapsWrapper = function(type) {
 
         var count = edges.length;
         var startPoint = null, destPoint = null;
+        var currentLine = null;
 
         for(var i = 0; i < count; i++) {
 
@@ -200,7 +201,7 @@ var mapsWrapper = function(type) {
             } else { continue; }
 
             // Creation of the line
-            this.edges[i] = new google.maps.Polyline({
+            currentLine = new google.maps.Polyline({
               path: [
                 new google.maps.LatLng(startPoint.lat, startPoint.lng),
                 new google.maps.LatLng(destPoint.lat, destPoint.lng)],
@@ -218,27 +219,30 @@ var mapsWrapper = function(type) {
 <?php endif ?>
             });
 
-            google.maps.event.addListener(this.edges[i], 'click', $.proxy(this.clickListener, this));
+            google.maps.event.addListener(currentLine, 'click', $.proxy(this.clickListener, this));
 
 <?php if ($editMode === true): ?>
             // ADMIN ------------------------------------------------------------------------------------------------------------
-            google.maps.event.addListener(this.edges[i], 'rightclick', (function(index, iM) {
+            google.maps.event.addListener(currentLine, 'rightclick', (function(index, iM) {
               return function() {
                 databaseWrapper.deleteEdge(index, $.proxy(iM.boundsHaveChanged, iM));
               }
             })(edges[i].id, isocronMap));
-            google.maps.event.addListener(this.edges[i].getPath(), 'set_at', (function(indexes, iM) {
+            google.maps.event.addListener(currentLine.getPath(), 'set_at', (function(indexes, iM) {
               return function() {
                 databaseWrapper.updateVertexCouple(indexes[0], this.getAt(0).lat(), this.getAt(0).lng(), 0, indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(iM.boundsHaveChanged, iM));
               }
             })([edges[i].start.id, edges[i].dest.id, edges[i].id],isocronMap));
-            google.maps.event.addListener(this.edges[i].getPath(), 'insert_at', (function(indexes, iM) {
+            google.maps.event.addListener(currentLine.getPath(), 'insert_at', (function(indexes, iM) {
               return function() {
                 databaseWrapper.cutEdge(indexes[0], indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(iM.boundsHaveChanged, iM));
               }
             })([edges[i].start.id, edges[i].dest.id, edges[i].id], isocronMap));
             // ADMIN ------------------------------------------------------------------------------------------------------------
 <?php endif ?>
+
+            // Pushes the line into the array
+            this.edges.push(currentLine);
         };
 
         if (display == true) this.displayDataOverlay();

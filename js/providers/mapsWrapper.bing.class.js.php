@@ -185,6 +185,7 @@ var mapsWrapper = function(type) {
 
         var count = edges.length;
         var startPoint = null, destPoint = null;
+        var currentLine = null;
 
         this.edgesCollection = new Microsoft.Maps.EntityCollection();
 
@@ -204,14 +205,14 @@ var mapsWrapper = function(type) {
                 
             } else { continue; }
 
-            this.edges[i] = new Microsoft.Maps.Polyline([
+            currentLine = new Microsoft.Maps.Polyline([
                 new Microsoft.Maps.Location(startPoint.lat, startPoint.lng),
                 new Microsoft.Maps.Location(destPoint.lat, destPoint.lng)
             ], {
                 strokeColor:new Microsoft.Maps.Color.fromHex(this.colorsForType[edges[i].type]), 
                 strokeThickness: this.thicknessesForType[edges[i].type]
             });
-            this.edgesCollection.push(this.edges[i]);
+            this.edgesCollection.push(currentLine);
 
         };
 
