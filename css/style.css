@@ -6,14 +6,16 @@ header {
 	padding: 10px 0;
 	border-bottom: 1px solid gray;
 }
-  header h1          	{ margin:0; line-height: 32px; }
-  header h1 span		{ color: gray;}
+  header h1          	{ margin:0; line-height: 32px; font-size: 31px; }
+  header h1 span		  { color: gray;}
   header #logo       	{ padding: 0 0 0 10px; }
   header #actionForm 	{ padding: 0 10px 0 0; }
-   header #addPin		{ margin-left: 10px; }
-   header #limitDiv 	{ padding: 5px 0 5px 10px; height: 18px; width: 300px; margin-right: 10px;}
-   header #limitSlider  { margin: 4px 10px; }
-   header #limitDiv #toggleDataOverlay {margin: 3px 8px 0 0; cursor: pointer;}
+  header #addPin		  { margin-left: 10px; }
+  header #limitDiv 	  { padding: 5px 0 5px 10px; height: 18px; width: 300px; margin-right: 10px;}
+  header #limitSlider { margin: 4px 10px; }
+  header #limitDiv #toggleDataOverlay {margin: 3px 8px 0 0; cursor: pointer;}
+  header #mean		    {margin-right: 10px;}
+  header #mean select {width: 150px;}
 
 footer {
 	height: 30px;
@@ -23,6 +25,7 @@ footer {
 	bottom:0;
 	border-top: 1px solid gray;
 }
+
   footer #copyright  { padding: 5px 0 0 10px; }
   footer #position, footer #objects { padding: 5px 5px 0 5px; cursor: pointer;}
 

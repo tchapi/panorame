@@ -109,4 +109,15 @@ Edges edition support undoing up to one-level, with an appropriate icon that wil
 
 Edges can be deleted with a right-click. There is no undo for this action.
 
+#### Consolidating ####
+
+What consolidating does :
+* find orphan vertices in the graph and soft-delete them
+* auto-merge vertices
+* recalculate edges distances and grades if a bias is detected after a change in a vertex affecting one or more edge
+
+> NB : Consolidating should be done at least after an edge was removed, after a vertex belonging to more than one edge was moved
+
+Consolidating is a deterministic operation in the database, thus can be done without consequences.
+
 - - - -
