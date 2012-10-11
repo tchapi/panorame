@@ -305,7 +305,7 @@ var isocronMap = function() {
 
         var speeds = this.meansAndSpeeds[this.meanSelect.find(':selected').val()][type];
 
-        return startingCost + (distance*speeds[0] + grade*speeds[1]);
+        return startingCost + Math.max(0, distance*speeds[0] + grade*speeds[1]);
        
     };
 
