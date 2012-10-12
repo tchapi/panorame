@@ -101,6 +101,8 @@ var mapsWrapper = function(type) {
             this.map.setOptions({draggableCursor: 'crosshair'});
         } else {
             this.map.setOptions({draggableCursor: 'default'});
+            this.addEdgePolyline.setMap(null);
+            google.maps.event.removeListener(this.addEdgeListener);
         }
     };
 
@@ -237,15 +239,14 @@ var mapsWrapper = function(type) {
               path: [
                 new google.maps.LatLng(startPoint.lat, startPoint.lng),
                 new google.maps.LatLng(destPoint.lat, destPoint.lng)],
-              strokeColor: this.colorsForType[edges[i].type],
-              strokeWeight: this.thicknessesForType[edges[i].type],
+              strokeColor: '#000000', // this.colorsForType[edges[i].type],
+              strokeWeight: 8, // this.thicknessesForType[edges[i].type],
 <?php if ($editMode === true): ?>
               // ADMIN ------------------------------------------------------------------------------------------------------------
-              strokeOpacity: 0,
-              editable: true,
+              strokeOpacity: 0.1,
               icons: [
-                {icon:{path:"M 2,5 2,-5 3.5,-2",strokeOpacity:0.75, strokeWeight:3, strokeColor: this.colorsForType[edges[i].type]},offset:"50%"},
-                {icon: {path: "M 0.5,0 0.5,1", strokeOpacity: 0.7, strokeWeight: 4 }, offset: '1', repeat: '3px'}
+                {icon:{path:"M 1.5,2 1.5,-2.5 2.5,-1.5",strokeOpacity:0.75, strokeWeight:3, strokeColor: this.colorsForType[edges[i].type]},offset:"50%"},
+                {icon: {path: "M 0.4,-0.5 0.4,0.5", strokeOpacity: 0.7, strokeWeight: 4, strokeColor: this.colorsForType[edges[i].type]}, repeat: '3px'}
               ]
               // ADMIN ------------------------------------------------------------------------------------------------------------
 <?php endif ?>
@@ -255,6 +256,7 @@ var mapsWrapper = function(type) {
 
 <?php if ($editMode === true): ?>
             // ADMIN ------------------------------------------------------------------------------------------------------------
+            google.maps.event.addListener(currentLine, 'mouseover', function(event){ this.setEditable(true);});
             google.maps.event.addListener(currentLine, 'rightclick', (function(index, iM) {
               return function() {
                 databaseWrapper.deleteEdge(index, $.proxy(iM.boundsHaveChanged, iM));
