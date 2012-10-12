@@ -80,8 +80,8 @@
           <strong>Automatically make both ways :</strong><br />
           <input name="addEdge_autoReverse" type="radio" value="0" checked><label class="radio" for="addEdge_autoReverse">None</label>
           <input name="addEdge_autoReverse" type="radio" value="same"><label class="radio text-success" for="addEdge_autoReverse">Same</label>
-          <input name="addEdge_autoReverse" type="radio" value="3"><label class="radio text-warning" for="addEdge_autoReverse">Walk</label>
-          <input name="addEdge_autoReverse" type="radio" value="4"><label class="radio text-error" for="addEdge_autoReverse">Cycles</label>
+          <input name="addEdge_autoReverse" type="radio" value="3"><label class="radio text-warning" for="addEdge_autoReverse">Cycles</label>
+          <input name="addEdge_autoReverse" type="radio" value="4"><label class="radio text-error" for="addEdge_autoReverse">Walk</label>
         </div>  
         <p class="muted well well-small"><b class="icon-info-sign"></b> <em>To delete an edge, right-click on it. Vertices will auto-merge under <?php echo _closestPointRadius_edit; ?>m.</em></p>
       </div>
