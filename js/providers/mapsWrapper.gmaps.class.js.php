@@ -97,6 +97,11 @@ var mapsWrapper = function(type) {
 <?php if ($editMode === true): ?>
     this.setAddEdge = function(booleanValue){
         this.addEdge = booleanValue;
+        if (booleanValue === true) {
+            this.map.setOptions({draggableCursor: 'crosshair'});
+        } else {
+            this.map.setOptions({draggableCursor: 'default'});
+        }
     };
 <?php endif ?>
 
@@ -119,7 +124,7 @@ var mapsWrapper = function(type) {
                     alt[0] = results[0].elevation;
                     alt[1] = results[1].elevation;
                 }
-
+                
                 this.addEdgeCallback(this.addEdge.lat(), this.addEdge.lng(), alt[0],event.latLng.lat(), event.latLng.lng(), alt[1]);
                 this.addEdge = true;
                 this.addEdgeEnd = false;
