@@ -246,7 +246,7 @@ var isocronMap = function() {
 <?php endif ?>            
             $('#objects span').html(data.count);
             
-            if (data.count != 0 && data.closest != null) {
+            if (data !== null && data.closest != null) {
 
                 this.data = data;
                 this.recalculateGraph();
