@@ -239,9 +239,11 @@ var mapsWrapper = function(type) {
               path: [
                 new google.maps.LatLng(startPoint.lat, startPoint.lng),
                 new google.maps.LatLng(destPoint.lat, destPoint.lng)],
+              strokeColor: this.colorsForType[edges[i].type],
+              strokeWeight: this.thicknessesForType[edges[i].type],
+<?php if ($editMode === true): ?>
               strokeColor: '#000000', // this.colorsForType[edges[i].type],
               strokeWeight: 8, // this.thicknessesForType[edges[i].type],
-<?php if ($editMode === true): ?>
               // ADMIN ------------------------------------------------------------------------------------------------------------
               strokeOpacity: 0.1,
               icons: [
