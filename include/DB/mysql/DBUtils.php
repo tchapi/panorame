@@ -175,6 +175,7 @@ class Utils {
     $getVerticesIn_query = sprintf("SELECT `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` v");
 
     $getVerticesIn_query = self::restrictForVertex($getVerticesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
+    $getVerticesIn_query .= " AND v.`is_deleted` = 0";
 
     $queryResult = mysql_query($getVerticesIn_query);
 
