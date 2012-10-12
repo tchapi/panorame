@@ -103,6 +103,27 @@ var mapsWrapper = function(type) {
             this.map.setOptions({draggableCursor: 'default'});
         }
     };
+
+    this.drawAddEdge = function(event){
+
+        if (this.addEdgePolyline)
+            this.addEdgePolyline.setMap(null);
+
+        var lineCoords = [
+            this.addEdge,
+            event.latLng
+        ];
+
+        this.addEdgePolyline = new google.maps.Polyline({
+            path: lineCoords,
+            strokeColor: "#000000",
+            strokeOpacity: 0.5,
+            strokeWeight: 4,
+            clickable: false
+        });
+
+        this.addEdgePolyline.setMap(this.map);
+    };
 <?php endif ?>
 
     this.clickListener = function(event){
@@ -115,6 +136,10 @@ var mapsWrapper = function(type) {
             this.addEdge = event.latLng;
             this.addEdgeEnd = true;
             console.log('Point A (start) :' + this.addEdge.lat() + ' - ' + this.addEdge.lng() + ' | Waiting for point B ...');
+
+            this.addEdgeListener = google.maps.event.addListener(this.map, 'mousemove', $.proxy(function (event) {
+                this.drawAddEdge(event);
+            }, this));
 
         } else if (this.addEdgeEnd === true) {
 
@@ -129,6 +154,9 @@ var mapsWrapper = function(type) {
                 this.addEdge = true;
                 this.addEdgeEnd = false;
                 console.log('Point B (dest) :' + event.latLng.lat() + ' - ' + event.latLng.lng() + ' | Adding the edge now.');
+
+                this.addEdgePolyline.setMap(null);
+                google.maps.event.removeListener(this.addEdgeListener);
 
             }, this));
         }
