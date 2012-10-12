@@ -170,7 +170,6 @@ var mapsWrapper = function(type) {
 
             this.position = new google.maps.LatLng(lat, lng);
             this.map.panTo(this.position);
-            this.map.setZoom(17);
             
             // Creates the marker & infoWindow
             if (!this.marker) {
