@@ -28,7 +28,7 @@ class DB {
   { 
     try {
 
-      $this->link = new Mongo("mongodb://".$this->username.":".$this->password."@".$this->server."/isocron");
+      $this->link = new Mongo("mongodb://".$this->username.":".$this->password."@".$this->server."/".$this->dbname);
       return true;
     
     } catch ( MongoConnectionException $e ) {
