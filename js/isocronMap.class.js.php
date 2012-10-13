@@ -204,6 +204,8 @@ var isocronMap = function() {
 
         }, this));
 
+        this.meanSelect.change($.proxy(function(e){this.recalculateGraph()}, this));
+
 <?php endif ?>
 
     };
