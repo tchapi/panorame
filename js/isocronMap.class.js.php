@@ -143,7 +143,7 @@ var isocronMap = function() {
                 this.continuousMode.removeAttr('disabled');
                 this.setNotice('Now leaving adding mode', 'success');
             } else {
-                mapsWrapper.setAddEdge(true, this.continuousMode.val());
+                mapsWrapper.setAddEdge(true, this.continuousMode.is(':checked'));
                 addEdgeButton.html('<b class="icon-ok icon-white"></b> Finish');
                 addEdgeButton.addClass('active');
                 this.continuousMode.attr('disabled', 'disabled');
