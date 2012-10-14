@@ -180,7 +180,7 @@ var mapsWrapper = function(type) {
                 });
             }
             this.marker.setPosition(this.position);
-            this.marker.setIcon(this.standardPinImage);
+            this.marker.setIcon(new google.maps.MarkerImage(this.standardPinImage, null, null, new google.maps.Point(14,44)));
 
             if (description != null){
                 // Displays the infoWindow
@@ -293,7 +293,7 @@ var mapsWrapper = function(type) {
         } else {
             this.removeClosestOverlay();
             this.closestPoint = new google.maps.Marker();
-            this.closestPoint.setIcon(this.closestPointPinImage);
+            this.closestPoint.setIcon(new google.maps.MarkerImage(this.closestPointPinImage, null, null, new google.maps.Point(14,44)));
             this.closestPoint.setPosition(position);
             if (display == true) this.displayClosestOverlay();
         }
