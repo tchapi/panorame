@@ -13,7 +13,7 @@ header {
   header #addPin		  { margin-left: 10px; }
   header #limitDiv 	  { padding: 5px 0 5px 10px; height: 18px; width: 300px; margin-right: 10px;}
   header #limitSlider { margin: 4px 10px; }
-  header #limitDiv #toggleDataOverlay {margin: 3px 8px 0 0; cursor: pointer;}
+  header #toggleDataOverlay {margin: 3px 8px 0 0; cursor: pointer;}
   header #mean		    {margin-right: 10px;}
   header #mean select {width: 150px;}
 
