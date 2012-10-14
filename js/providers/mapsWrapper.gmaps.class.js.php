@@ -1,3 +1,4 @@
+<?php header('Content-type: application/javascript'); ?>
 <?php if(isset($_GET['edit']) && $_GET['edit'] == 1) $editMode = true; else $editMode = false; ?>
 /* Maps Wrapper
  * Google Maps
