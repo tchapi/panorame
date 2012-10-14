@@ -50,7 +50,7 @@
       <div class='span5' id="actionForm">
 
 <?php if ($editMode === true): ?> 
-          <div id="editMode" class="alert alert-warning pull-right"><strong>Editing mode</strong></div> 
+          <div id="editMode" class="alert alert-warning pull-right"><b id="toggleDataOverlay" data-original-title="Toggle overlays" class="icon-eye-open pull-left"></b> <strong>Editing mode</strong></div> 
 <?php else: ?>
           <div id="limitDiv" class="alert alert-info pull-right">
             <b id="toggleDataOverlay" data-original-title="Toggle overlays" class="icon-eye-open pull-left"></b>
