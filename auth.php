@@ -1,4 +1,9 @@
-<?php if (!isset($_POST['name']) || !isset($_POST['password']) || $_POST['password'] != "panorame" || $_POST['name'] == ""): ?>
+<?php
+
+  $password = "panorame";
+
+ if ( (!isset($_POST['name']) || !isset($_POST['password']) || $_POST['password'] != $password || $_POST['name'] == "") && (!isset($_COOKIE['panorame_auth']) || $_COOKIE['panorame_auth'] != md5($password)) ){
+?>
 <!DOCTYPE html>
 <html>
   <head>
@@ -29,5 +34,11 @@
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js" type="text/javascript"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
 </html>
-<?php exit(1); ?>
-<?php endif ?>
+<?php 
+
+  exit(1);
+  } 
+
+  setcookie( "panorame_auth", md5($password), strtotime( '+30 days' ) ); 
+
+?>
