@@ -31,18 +31,15 @@ class Utils {
   public static function getMeansAndSpeeds(){
 
   	global $DBConnection;
-
     $db = $DBConnection->getDB();
-
-    $db->resetError();
 
     $means_raw = iterator_to_array($db->means->find());
     $means = array();
 
-    // Fetch the types
+    // Fetch the means
     foreach($means_raw as $mean) {
       
-    	$explorablesAsPHPArray = iterator_to_array($db->speeds->find(array("mean_id" => $mean['_id'])));
+    	$explorablesAsPHPArray = iterator_to_array($db->speeds->find(array('mean_id' => $mean['_id'])));
 
     	$explorables = array();
 
@@ -57,5 +54,321 @@ class Utils {
     return $means;
 
   }
-	
+    
+  /*
+   * Extends the given bounding box by _extendBoundsPointRadius, to allow for more smooth panning in the view
+   * Allows to have more routes in the view as well, by capilarity
+   */
+  public static function extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng){
+
+    $ratio = _extendBoundsPointRadius/_earth_radius;
+    
+    // Calculating new NW point
+    $lat_rad = $NW_lat*pi()/180;
+    $lng_rad = $NW_lng*pi()/180;
+    $cos_lat_rad = cos($lat_rad);
+    $sin_lat_rad = sin($lat_rad);
+
+    $brng = (315/180)*pi(); // bearing is -45°
+    $newNW_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
+    $newNW_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($newNW_lat*pi()/180)))* 180 / pi();
+
+    // Calculating new SE point
+    $lat_rad = $SE_lat*pi()/180;
+    $lng_rad = $SE_lng*pi()/180;
+    $cos_lat_rad = cos($lat_rad);
+    $sin_lat_rad = sin($lat_rad);
+
+    $brng = 135/180*pi(); // Bearing is 135°
+    $newSE_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
+    $newSE_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($newSE_lat*pi()/180)))* 180 / pi();
+
+    return array('NW_lat' => $newNW_lat, 'NW_lng' => $newNW_lng, 'SE_lat' => $newSE_lat, 'SE_lng' => $newSE_lng);
+
+  }
+
+  /*
+   * Restricts a query for a vertex (of table v) for a bounding box
+   * Takes the POI into account if existing
+   */
+  public static function restrictToBBox($array, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+
+    if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
+
+    	// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      // Poi should be included
+    	$boundingBox = array(array($NW_lng, $SE_lat), array($SE_lng,  $NW_lat));
+    	$restrict =  array('point' => array('within' => array( '$box' => $boundingBox )));
+    	// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    } else {
+
+      // Just a bounds without the POI
+    	$boundingBox = array(array($NW_lng, $SE_lat), array($SE_lng,  $NW_lat));
+    	$restrict =  array('point' => array('within' => array( '$box' => $boundingBox )));
+      
+    }
+
+    array_merge($array, $restrict);
+    return $array;
+  }
+
+  /*
+   * GET ALL THE VERTICES in given bounds expressed as two LAT / LNG couples for NW and SE
+   */
+  public static function getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+
+  	global $DBConnection;
+    $db = $DBConnection->getDB();
+
+    $restrictArray = self::restrictToBBox(array('is_deleted' => 0), $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
+    
+    $vertices = iterator_to_array($db->vertices->find($restrictArray));
+
+    $verticesArray = array();
+
+    foreach($vertices as $vertex){
+    	$verticesArray[] = $vertex;
+    }
+
+    return $verticesArray;
+
+  }
+
+
+  /*
+   * GET ALL THE EDGES in given bounds expressed as two LAT / LNG couples for NW and SE
+   */
+  public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+
+  	global $DBConnection;
+    $db = $DBConnection->getDB();
+
+    $restrictArray = self::restrictToBBox(array(), $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
+    
+    $edges = iterator_to_array($db->edges_computed->find($restrictArray));
+
+ 		$edgesArray = array();
+
+    foreach($edges as $edge){
+    	$edge["id"] = $edge["_id"];
+    	unset($edge["_id"]);
+    	$edgesArray[] = $edge;
+    }
+
+    return $edgesArray;
+
+  }
+
+	/*
+   * GET ALL THE VERTICES in given bounds expressed as two LAT / LNG couples for NW and SE
+   * AND their 1th children
+   */
+  public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+
+	}
+
+	/*
+   * GET The closest vertex from a given lat / lng couple within a x meters radius
+   */
+  public static function getClosestVertex($lat, $lng, $radius_in_m){
+
+  	global $DBConnection;
+    $db = $DBConnection->getDB();
+
+    $closest = current(iterator_to_array($db->vertices->find(array('is_deleted' => 0, 'point' => array( '$near' => array( floatval($lng), floatval($lat)), '$maxDistance' => $radius_in_m)))->limit(1)));
+
+    return $closest;
+
+	}
+
+/* ======================================================================== *
+ *                                                                          *
+ *                            ADMIN FUNCTIONS                               *
+ *                                                                          *
+ * ======================================================================== */ 
+
+
+  /*
+   * GET The types availables
+   */
+  public static function getTypes(){
+
+    global $DBConnection;
+    $db = $DBConnection->getDB();
+
+    $types_raw = iterator_to_array($db->types->find(array('editable' => 1))->sort(array('_id' => 1)));
+    $types = array();
+
+    // Fetch the means
+    foreach($types_raw as $type) {
+       
+       array_push($types, array('id' => $type['_id'], 'description' => $type['description'], 'slug' => $type['slug']));
+      
+    }
+
+    return $types;
+
+  }
+
+  /*
+   * Updating a vertex couple
+   */
+  public static function updateVertexCouple($start_id, $start_lat, $start_lng, $start_alt, $dest_id, $dest_lat, $dest_lng, $dest_alt, $edge_id){
+
+    global $DBConnection;
+    $db = $DBConnection->getDB();
+
+    $db->vertices->update(array('_id' => $start_id), array( '$set' => array( 'point.lat' => $start_lat, 'point.lng' => $start_lng, 'alt' => $start_alt )));
+    $db->vertices->update(array('_id' => $dest_id),array( '$set' => array( 'point.lat' => $dest_lat, 'point.lng' => $dest_lng, 'alt' => $dest_alt )));
+
+    self::consolidate();
+
+    return true;
+  }
+
+	/*
+   * Adding an edge
+   */
+  public static function addEdge($start_lat, $start_lng, $start_alt, $dest_lat, $dest_lng, $dest_alt, $type){
+
+    $startExistsAlready = self::getClosestVertex($start_lat, $start_lng, _closestPointRadius_edit);
+    $destExistsAlready = self::getClosestVertex($dest_lat, $dest_lng, _closestPointRadius_edit);
+
+    global $DBConnection;
+    $db = $DBConnection->getDB();
+
+    // Create start vertex if it doesn't exist
+    if ($startExistsAlready == false) {
+
+    	// LAST ID
+      $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
+      $startVertex_id = intval($lastVertexIdElement['_id'] + 1);
+
+      $db->vertices->insert(array(
+					"_id" => $startVertex_id,
+					"is_deleted" => 0,
+					"point" => array(
+						"lat" => $start_lat,
+						"lng" => $start_lng),
+					"alt" => $start_alt 
+					
+				));
+
+    } else {
+      $startVertex_id = intval($startExistsAlready['_id']);
+    }
+
+    // Create dest vertex if it doesn't exist
+    if ($destExistsAlready == false) {
+
+      // LAST ID
+      $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
+      $destVertex_id = intval($lastVertexIdElement['_id'] + 1);
+
+      $db->vertices->insert(array(
+					"_id" => $destVertex_id,
+					"is_deleted" => 0,
+					"point" => array(
+						"lat" => $dest_lat,
+						"lng" => $dest_lng),
+					"alt" => $dest_alt 
+				));
+      
+    } else {
+      $destVertex_id = intval($destExistsAlready['_id']);
+    }
+
+    // Creates the edge
+    $distance = self::haversine($start_lat, $start_lng, $dest_lat, $dest_lng);
+    $grade = $dest_alt - $start_alt;
+
+    // LAST ID
+    $lastEdgeIdElement = current(iterator_to_array($db->edges->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
+    $nextEdge_id = intval($lastEdgeIdElement['_id'] + 1);
+
+    $db->edges->insert(array(
+			"_id" => $nextEdge_id,
+			"from_id" => $startVertex_id,
+			"to_id" => $destVertex_id,
+			"distance" => $distance,
+			"grade" => $grade,
+			"type" => $type 
+    	));
+
+    self::consolidate();
+
+    return array(
+      '1_start_alreadyExisted' => $startExistsAlready,
+      '2_dest_alreadyExisted' => $destExistsAlready,
+      '3_start_insert' => $startVertex_id,
+      '4_dest_insert' => $destVertex_id,
+      '5_create_edge' => $nextEdge_id
+    );
+
+  }
+
+  /*
+   * Consolidate the database
+   */
+  public static function consolidate(){
+
+  	global $DBConnection;
+    $db = $DBConnection->getDB();
+
+    // Find all edges to compute them
+    $edges = iterator_to_array($db->edges->find());
+
+    // Fetch the edges
+    $edgesArray = array();
+
+		$db->edges_computed->remove(array());
+		$counter = 0;
+
+    foreach ($edges as $edge) {
+    
+    	$startVertex = current(iterator_to_array($db->vertices->find(array('_id' => $edge['from_id']))->limit(1)));
+			$destVertex = current(iterator_to_array($db->vertices->find(array('_id' => $edge['to_id']))->limit(1)));
+
+			if (intval($startVertex["_id"]) != intval($destVertex["_id"])) {
+
+				$db->edges_computed->insert(array(
+                '_id' => intval($edge["_id"]), 
+                'start' => array(
+                  'id' => intval($startVertex["_id"]),
+                  'point' => array(
+                    'lat' => floatval($startVertex["point"]["lat"]),
+                    'lng' => floatval($startVertex["point"]["lng"]),
+                    'alt' => intval($startVertex["alt"])
+                  )
+                ),
+                'dest' => array(
+                  'id' => intval($destVertex["_id"]),
+                  'point' => array(
+                    'lat' => floatval($destVertex["point"]["lat"]),
+                    'lng' => floatval($destVertex["point"]["lng"]),
+                    'alt' => intval($destVertex["alt"])
+                  )
+                ),
+                'distance' => floatval(self::haversine($startVertex["point"]["lat"], $startVertex["point"]["lng"], $destVertex["point"]["lat"], $destVertex["point"]["lng"])),
+                'grade' => intval($destVertex["alt"] - $startVertex["alt"]),
+                'type' => intval($edge['type'])
+              ));
+			
+				$counter += 1;
+			}
+
+    }
+
+    // Finds orphan vertices and deletes them
+    /*$findOrphans_query = "UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` NOT IN 
+              (SELECT `from_id` AS `id` FROM `edges` UNION
+                SELECT `to_id` AS `id` FROM `edges`)";
+		*/
+
+    return array(
+      'nb_inserted' => $counter
+    );
+  }
+  
 }
