@@ -1,3 +1,4 @@
+<?php header('Content-type: application/javascript'); ?>
 <?php if(isset($_GET['edit']) && $_GET['edit'] == 1) $editMode = true; else $editMode = false; ?>
 /* isocronMap
  *
@@ -139,17 +140,24 @@ var isocronMap = function() {
                 mapsWrapper.setAddEdge(false);
                 addEdgeButton.html('<b class="icon-plus-sign icon-white"></b> Add edges');
                 addEdgeButton.removeClass('active');
+                this.continuousMode.removeAttr('disabled');
+                this.setNotice('Now leaving adding mode', 'success');
             } else {
-                mapsWrapper.setAddEdge(true);
+                mapsWrapper.setAddEdge(true, this.continuousMode.val());
                 addEdgeButton.html('<b class="icon-ok icon-white"></b> Finish');
                 addEdgeButton.addClass('active');
+                this.continuousMode.attr('disabled', 'disabled');
+                this.setNotice('Now in adding mode', 'danger');
             }
 
         },this));
 
         consolidateButton.click($.proxy(function(event){
 
-            databaseWrapper.consolidate($.proxy(function(data){this.boundsHaveChanged();}, this));
+            databaseWrapper.consolidate($.proxy(function(data){
+                this.boundsHaveChanged();
+                this.setNotice('Database consolidated', 'success');
+            }, this));
 
         },this));
 
@@ -165,6 +173,11 @@ var isocronMap = function() {
             }, this));
 
         }, this));
+
+        this.continuousMode = $('#addEdge_continuous');
+
+        this.notice = $('#notice');
+        this.setNotice('Welcome', 'info');
         /* ------------------- ADMIN ------------------- */
 <?php else: ?>
         this.limitDiv     = $('#limitDiv');
@@ -178,12 +191,12 @@ var isocronMap = function() {
             start: this.limit,
             change:$.proxy(function(){
                 this.limit = this.limitSlider.noUiSlider('value')[1];
-                this.limitValue.html(this.limit + ' s');
+                this.limitValue.html(this.getLimit());
                 this.rangeHasChanged();
             }, this)
         });
 
-        this.limitValue.html(this.limitSlider.noUiSlider('value')[1] + ' s');
+        this.limitValue.html(this.getLimit());
 
         this.meanSelect = $('#meanSelector');
         this.meansAndSpeeds = [];
@@ -207,6 +220,17 @@ var isocronMap = function() {
         this.meanSelect.change($.proxy(function(e){this.recalculateGraph()}, this));
 
 <?php endif ?>
+
+    };
+
+    this.getLimit = function(){
+
+        if (this.limit >= 3600 - 1) return "&infin;";
+
+        var min = Math.floor(this.limit / 60);
+        var sec = this.limit - min*60;
+
+        return ( (min==0?'':min + 'm ') + (sec==0?'':sec + 's'));
 
     };
 
@@ -451,13 +475,28 @@ var isocronMap = function() {
     // ADMIN ---------------------
     this.addEdge = function(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt){
 
-        databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, this.typeSelect.find('option:selected').attr('rel'), $.proxy(this.boundsHaveChanged,this));
+        databaseWrapper.addEdge(start_lat, start_lng, start_alt, dest_lat, dest_lng, dest_alt, this.typeSelect.find('option:selected').attr('rel'), $.proxy(function(){
+            this.boundsHaveChanged();
+            this.setNotice('Edge added.', 'success');
+        },this));
 
         var autoReserve_value = this.autoReverse.filter(':checked').val();
         if (autoReserve_value != "0" ) {
             var type = (autoReserve_value == "same")?this.typeSelect.find('option:selected').attr('rel'):autoReserve_value;
             databaseWrapper.addEdge(dest_lat, dest_lng, dest_alt, start_lat, start_lng, start_alt, type, $.proxy(this.boundsHaveChanged,this));
         }
+    };
+
+    this.setNotice = function(message, messageClass){
+
+        if (message == "") {
+            this.notice.hide();
+        } else {
+            this.notice.html(' <strong>' + messageClass.toUpperCase() + '</strong> : ' + message);
+            this.notice.removeClass().addClass('pull-right alert alert-' + messageClass);
+            this.notice.show();
+        }
+
     };
 <?php endif ?>
 }

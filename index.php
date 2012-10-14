@@ -50,7 +50,8 @@
       <div class='span5' id="actionForm">
 
 <?php if ($editMode === true): ?> 
-          <div id="editMode" class="alert alert-warning pull-right"><b id="toggleDataOverlay" data-original-title="Toggle overlays" class="icon-eye-open pull-left"></b> <strong>Editing mode</strong></div> 
+          <div id="editMode" class="alert alert-warning pull-right"><b id="toggleDataOverlay" data-original-title="Toggle overlays" class="icon-eye-open pull-left"></b> <strong>Editing mode</strong></div>
+          <div id="notice" class="alert alert-info pull-right"><b class="icon-info-sign pull-left"></b> <strong></strong></div> 
 <?php else: ?>
           <div id="limitDiv" class="alert alert-info pull-right">
             <b id="toggleDataOverlay" data-original-title="Toggle overlays" class="icon-eye-open pull-left"></b>
@@ -83,6 +84,9 @@
           <input name="addEdge_autoReverse" type="radio" value="3"><label class="radio text-warning" for="addEdge_autoReverse">Cycles</label>
           <input name="addEdge_autoReverse" type="radio" value="4"><label class="radio text-error" for="addEdge_autoReverse">Walk</label>
         </div>  
+        <div class="form-line">
+          <label for="addEdge_continuous"><strong>Continous mode : </strong> </label> <input name="addEdge_continuous" id="addEdge_continuous" type="checkbox" value="0">
+        </div>
         <p class="muted well well-small"><b class="icon-info-sign"></b> <em>Mouse over an edge to make it editable (handles will appear).<br/>To delete an edge, right-click on it.<br/>Vertices will auto-merge under <?php echo _closestPointRadius_edit; ?>m.</em></p>
       </div>
       <div class="modal-footer">

@@ -1,3 +1,4 @@
+<?php header('Content-type: application/javascript'); ?>
 /* Maps Wrapper
  * Map Quest
  */

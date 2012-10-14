@@ -96,13 +96,14 @@ var mapsWrapper = function(type) {
     };
 
 <?php if ($editMode === true): ?>
-    this.setAddEdge = function(booleanValue){
+    this.setAddEdge = function(booleanValue, continuousMode){
         this.addEdge = booleanValue;
         if (booleanValue === true) {
             this.map.setOptions({draggableCursor: 'crosshair'});
+            this.continuousMode = continuousMode;
         } else {
             this.map.setOptions({draggableCursor: 'default'});
-            this.addEdgePolyline.setMap(null);
+            if(this.addEdgePolyline) this.addEdgePolyline.setMap(null);
             google.maps.event.removeListener(this.addEdgeListener);
         }
     };
@@ -160,6 +161,10 @@ var mapsWrapper = function(type) {
 
                 this.addEdgePolyline.setMap(null);
                 google.maps.event.removeListener(this.addEdgeListener);
+
+                if (this.continuousMode){
+                    this.clickListener(event);
+                }
 
             }, this));
         }
@@ -262,17 +267,25 @@ var mapsWrapper = function(type) {
             google.maps.event.addListener(currentLine, 'mouseover', function(event){ this.setEditable(true);});
             google.maps.event.addListener(currentLine, 'rightclick', (function(index, iM) {
               return function() {
-                databaseWrapper.deleteEdge(index, $.proxy(iM.boundsHaveChanged, iM));
+                databaseWrapper.deleteEdge(index, $.proxy(function(){
+                    this.boundsHaveChanged()
+                    this.setNotice('Edge #' + index + ' deleted. You cannot undo.', 'success');
+                }, iM));
               }
             })(edges[i].id, isocronMap));
             google.maps.event.addListener(currentLine.getPath(), 'set_at', (function(indexes, iM) {
               return function() {
-                databaseWrapper.updateVertexCouple(indexes[0], this.getAt(0).lat(), this.getAt(0).lng(), 0, indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(iM.boundsHaveChanged, iM));
+                databaseWrapper.updateVertexCouple(indexes[0], this.getAt(0).lat(), this.getAt(0).lng(), 0, indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(function(){
+                    this.setNotice('Vertices #' + indexes[0] + ' and #' + indexes[1] + ' updated. You can undo.', 'info');
+                }, iM));
               }
             })([edges[i].start.id, edges[i].dest.id, edges[i].id],isocronMap));
             google.maps.event.addListener(currentLine.getPath(), 'insert_at', (function(indexes, iM) {
               return function() {
-                databaseWrapper.cutEdge(indexes[0], indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(iM.boundsHaveChanged, iM));
+                databaseWrapper.cutEdge(indexes[0], indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(function(){
+                    this.boundsHaveChanged();
+                    this.setNotice('Edge #' + indexes[2] + ' cut in two. You cannot undo.', 'success');
+                }, iM));
               }
             })([edges[i].start.id, edges[i].dest.id, edges[i].id], isocronMap));
             // ADMIN ------------------------------------------------------------------------------------------------------------

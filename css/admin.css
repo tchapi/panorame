@@ -2,7 +2,7 @@ header,
 footer{
 	background: lightGoldenrodYellow;
 }
-header #editMode { padding: 5px 10px 5px 10px; height: 18px; margin-right: 10px;}
+header #editMode, #notice { padding: 5px 10px 5px 10px; height: 18px; margin-right: 10px;}
 
 #admin{
 	position: absolute;
