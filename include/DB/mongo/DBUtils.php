@@ -128,7 +128,15 @@ class Utils {
     $verticesArray = array();
 
     foreach($vertices as $vertex){
-    	$verticesArray[] = $vertex;
+
+    	$verticesArray[] = array(
+	    	"id" => $vertex['_id'],
+	    	"point" =>array(
+	    		"lat" => $vertex['point'][1],
+	    		"lng" => $vertex['point'][0]
+	    		),
+	    	"alt" => $vertex['alt']
+	    	);
     }
 
     return $verticesArray;
