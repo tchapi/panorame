@@ -1,5 +1,6 @@
 <?php
 
+  date_default_timezone_set('Europe/Paris');
   $password = "panorame";
 
  if ( (!isset($_POST['name']) || !isset($_POST['password']) || $_POST['password'] != $password || $_POST['name'] == "") && (!isset($_COOKIE['panorame_auth']) || $_COOKIE['panorame_auth'] != md5($password)) ){
@@ -38,6 +39,7 @@
 
   exit(1);
   } 
+
 
   setcookie( "panorame_auth", md5($password), strtotime( '+30 days' ) ); 
 
