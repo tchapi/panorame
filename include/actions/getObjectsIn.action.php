@@ -3,7 +3,7 @@
   $app = '_BACKEND';
   include_once('../config.php');
 
-  if (isset($_POST['bounds']) && isset($_POST['poi']) && isset($_POST['type'])){
+  if (isset($_POST['bounds']) && $_POST['bounds'] != null && isset($_POST['poi']) && isset($_POST['type'])){
 
     switch ($_POST['type']){
       case 'vertices':
