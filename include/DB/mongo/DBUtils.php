@@ -176,9 +176,20 @@ class Utils {
   	global $DBConnection;
     $db = $DBConnection->getDB();
 
-    $closest = current(iterator_to_array($db->vertices->find(array('is_deleted' => 0, 'point' => array( '$near' => array( floatval($lng), floatval($lat)), '$maxDistance' => $radius_in_m)))->limit(1)));
+    $closest = current(iterator_to_array($db->vertices->find(array('is_deleted' => 0, 'point' => array( '$nearSphere' => array( floatval($lng), floatval($lat)), '$maxDistance' => $radius_in_m/_earth_radius)))->limit(1)));
 
-    return $closest;
+    if ($closest == false){
+    	return null;
+    } else {
+	    return array(
+	    	"id" => $closest['_id'],
+	    	"point" =>array(
+	    		"lat" => $closest['point'][1],
+	    		"lng" => $closest['point'][0]
+	    		),
+	    	"alt" => $closest['alt']
+	    	);
+	  }
 
 	}
 
@@ -216,15 +227,36 @@ class Utils {
    */
   public static function updateVertexCouple($start_id, $start_lat, $start_lng, $start_alt, $dest_id, $dest_lat, $dest_lng, $dest_alt, $edge_id){
 
-    global $DBConnection;
+    $startExistsAlready = self::getClosestVertex($start_lat, $start_lng, _closestPointRadius_edit);
+    $destExistsAlready = self::getClosestVertex($dest_lat, $dest_lng, _closestPointRadius_edit);
+
+		global $DBConnection;
     $db = $DBConnection->getDB();
 
-    $db->vertices->update(array('_id' => $start_id), array( '$set' => array( 'point.lat' => $start_lat, 'point.lng' => $start_lng, 'alt' => $start_alt )));
-    $db->vertices->update(array('_id' => $dest_id),array( '$set' => array( 'point.lat' => $dest_lat, 'point.lng' => $dest_lng, 'alt' => $dest_alt )));
+    if ($startExistsAlready == null || intval($startExistsAlready['id']) == $start_id) {
+    	$db->vertices->update(array('_id' => $start_id), array( '$set' => array( 'point' => array($start_lng, $start_lat), 'alt' => $start_alt )));
+    } else {
+
+    	$db->edges->update(array('from_id' => $start_id), array('$set' => array( 'from_id' => intval($startExistsAlready['id']))));
+    	$db->edges->update(array('to_id' => $start_id), array('$set' => array( 'to_id' => intval($startExistsAlready['id']))));
+
+    }
+
+    if ($destExistsAlready == null || intval($destExistsAlready['id']) == $dest_id) {
+    	$db->vertices->update(array('_id' => $dest_id),array( '$set' => array( 'point' => array($dest_lng, $dest_lat), 'alt' => $dest_alt )));
+    } else {
+
+    	$db->edges->update(array('from_id' => $dest_id), array('$set' => array( 'from_id' => intval($destExistsAlready['id']))));
+    	$db->edges->update(array('to_id' => $dest_id), array('$set' => array( 'to_id' => intval($destExistsAlready['id']))));
+
+    }
 
     self::consolidate();
 
-    return true;
+    return array(
+      '1_start_alreadyExisted' => $startExistsAlready,
+      '2_dest_alreadyExisted' => $destExistsAlready
+      );
   }
 
 	/*
@@ -239,7 +271,7 @@ class Utils {
     $db = $DBConnection->getDB();
 
     // Create start vertex if it doesn't exist
-    if ($startExistsAlready == false) {
+    if ($startExistsAlready == null) {
 
     	// LAST ID
       $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
@@ -248,19 +280,17 @@ class Utils {
       $db->vertices->insert(array(
 					"_id" => $startVertex_id,
 					"is_deleted" => 0,
-					"point" => array(
-						"lat" => $start_lat,
-						"lng" => $start_lng),
+					"point" => array($start_lng, $start_lat),
 					"alt" => $start_alt 
 					
 				));
 
     } else {
-      $startVertex_id = intval($startExistsAlready['_id']);
+      $startVertex_id = intval($startExistsAlready['id']);
     }
 
     // Create dest vertex if it doesn't exist
-    if ($destExistsAlready == false) {
+    if ($destExistsAlready == null) {
 
       // LAST ID
       $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
@@ -269,14 +299,12 @@ class Utils {
       $db->vertices->insert(array(
 					"_id" => $destVertex_id,
 					"is_deleted" => 0,
-					"point" => array(
-						"lat" => $dest_lat,
-						"lng" => $dest_lng),
+					"point" => array($dest_lng, $dest_lat),
 					"alt" => $dest_alt 
 				));
       
     } else {
-      $destVertex_id = intval($destExistsAlready['_id']);
+      $destVertex_id = intval($destExistsAlready['id']);
     }
 
     // Creates the edge
@@ -337,20 +365,20 @@ class Utils {
                 'start' => array(
                   'id' => intval($startVertex["_id"]),
                   'point' => array(
-                    'lat' => floatval($startVertex["point"]["lat"]),
-                    'lng' => floatval($startVertex["point"]["lng"]),
+                    'lat' => floatval($startVertex["point"][1]),
+                    'lng' => floatval($startVertex["point"][0]),
                     'alt' => intval($startVertex["alt"])
                   )
                 ),
                 'dest' => array(
                   'id' => intval($destVertex["_id"]),
                   'point' => array(
-                    'lat' => floatval($destVertex["point"]["lat"]),
-                    'lng' => floatval($destVertex["point"]["lng"]),
+                    'lat' => floatval($destVertex["point"][1]),
+                    'lng' => floatval($destVertex["point"][0]),
                     'alt' => intval($destVertex["alt"])
                   )
                 ),
-                'distance' => floatval(self::haversine($startVertex["point"]["lat"], $startVertex["point"]["lng"], $destVertex["point"]["lat"], $destVertex["point"]["lng"])),
+                'distance' => floatval(self::haversine($startVertex["point"][1], $startVertex["point"][0], $destVertex["point"][1], $destVertex["point"][0])),
                 'grade' => intval($destVertex["alt"] - $startVertex["alt"]),
                 'type' => intval($edge['type'])
               ));
@@ -361,6 +389,7 @@ class Utils {
     }
 
     // Finds orphan vertices and deletes them
+    // TODOOOOOOO !!!!!!!!!!!!!!!!!!!
     /*$findOrphans_query = "UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` NOT IN 
               (SELECT `from_id` AS `id` FROM `edges` UNION
                 SELECT `to_id` AS `id` FROM `edges`)";
