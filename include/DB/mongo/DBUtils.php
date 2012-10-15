@@ -282,7 +282,7 @@ class Utils {
     if ($startExistsAlready == null) {
 
     	// LAST ID
-      $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array('is_deleted' => 0), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
+      $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
       $startVertex_id = intval($lastVertexIdElement['_id'] + 1);
 
       $db->vertices->insert(array(
@@ -301,7 +301,7 @@ class Utils {
     if ($destExistsAlready == null) {
 
       // LAST ID
-      $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array('is_deleted' => 0), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
+      $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
       $destVertex_id = intval($lastVertexIdElement['_id'] + 1);
 
       $db->vertices->insert(array(
@@ -316,7 +316,7 @@ class Utils {
     }
 
     // LAST ID
-    $lastEdgeIdElement = current(iterator_to_array($db->edges->find(array('is_deleted' => 0), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
+    $lastEdgeIdElement = current(iterator_to_array($db->edges->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
     $nextEdge_id = intval($lastEdgeIdElement['_id'] + 1);
 
     $db->edges->insert(array(
@@ -371,7 +371,7 @@ class Utils {
 
       // Creates the new vertex
       // LAST ID
-      $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array('is_deleted' => 0), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
+      $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
       $newVertex_id = intval($lastVertexIdElement['_id'] + 1);
 
       $db->vertices->insert(array(
@@ -391,13 +391,13 @@ class Utils {
 
     // Retrieves the type for the new edge
     $edgeForType = current(iterator_to_array($db->edges->find(array('is_deleted' => 0, '_id' => $edge_id), array('type' => 1))->limit(1)));
-
+    var_dump($edgeForType);
     // -------------------------------
     // Update edge from new ---> dest 
     // LAST ID
-    $lastEdgeIdElement = current(iterator_to_array($db->edges->find(array('is_deleted' => 0), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
+    $lastEdgeIdElement = current(iterator_to_array($db->edges->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
     $newEdge_id = intval($lastEdgeIdElement['_id'] + 1);
-
+var_dump($newEdge_id);
     $db->edges->insert(array(
 				'_id' => $newEdge_id,
 				'is_deleted' => 0,
@@ -478,7 +478,7 @@ class Utils {
 
 		}
 		
-		$db->vertices->update(array( '_id' => array( '$nin' => $ninVertices)), array( '$set' => array( 'is_deleted' => 1)));
+		$result = $db->vertices->update(array( '_id' => array( '$nin' => $ninVertices)), array( '$set' => array( 'is_deleted' => 1)), array('multiple' => true));
 
     return array(
       'nb_inserted' => $counter
