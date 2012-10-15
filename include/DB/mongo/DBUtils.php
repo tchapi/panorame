@@ -315,10 +315,6 @@ class Utils {
       $destVertex_id = intval($destExistsAlready['id']);
     }
 
-    // Creates the edge
-    $distance = self::haversine($start_lat, $start_lng, $dest_lat, $dest_lng);
-    $grade = $dest_alt - $start_alt;
-
     // LAST ID
     $lastEdgeIdElement = current(iterator_to_array($db->edges->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
     $nextEdge_id = intval($lastEdgeIdElement['_id'] + 1);
@@ -327,8 +323,6 @@ class Utils {
 			"_id" => $nextEdge_id,
 			"from_id" => $startVertex_id,
 			"to_id" => $destVertex_id,
-			"distance" => $distance,
-			"grade" => $grade,
 			"type" => $type 
     	));
 
@@ -360,6 +354,64 @@ class Utils {
       '1_delete_edge' => $result
       );
   }
+
+
+  /*
+   * Cutting an edge into two edges
+   */
+  public static function cutEdge($start_id, $dest_id, $new_lat, $new_lng, $new_alt, $edge_id){
+
+    global $DBConnection;
+    $db = $DBConnection->getDB();
+
+    $newVertexAlreadyExists = self::getClosestVertex($new_lat, $new_lng, _closestPointRadius_edit);
+
+    if ($newVertexAlreadyExists == null) {
+
+      // Creates the new vertex
+      // LAST ID
+      $lastVertexIdElement = current(iterator_to_array($db->vertices->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
+      $newVertex_id = intval($lastVertexIdElement['_id'] + 1);
+
+      $db->vertices->insert(array(
+					"_id" => $newVertex_id,
+					"is_deleted" => 0,
+					"point" => array($new_lng, $new_lat),
+					"alt" => $new_alt 
+				));
+      
+    } else {
+      $newVertex_id = intval($newVertexAlreadyExists['id']);
+    }
+    
+    // -------------------------------
+    // Update edge from start ---> new 
+    $db->edges->update(array('_id' => $edge_id), array('$set' => array( 'to_id' => $newVertex_id)));
+
+    // Retrieves the type for the new edge
+    $edgeForType = current(iterator_to_array($db->edges->find(array('_id' => $edge_id), array('type' => 1))->limit(1)));
+
+    // -------------------------------
+    // Update edge from new ---> dest 
+    // LAST ID
+    $lastEdgeIdElement = current(iterator_to_array($db->edges->find(array(), array('_id' => 1))->sort(array('_id' => -1))->limit(1)));
+    $newEdge_id = intval($lastEdgeIdElement['_id'] + 1);
+
+    $db->edges->insert(array(
+				'_id' => $newEdge_id,
+				'from_id' => $newVertex_id,
+				'to_id' => $dest_id,
+				'type' => $edgeForType['type']
+			));
+
+    self::consolidate();
+    
+    return array(
+      '1_new_already_exists' => $newVertexAlreadyExists
+      );
+  }
+
+
 
   /*
    * Consolidate the database
