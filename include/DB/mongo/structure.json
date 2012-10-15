@@ -1,0 +1,254 @@
+/** edges indexes **/
+db.getCollection("edges").ensureIndex({
+  "_id": NumberInt(1)
+},[
+  
+]);
+
+/** edges_computed indexes **/
+db.getCollection("edges_computed").ensureIndex({
+  "_id": NumberInt(1)
+},[
+  
+]);
+
+/** means indexes **/
+db.getCollection("means").ensureIndex({
+  "_id": NumberInt(1)
+},[
+  
+]);
+
+/** speeds indexes **/
+db.getCollection("speeds").ensureIndex({
+  "_id": NumberInt(1)
+},[
+  
+]);
+
+/** system.users indexes **/
+db.getCollection("system.users").ensureIndex({
+  "_id": NumberInt(1)
+},[
+  
+]);
+
+/** types indexes **/
+db.getCollection("types").ensureIndex({
+  "_id": NumberInt(1)
+},[
+  
+]);
+
+/** vertices indexes **/
+db.getCollection("vertices").ensureIndex({
+  "_id": NumberInt(1)
+},[
+  
+]);
+
+/** vertices indexes **/
+db.getCollection("vertices").ensureIndex({
+  "point": "2d"
+},[
+  
+]);
+
+/** edges records **/
+
+/** edges_computed records **/
+
+/** means records **/
+db.getCollection("means").insert({
+  "_id": 3,
+  "description": "Driving",
+  "slug": "driving"
+});
+db.getCollection("means").insert({
+  "_id": 1,
+  "description": "Walking",
+  "slug": "walking"
+});
+db.getCollection("means").insert({
+  "_id": 2,
+  "description": "Cycling",
+  "slug": "cycling"
+});
+
+/** speeds records **/
+db.getCollection("speeds").insert({
+  "_id": 1,
+  "mean_id": 1,
+  "type_id": 2,
+  "flat_speed": 0.7246,
+  "grade_speed": 5.8823
+});
+db.getCollection("speeds").insert({
+  "_id": 2,
+  "mean_id": 1,
+  "type_id": 3,
+  "flat_speed": 0.7246,
+  "grade_speed": 5.8823
+});
+db.getCollection("speeds").insert({
+  "_id": 3,
+  "mean_id": 1,
+  "type_id": 4,
+  "flat_speed": 0.7246,
+  "grade_speed": 5.8823
+});
+db.getCollection("speeds").insert({
+  "_id": 5,
+  "mean_id": 1,
+  "type_id": 6,
+  "flat_speed": 0.0889,
+  "grade_speed": 0
+});
+db.getCollection("speeds").insert({
+  "_id": 6,
+  "mean_id": 2,
+  "type_id": 2,
+  "flat_speed": 0.12,
+  "grade_speed": 1.2048
+});
+db.getCollection("speeds").insert({
+  "_id": 7,
+  "mean_id": 2,
+  "type_id": 3,
+  "flat_speed": 0.12,
+  "grade_speed": 1.2048
+});
+db.getCollection("speeds").insert({
+  "_id": 8,
+  "mean_id": 3,
+  "type_id": 2,
+  "flat_speed": 0.0899,
+  "grade_speed": 0
+});
+db.getCollection("speeds").insert({
+  "_id": 9,
+  "mean_id": 3,
+  "type_id": 5,
+  "flat_speed": 0.0899,
+  "grade_speed": 0
+});
+
+/** system.indexes records **/
+db.getCollection("system.indexes").insert({
+  "v": NumberInt(1),
+  "key": {
+    "_id": NumberInt(1)
+  },
+  "ns": "panorame.types",
+  "name": "_id_"
+});
+db.getCollection("system.indexes").insert({
+  "v": NumberInt(1),
+  "key": {
+    "_id": NumberInt(1)
+  },
+  "ns": "panorame.means",
+  "name": "_id_"
+});
+db.getCollection("system.indexes").insert({
+  "v": NumberInt(1),
+  "key": {
+    "_id": NumberInt(1)
+  },
+  "ns": "panorame.speeds",
+  "name": "_id_"
+});
+db.getCollection("system.indexes").insert({
+  "v": NumberInt(1),
+  "key": {
+    "_id": NumberInt(1)
+  },
+  "ns": "panorame.system.users",
+  "name": "_id_"
+});
+db.getCollection("system.indexes").insert({
+  "v": NumberInt(1),
+  "key": {
+    "_id": NumberInt(1)
+  },
+  "ns": "panorame.edges_computed",
+  "name": "_id_"
+});
+db.getCollection("system.indexes").insert({
+  "v": NumberInt(1),
+  "key": {
+    "_id": NumberInt(1)
+  },
+  "ns": "panorame.vertices",
+  "name": "_id_"
+});
+db.getCollection("system.indexes").insert({
+  "v": NumberInt(1),
+  "key": {
+    "point": "2d"
+  },
+  "ns": "panorame.vertices",
+  "name": "point_2d"
+});
+db.getCollection("system.indexes").insert({
+  "v": NumberInt(1),
+  "key": {
+    "_id": NumberInt(1)
+  },
+  "ns": "panorame.edges",
+  "name": "_id_"
+});
+
+/** system.users records **/
+db.getCollection("system.users").insert({
+  "_id": ObjectId("50798192dbd575da20713dce"),
+  "user": "panorame",
+  "readOnly": false,
+  "pwd": "fef255fe56b67ba3054e70c6f23ce20f"
+});
+
+/** types records **/
+db.getCollection("types").insert({
+  "_id": 6,
+  "description": "One-way edge of suburban transport",
+  "slug": "1-way suburban",
+  "secable": 0,
+  "editable": 1
+});
+db.getCollection("types").insert({
+  "_id": 5,
+  "description": "One-way edge accessible to cars only",
+  "slug": "1-way highway",
+  "secable": 1,
+  "editable": 1
+});
+db.getCollection("types").insert({
+  "_id": 4,
+  "description": "One-way edge accessible to pedestrians",
+  "slug": "1-way pedestrians",
+  "secable": 1,
+  "editable": 1
+});
+db.getCollection("types").insert({
+  "_id": 3,
+  "description": "One-way edge accessible to cycles\/pedestrians",
+  "slug": "1-way cycles",
+  "secable": 1,
+  "editable": 1
+});
+db.getCollection("types").insert({
+  "_id": 2,
+  "description": "One-way edge accessible to cars\/cycles\/pedestrians",
+  "slug": "1-way all",
+  "secable": 1,
+  "editable": 1
+});
+db.getCollection("types").insert({
+  "_id": 1,
+  "description": "Linking edge from the POI to the closest point in the network",
+  "slug": "",
+  "secable": 0,
+  "editable": 0
+});
+
+/** vertices records **/
