@@ -345,6 +345,23 @@ class Utils {
   }
 
   /*
+   * Deleting an edge
+   */
+  public static function deleteEdge($edge_id){
+
+    global $DBConnection;
+    $db = $DBConnection->getDB();
+
+    $result = $db->edges->remove(array('_id' => $edge_id));
+
+    self::consolidate();
+
+    return array(
+      '1_delete_edge' => $result
+      );
+  }
+
+  /*
    * Consolidate the database
    */
   public static function consolidate(){
