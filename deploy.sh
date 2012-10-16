@@ -71,7 +71,7 @@ echo ""
 git checkout live
 git reset --hard HEAD
 git fetch
-git merge origin/live
+git merge origin live
 git status
 echo ""
 
