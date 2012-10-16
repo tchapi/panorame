@@ -70,7 +70,8 @@ echo -e " #"${GREEN}" Checking out live branch from origin"${RESET}
 echo ""
 git checkout live
 git reset --hard HEAD
-git pull origin live
+git fetch
+git merge origin/live
 git status
 echo ""
 
