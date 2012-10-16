@@ -5,7 +5,7 @@
         define('_PATH', dirname(__FILE__) . '/');
   
   /* Defines database engine */
-  define('_engine', "mongo"); // OR mysql
+  define('_engine', "mysql"); // OR mysql
 
   /* Closest function radius (in m) */
   define('_closestPointRadius_search', 200);
