@@ -66,7 +66,7 @@ echo ""
 cd ${DEPLOY_PATH}
 
 # Git all the way
-echo -e " #"${GREEN}" Checking out live branch "${RESET}
+echo -e " #"${GREEN}" Checking out live branch from origin"${RESET}
 echo ""
 git checkout live
 git reset --hard HEAD
