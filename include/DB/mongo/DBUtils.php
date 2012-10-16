@@ -174,6 +174,31 @@ class Utils {
    */
   public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
+    // Extends the bounds
+    $b = self::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
+
+  	global $DBConnection;
+    $db = $DBConnection->getDB();
+
+    $restrictArray = self::restrictToBBox(array(), $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
+    
+    $reduce = "function(obj, prev){
+    	prev.children.push({\"id\": obj.dest.id, \"path_id\": obj._id, \"distance\": obj.distance, \"grade\": obj.grade, \"type\": obj.type, \"secable\": obj.secable });
+    	prev.point = { \"lat\": obj.start.point.lat, \"lng\": obj.start.point.lng, \"alt\": obj.start.point.alt};
+    }";
+
+		$result = $db->edges_computed->group(array('start.id' => 1), array( 'children' => array()), $reduce, array("condition" =>$restrictArray));
+		$edges = $result['retval'];
+		$edgesArray = array();
+
+		foreach($edges as $edge){
+
+			$edgesArray[$edge['start.id']] = $edge;
+			unset($edgesArray[$edge['start.id']]['start.id']);
+
+		}
+
+		return $edgesArray;
 	}
 
 	/*
