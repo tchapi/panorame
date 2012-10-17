@@ -1,13 +1,10 @@
 # exclude.rsync
-.svn
-*.swp
-svn-commit*
 .DS_Store
 .gitignore
 .git
-htaccess
-.htaccess
-deploy.sh
+.svn
+svn-commit*
+*.swp
 test*
 exclude.rsync
 TODO*
