@@ -3,7 +3,7 @@
   $app = '_BACKEND';
   include_once('../../config.php');
 
-  class Test {
+  class Fill {
  
     /*
      * HAVERSINE function for distance between two points on Earth
@@ -139,6 +139,45 @@
 
     }
 
+    private static function exportMySQLToMongo(){
+
+      // edges
+      $edgesQuery = "SELECT id, is_deleted, from_id, to_id, type FROM `edges` WHERE is_deleted = 0";
+      $exe = mysql_query($edgesQuery);
+
+      while ($edge = mysql_fetch_array($exe, MYSQL_ASSOC)){
+
+        $exportJSON .= 'db.getCollection("edges").insert({ "_id": '.$edge['id'].', "is_deleted": '.$edge['is_deleted'].', "from_id": '.$edge['from_id'].', "to_id": '.$edge['to_id'].', "type": '.$edge['type'].' });'."\n";
+      }
+
+      // vertices
+      $verticesQuery = "SELECT X(point) AS lng, Y(point) AS lat, elevation, id, is_deleted FROM `vertices` WHERE is_deleted = 0";
+      $exe = mysql_query($verticesQuery);
+
+      while ($vertex = mysql_fetch_array($exe, MYSQL_ASSOC)){
+
+        $exportJSON .= 'db.getCollection("vertices").insert({ "_id": '.$vertex['id'].', "is_deleted": '.$vertex['is_deleted'].', "alt": '.intval($vertex['elevation']).', "point": { "0": '.$vertex['lng'].', "1": '.$vertex['lat'].' } });'."\n";
+      }
+
+      return $exportJSON;
+
+    }
+
+    public static function export(){
+
+      switch(_engine){
+        case 'mysql':
+          return self::exportMySQLToMongo();
+          break;
+        case 'mongo':
+          return self::exportMongoToMySQL();
+          break;
+      }
+
+      return false;
+
+    }
+
     public static function fillWithRandomStuff($limit){
 
       switch(_engine){
@@ -156,14 +195,24 @@
 
   };
 
-  $numberOfEdgesToInsert = isset($_GET['n'])?intval($_GET['n']):0;
+  if (isset($_GET['random']) && $_GET['random'] == 1){
 
-  if ($numberOfEdgesToInsert > 0 && $numberOfEdgesToInsert < 100000) {
-    // Come on, INSERT SOME FUCKING VERTICES AND EDGES !!
-    header('Content-type: application/json');
-    print json_encode(array( 'number' => $numberOfEdgesToInsert, 'result' => Test::fillWithRandomStuff($_GET['n'])));
-  } else {
-    // GO FUCK YOURSELF
-    header('Content-type: application/json');
-    print json_encode(array( 'number' => $numberOfEdgesToInsert, 'result' => array( 'state' => false, 'description' => 'Too many or too few!')));   
+    $numberOfEdgesToInsert = isset($_GET['n'])?intval($_GET['n']):0;
+
+    if ($numberOfEdgesToInsert > 0 && $numberOfEdgesToInsert < 100000) {
+      // Come on, INSERT SOME FUCKING VERTICES AND EDGES !!
+      header('Content-type: application/json');
+      print json_encode(array( 'number' => $numberOfEdgesToInsert, 'result' => Fill::fillWithRandomStuff($_GET['n'])));
+    } else {
+      // GO FUCK YOURSELF
+      header('Content-type: application/json');
+      print json_encode(array( 'number' => $numberOfEdgesToInsert, 'result' => array( 'state' => false, 'description' => 'Too many or too few!')));   
+    }
+
+  } elseif (isset($_GET['export']) && $_GET['export'] == 1){
+
+    header('Content-type: application/javascript');
+    print Fill::export();
+
   }
+

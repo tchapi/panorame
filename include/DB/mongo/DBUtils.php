@@ -209,6 +209,8 @@ class Utils {
 
 		foreach($edgesLeafVertices as $edgeLeaf){
 
+			if ($edgeLeaf['dest.id'] == 0 ) var_dump($edgeLeaf);
+
 			if (!isset($edgesArray[$edgeLeaf['dest.id']])) {
 				$edgesArray[$edgeLeaf['dest.id']] = $edgeLeaf;
 				unset($edgesArray[$edgeLeaf['dest.id']]['dest.id']);
@@ -480,6 +482,8 @@ var_dump($newEdge_id);
     
     	$startVertex = current(iterator_to_array($db->vertices->find(array('is_deleted' => 0, '_id' => $edge['from_id']))->limit(1)));
 			$destVertex = current(iterator_to_array($db->vertices->find(array('is_deleted' => 0, '_id' => $edge['to_id']))->limit(1)));
+
+			if ($startVertex == null || $destVertex == null) continue;
 
 			$type = current(iterator_to_array($db->types->find(array( '_id' => $edge['type']))->limit(1)));
 
