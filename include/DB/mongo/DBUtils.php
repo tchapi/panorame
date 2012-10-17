@@ -182,19 +182,37 @@ class Utils {
 
     $restrictArray = self::restrictToBBox(array(), $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
     
-    $reduce = "function(obj, prev){
+    $reduceFrom = "function(obj, prev){
     	prev.children.push({\"id\": obj.dest.id, \"path_id\": obj._id, \"distance\": obj.distance, \"grade\": obj.grade, \"type\": obj.type, \"secable\": obj.secable });
     	prev.point = { \"lat\": obj.start.point.lat, \"lng\": obj.start.point.lng, \"alt\": obj.start.point.alt};
     }";
 
-		$result = $db->edges_computed->group(array('start.id' => 1), array( 'children' => array()), $reduce, array("condition" =>$restrictArray));
-		$edges = $result['retval'];
+    $reduceTo = "function(obj, prev){
+    	prev.children = null;
+    	prev.point = { \"lat\": obj.dest.point.lat, \"lng\": obj.dest.point.lng, \"alt\": obj.dest.point.alt};
+    }";
+
+		$resultFrom = $db->edges_computed->group(array('start.id' => 1), array( 'children' => array()), $reduceFrom, array("condition" =>$restrictArray));
+		$resultTo = $db->edges_computed->group(array('dest.id' => 1), array( 'children' => array()), $reduceTo, array("condition" =>$restrictArray));
+		
+		$edges = $resultFrom['retval'];
+		$edgesLeafVertices = $resultTo['retval'];
+
 		$edgesArray = array();
 
 		foreach($edges as $edge){
 
 			$edgesArray[$edge['start.id']] = $edge;
 			unset($edgesArray[$edge['start.id']]['start.id']);
+
+		}
+
+		foreach($edgesLeafVertices as $edgeLeaf){
+
+			if (!isset($edgesArray[$edgeLeaf['dest.id']])) {
+				$edgesArray[$edgeLeaf['dest.id']] = $edgeLeaf;
+				unset($edgesArray[$edgeLeaf['dest.id']]['dest.id']);
+			}
 
 		}
 
@@ -220,7 +238,9 @@ class Utils {
 	    		"lat" => $closest['point'][1],
 	    		"lng" => $closest['point'][0]
 	    		),
-	    	"alt" => $closest['alt']
+	    	"alt" => $closest['alt'], 
+	    	"distance" =>  self::haversine($lat, $lng, $closest['point'][1], $closest['point'][0])
+
 	    	);
 	  }
 
@@ -439,7 +459,6 @@ var_dump($newEdge_id);
   }
 
 
-
   /*
    * Consolidate the database
    */
@@ -461,6 +480,8 @@ var_dump($newEdge_id);
     
     	$startVertex = current(iterator_to_array($db->vertices->find(array('is_deleted' => 0, '_id' => $edge['from_id']))->limit(1)));
 			$destVertex = current(iterator_to_array($db->vertices->find(array('is_deleted' => 0, '_id' => $edge['to_id']))->limit(1)));
+
+			$type = current(iterator_to_array($db->types->find(array( '_id' => $edge['type']))->limit(1)));
 
 			if (intval($startVertex["_id"]) != intval($destVertex["_id"])) {
 
@@ -484,7 +505,8 @@ var_dump($newEdge_id);
                 ),
                 'distance' => floatval(self::haversine($startVertex["point"][1], $startVertex["point"][0], $destVertex["point"][1], $destVertex["point"][0])),
                 'grade' => intval($destVertex["alt"] - $startVertex["alt"]),
-                'type' => intval($edge['type'])
+                'type' => intval($edge['type']),
+               	'secable' => intval($type['secable'])
               ));
 			
 				$counter += 1;
