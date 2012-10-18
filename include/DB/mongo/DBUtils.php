@@ -177,7 +177,7 @@ class Utils {
     // Extends the bounds
     $b = self::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
 
-  	global $DBConnection;
+    global $DBConnection;
     $db = $DBConnection->getDB();
 
     $restrictArray = self::restrictToBBox(array(), $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
@@ -192,33 +192,31 @@ class Utils {
     	prev.point = { \"lat\": obj.dest.point.lat, \"lng\": obj.dest.point.lng, \"alt\": obj.dest.point.alt};
     }";
 
-		$resultFrom = $db->edges_computed->group(array('start.id' => 1), array( 'children' => array()), $reduceFrom, array("condition" =>$restrictArray));
-		$resultTo = $db->edges_computed->group(array('dest.id' => 1), array( 'children' => array()), $reduceTo, array("condition" =>$restrictArray));
-		
-		$edges = $resultFrom['retval'];
-		$edgesLeafVertices = $resultTo['retval'];
-
-		$edgesArray = array();
-
-		foreach($edges as $edge){
-
-			$edgesArray[$edge['start.id']] = $edge;
-			unset($edgesArray[$edge['start.id']]['start.id']);
-
-		}
-
-		foreach($edgesLeafVertices as $edgeLeaf){
-
-			if ($edgeLeaf['dest.id'] == 0 ) var_dump($edgeLeaf);
-
-			if (!isset($edgesArray[$edgeLeaf['dest.id']])) {
-				$edgesArray[$edgeLeaf['dest.id']] = $edgeLeaf;
-				unset($edgesArray[$edgeLeaf['dest.id']]['dest.id']);
-			}
-
-		}
-
-		return $edgesArray;
+    $resultFrom = $db->edges_computed->group(array('start.id' => 1), array( 'children' => array()), $reduceFrom, array("condition" =>$restrictArray));
+    $resultTo = $db->edges_computed->group(array('dest.id' => 1), array( 'children' => array()), $reduceTo, array("condition" =>$restrictArray));
+    
+    $edges = $resultFrom['retval'];
+    $edgesLeafVertices = $resultTo['retval'];
+    
+    $edgesArray = array();
+    
+    foreach($edges as $edge){
+    
+    	$edgesArray[$edge['start.id']] = $edge;
+    	unset($edgesArray[$edge['start.id']]['start.id']);
+    
+    }
+    
+    foreach($edgesLeafVertices as $edgeLeaf){
+    
+    	if (!isset($edgesArray[$edgeLeaf['dest.id']])) {
+    		$edgesArray[$edgeLeaf['dest.id']] = $edgeLeaf;
+    		unset($edgesArray[$edgeLeaf['dest.id']]['dest.id']);
+    	}
+    
+    }
+    
+    return $edgesArray;
 	}
 
 	/*
