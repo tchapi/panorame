@@ -33,7 +33,7 @@ class Utils {
   	global $DBConnection;
     $db = $DBConnection->getDB();
 
-    $means_raw = iterator_to_array($db->means->find());
+    $means_raw = iterator_to_array($db->means->find()->sort(array("_id" => 1)));
     $means = array();
 
     // Fetch the means
