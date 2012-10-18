@@ -53,6 +53,7 @@ var mapsWrapper = function(type) {
 
         this.colorsForType = genericOptions.colorsForType;
         this.thicknessesForType = genericOptions.thicknessesForType;
+        this.zIndexesForType = genericOptions.zIndexesForType;
         this.standardPinImage = genericOptions.standardPinImage;
         this.closestPointPinImage = genericOptions.closestPointPinImage;
 
@@ -211,7 +212,8 @@ var mapsWrapper = function(type) {
                 new Microsoft.Maps.Location(destPoint.lat, destPoint.lng)
             ], {
                 strokeColor:new Microsoft.Maps.Color.fromHex(this.colorsForType[edges[i].type]), 
-                strokeThickness: this.thicknessesForType[edges[i].type]
+                strokeThickness: this.thicknessesForType[edges[i].type],
+                //zIndex: this.zIndexesForType[edges[i].type] // not working ;(
             });
             this.edgesCollection.push(currentLine);
 

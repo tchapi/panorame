@@ -57,6 +57,7 @@ var mapsWrapper = function(type) {
 
         this.colorsForType = genericOptions.colorsForType;
         this.thicknessesForType = genericOptions.thicknessesForType;
+        this.zIndexesForType = genericOptions.zIndexesForType;
         this.standardPinImage = genericOptions.standardPinImage;
         this.closestPointPinImage = genericOptions.closestPointPinImage;
 
@@ -247,9 +248,10 @@ var mapsWrapper = function(type) {
                 new google.maps.LatLng(destPoint.lat, destPoint.lng)],
               strokeColor: this.colorsForType[edges[i].type],
               strokeWeight: this.thicknessesForType[edges[i].type],
+              zIndex: this.zIndexesForType[edges[i].type]
 <?php if ($editMode === true): ?>
-              strokeColor: '#000000', // this.colorsForType[edges[i].type],
-              strokeWeight: 8, // this.thicknessesForType[edges[i].type],
+              strokeColor: '#000000',
+              strokeWeight: 8,
               // ADMIN ------------------------------------------------------------------------------------------------------------
               strokeOpacity: 0.1,
               icons: [

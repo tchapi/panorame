@@ -75,6 +75,7 @@ var mapsWrapper = function(type) {
 
         this.colorsForType = genericOptions.colorsForType;
         this.thicknessesForType = genericOptions.thicknessesForType;
+        this.zIndexesForType = genericOptions.zIndexesForType;
         this.standardPinImage = genericOptions.standardPinImage;
         this.closestPointPinImage = genericOptions.closestPointPinImage;
 
@@ -208,7 +209,7 @@ var mapsWrapper = function(type) {
         var startPoint = null, destPoint = null;
         var currentLine = null;
 
-        this.edgesCollection = new OpenLayers.Layer.Vector("edges");
+        this.edgesCollection = new OpenLayers.Layer.Vector("edges", {rendererOptions: { zIndexing: true }});
 
         for(var i = 0; i < count; i++) {
             
@@ -232,7 +233,8 @@ var mapsWrapper = function(type) {
             ]));
             currentLine.style = {
                 strokeColor: this.colorsForType[edges[i].type],
-                strokeWidth: this.thicknessesForType[edges[i].type]
+                strokeWidth: this.thicknessesForType[edges[i].type], 
+                graphicZIndex: this.zIndexesForType[edges[i].type]
             };
 
             this.edges.push(currentLine);

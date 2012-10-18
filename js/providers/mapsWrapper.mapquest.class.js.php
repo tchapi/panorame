@@ -37,6 +37,7 @@ var mapsWrapper = function(type) {
 
         this.colorsForType = genericOptions.colorsForType;
         this.thicknessesForType = genericOptions.thicknessesForType;
+        this.zIndexesForType = genericOptions.zIndexesForType;
         this.standardPinImage = genericOptions.standardPinImage;
         this.closestPointPinImage = genericOptions.closestPointPinImage;
 
@@ -197,6 +198,7 @@ var mapsWrapper = function(type) {
             this.edgesCollection.add(currentLine);
             currentLine.color = this.colorsForType[edges[i].type];
             currentLine.borderWith = this.thicknessesForType[edges[i].type];
+            currentLine.zIndex = this.zIndexesForType[edges[i].type];
 
         };
 

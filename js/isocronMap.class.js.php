@@ -60,7 +60,8 @@ var isocronMap = function() {
             positionCallback: $.proxy(this.updateCurrentPosition, this),
             boundsHaveChangedCallback : $.proxy(this.boundsHaveChanged, this),
             colorsForType: ['', '#000000','#009900','#FF9933','#FF6666','#FF0000','#006699'], // 0, 1, 2
-            thicknessesForType: [4, 2, 4, 4, 4, 4,4], // 0, 1, 2
+            thicknessesForType: [4, 2, 4, 4, 4, 4, 4], // 0, 1, 2
+            zIndexesForType: [0,6,5,4,3,2,1],
             standardPinImage: '/img/pins/Blue/8.png',
             closestPointPinImage: '/img/pins/Green/8.png',
             mapReadyCallback: $.proxy(this.mapIsReady, this),
