@@ -36,8 +36,8 @@
 
       $availableFromId = $row['id'] + 1;
 
-      $vertices = "INSERT INTO  `isocron`.`vertices` (`id`, `point` ,`elevation`) VALUES ";
-      $edges = "INSERT INTO  `isocron`.`edges` (`from_id` ,`to_id`,`distance` ,`grade`, `type`) VALUES ";
+      $vertices = "INSERT INTO  `vertices` (`id`, `point` ,`elevation`) VALUES ";
+      $edges = "INSERT INTO  `edges` (`from_id` ,`to_id`,`distance` ,`grade`, `type`) VALUES ";
 
       $currentId = $availableFromId;
       $currentNextId = $availableFromId + 1;
@@ -141,6 +141,8 @@
 
     private static function exportMySQLToMongo(){
 
+      $exportJSON = "";
+
       // edges
       $edgesQuery = "SELECT id, is_deleted, from_id, to_id, type FROM `edges` WHERE is_deleted = 0";
       $exe = mysql_query($edgesQuery);
@@ -165,7 +167,26 @@
 
     private static function exportMongoToMySQL(){
 
-      // TODO
+      global $DBConnection;
+
+      $db = $DBConnection->getDB();
+
+      $db->resetError();
+
+      $exportSQL = "";
+
+      $vertices = iterator_to_array($db->vertices->find(array("is_deleted" => 0)));
+      $edges = iterator_to_array($db->edges->find(array("is_deleted" => 0)));
+
+      foreach($vertices as $vertex){
+        $exportSQL .= "INSERT INTO `vertices` (`id`, `point` ,`elevation`) VALUES (".$vertex['_id'].", GEOMFROMTEXT(  'POINT(".$vertex['point'][1]." ".$vertex['point'][0].")', 4326 ), ".$vertex['alt']."); "."\n";
+      }
+
+      foreach($edges as $edge){
+        $exportSQL .= "INSERT INTO `edges` (`id`, `from_id` , `to_id`, `is_dirty`, `type`) VALUES (".$edge['_id'].", ".$edge['from_id'].", ".$edge['to_id'].", 1, ".$edge['type']."); "."\n";
+      }
+  
+      return $exportSQL;
 
     }
 
@@ -217,7 +238,7 @@
 
   } elseif (isset($_GET['export']) && $_GET['export'] == 1){
 
-    header('Content-type: application/javascript');
+    header('Content-type: text/plain');
     print Fill::export();
 
   }
