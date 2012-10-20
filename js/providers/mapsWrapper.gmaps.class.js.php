@@ -248,7 +248,7 @@ var mapsWrapper = function(type) {
                 new google.maps.LatLng(destPoint.lat, destPoint.lng)],
               strokeColor: this.colorsForType[edges[i].type],
               strokeWeight: this.thicknessesForType[edges[i].type],
-              zIndex: this.zIndexesForType[edges[i].type]
+              zIndex: this.zIndexesForType[edges[i].type],
 <?php if ($editMode === true): ?>
               strokeColor: '#000000',
               strokeWeight: 8,
