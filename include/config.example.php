@@ -10,7 +10,7 @@
   /* Closest function radius (in m) */
   define('_closestPointRadius_search', 200);
   define('_closestPointRadius_edit', 5);
-  define('_extendBoundsPointRadius', 500);
+  define('_extendBoundsPointRadius', 200);
   
   define('_earth_radius', 6371030.00); // in m
   
@@ -41,10 +41,12 @@
     /* ----------------------------- */
     /* ------- DO NOT MODIFY ------- */
 
-      $database_connector_path = _PATH.'DB/'._engine.'/DBConnector.php';
-      $database_utils_path = _PATH.'DB/'._engine.'/DBUtils.php';
+      $database_connector_path = _PATH.'DB/'._engine.'/DBConnector.class.php';
+      $geo_utils_path = _PATH.'Geo/GeoUtils.class.php';
+      $database_utils_path = _PATH.'DB/'._engine.'/DBUtils.class.php';
 
       include_once($database_connector_path);
+      include_once($geo_utils_path);
       include_once($database_utils_path);
 
     /* ----------------------------- */
