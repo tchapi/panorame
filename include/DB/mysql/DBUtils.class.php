@@ -706,7 +706,7 @@ class DBUtils {
       '1_find_orphans' => $findOrphans_result,
       '2_zero_distance' => $zeroDistance_result,
       '3_delete_inconsistencies' => $deletedInconsistencies_result,
-      '4_update_distances' => $ updateDistances_result
+      '4_update_distances' => $updateDistances_result
     );
   }
   

@@ -25,7 +25,7 @@ DELIMITER $$
 -- Procedures
 --
 DROP PROCEDURE IF EXISTS `getClosest`$$
-CREATE DEFINER=`panorame`@`localhost` PROCEDURE `getClosest`(IN `orig_lat` double, IN `orig_lng` double, IN `max_radius`integer)
+CREATE DEFINER=`panorame`@`localhost` PROCEDURE `getClosest`(IN `orig_lat` double, IN `orig_lng` double, IN `max_radius` integer)
     NO SQL
 SELECT 
     `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt,
