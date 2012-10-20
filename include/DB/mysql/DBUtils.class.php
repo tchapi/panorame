@@ -7,12 +7,14 @@ class DBUtils {
    */
   public static function getMeansAndSpeeds(){
 
+    global $DBConnection;
+
     $getMeansAndSpeeds_query = "SELECT m.`id` AS id, m.`description` AS description, GROUP_CONCAT(CONCAT('{\"type_id\":', s.`type_id`, ', \"speeds\": [', s.`flat_speed`, ',', s.`grade_speed`, ']}')) AS explorables
                        FROM `means` m
                        LEFT JOIN `speeds` s ON (m.`id`= s.`mean_id`)
                        GROUP BY mean_id ";
 
-    $getMeansAndSpeeds_result = mysql_query($getMeansAndSpeeds_query);
+    $getMeansAndSpeeds_result = $DBConnection->link->query($getMeansAndSpeeds_query);
 
     // Returns true if the query was well executed
     if (!$getMeansAndSpeeds_result || $getMeansAndSpeeds_result == false ) {
@@ -20,7 +22,7 @@ class DBUtils {
     } else {
       // Fetch the types
       $means = array();
-        while ($row = mysql_fetch_array($getMeansAndSpeeds_result, MYSQL_ASSOC)) {
+        while ($row = $getMeansAndSpeeds_result->fetch_assoc()) {
           
           $explorables = array();
 
@@ -48,29 +50,31 @@ class DBUtils {
    */
   public static function restrictForVertex($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
+    global $DBConnection;
+    
     if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
 
       // Poi should be included
       $where_clause = sprintf(" WHERE MBRIntersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))') )",
-            mysql_real_escape_string($NW_lng),
-            mysql_real_escape_string($NW_lat),
-            mysql_real_escape_string($SE_lng),
-            mysql_real_escape_string($SE_lat),
-            mysql_real_escape_string($POI_lng),
-            mysql_real_escape_string($POI_lat),
-            mysql_real_escape_string($NW_lng),
-            mysql_real_escape_string($NW_lat));
+            $DBConnection->link->escape_string($NW_lng),
+            $DBConnection->link->escape_string($NW_lat),
+            $DBConnection->link->escape_string($SE_lng),
+            $DBConnection->link->escape_string($SE_lat),
+            $DBConnection->link->escape_string($POI_lng),
+            $DBConnection->link->escape_string($POI_lat),
+            $DBConnection->link->escape_string($NW_lng),
+            $DBConnection->link->escape_string($NW_lat));
 
     } else {
 
       // Just a polyline without the POI
       $where_clause = sprintf(" WHERE MBRIntersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F))') )",
-            mysql_real_escape_string($NW_lng),
-            mysql_real_escape_string($NW_lat),
-            mysql_real_escape_string($SE_lng),
-            mysql_real_escape_string($SE_lat),
-            mysql_real_escape_string($NW_lng),
-            mysql_real_escape_string($NW_lat));
+            $DBConnection->link->escape_string($NW_lng),
+            $DBConnection->link->escape_string($NW_lat),
+            $DBConnection->link->escape_string($SE_lng),
+            $DBConnection->link->escape_string($SE_lat),
+            $DBConnection->link->escape_string($NW_lng),
+            $DBConnection->link->escape_string($NW_lat));
       
     }
 
@@ -83,29 +87,31 @@ class DBUtils {
    */
   public static function restrictForEdgeBBox($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
+    global $DBConnection;
+    
     if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
 
       // Poi should be included
       $where_clause = sprintf(" WHERE MBRIntersects( LINESTRING(v.point,v_dest.point), GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))') )",
-            mysql_real_escape_string($NW_lng),
-            mysql_real_escape_string($NW_lat),
-            mysql_real_escape_string($SE_lng),
-            mysql_real_escape_string($SE_lat),
-            mysql_real_escape_string($POI_lng),
-            mysql_real_escape_string($POI_lat),
-            mysql_real_escape_string($NW_lng),
-            mysql_real_escape_string($NW_lat));
+            $DBConnection->link->escape_string($NW_lng),
+            $DBConnection->link->escape_string($NW_lat),
+            $DBConnection->link->escape_string($SE_lng),
+            $DBConnection->link->escape_string($SE_lat),
+            $DBConnection->link->escape_string($POI_lng),
+            $DBConnection->link->escape_string($POI_lat),
+            $DBConnection->link->escape_string($NW_lng),
+            $DBConnection->link->escape_string($NW_lat));
 
     } else {
 
       // Just a polygon without the POI
       $where_clause = sprintf(" WHERE MBRIntersects( LINESTRING(v.point,v_dest.point), GeomFromText('POLYGON((%F %F, %F %F, %F %F))') )",
-            mysql_real_escape_string($NW_lng),
-            mysql_real_escape_string($NW_lat),
-            mysql_real_escape_string($SE_lng),
-            mysql_real_escape_string($SE_lat),
-            mysql_real_escape_string($NW_lng),
-            mysql_real_escape_string($NW_lat));   
+            $DBConnection->link->escape_string($NW_lng),
+            $DBConnection->link->escape_string($NW_lat),
+            $DBConnection->link->escape_string($SE_lng),
+            $DBConnection->link->escape_string($SE_lat),
+            $DBConnection->link->escape_string($NW_lng),
+            $DBConnection->link->escape_string($NW_lat));   
 
     }
 
@@ -117,12 +123,14 @@ class DBUtils {
    */
   public static function getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
+    global $DBConnection;
+
     $getVerticesIn_query = sprintf("SELECT `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` v");
 
     $getVerticesIn_query = self::restrictForVertex($getVerticesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
     $getVerticesIn_query .= " AND v.`is_deleted` = 0";
 
-    $queryResult = mysql_query($getVerticesIn_query);
+    $queryResult = $DBConnection->link->query($getVerticesIn_query);
 
     // Returns true if the query was well executed
     if (!$queryResult || $queryResult == false ) {
@@ -130,7 +138,7 @@ class DBUtils {
     } else {
       // Fetch the vertices
       $verticesArray = array();
-      while ($row = mysql_fetch_array($queryResult, MYSQL_ASSOC)) {
+      while ($row = $queryResult->fetch_assoc()) {
       $verticesArray[] = array(
                     'id' => intval($row["id"]), 
                     'point' => array(
@@ -151,6 +159,8 @@ class DBUtils {
    */
   public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
+    global $DBConnection;
+
     // Extends the bounds
     $b = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
 
@@ -162,7 +172,7 @@ class DBUtils {
     $getVerticesAndChildrenIn_query  = self::restrictForVertex($getVerticesAndChildrenIn_query, $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
     $getVerticesAndChildrenIn_query .= " GROUP BY v.`id`";
 
-    $queryResult = mysql_query($getVerticesAndChildrenIn_query);
+    $queryResult = $DBConnection->link->query($getVerticesAndChildrenIn_query);
 
     // Returns true if the query was well executed
     if (!$queryResult || $queryResult == false ) {
@@ -170,7 +180,7 @@ class DBUtils {
     } else {
       // Fetch the vertices
       $vertices = array();
-      while ($row = mysql_fetch_array($queryResult, MYSQL_ASSOC)) {
+      while ($row = $queryResult->fetch_assoc()) {
         
         if ($row["children"] == null){
           $childrenAsPHPArray = null;
@@ -198,6 +208,8 @@ class DBUtils {
    */
   public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
+    global $DBConnection;
+    
     $getEdgesIn_query = "SELECT e.`id` AS id, Y(v.`point`) AS lat_start, X(v.`point`) AS lng_start, v.`elevation` AS alt_start, v.`id` AS id_start,
                   Y(v_dest.`point`) AS lat_dest, X(v_dest.`point`) AS lng_dest, v_dest.`elevation` AS alt_dest, v_dest.`id` AS id_dest,
                   e.`distance` AS distance, e.`grade` AS grade, e.`type` AS type
@@ -208,7 +220,7 @@ class DBUtils {
     $getEdgesIn_query  = self::restrictForEdgeBBox($getEdgesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
     $getEdgesIn_query .= " AND e.`is_deleted` = 0";
     
-    $queryResult = mysql_query($getEdgesIn_query);
+    $queryResult = $DBConnection->link->query($getEdgesIn_query);
 
     // Returns true if the query was well executed
     if (!$queryResult || $queryResult == false ) {
@@ -216,7 +228,7 @@ class DBUtils {
     } else {
       // Fetch the edges
       $edges = array();
-      while ($row = mysql_fetch_array($queryResult, MYSQL_ASSOC)) {
+      while ($row = $queryResult->fetch_assoc()) {
         $edges[] = array(
                   'id' => intval($row["id"]), 
                   'start' => array(
@@ -248,51 +260,35 @@ class DBUtils {
   /*
    * GET The closest vertex from a given lat / lng couple within a x meters radius
    */
-  public static function build_sorter($lat, $lng) {
-    return function ($a, $b) use ($lat, $lng)
-    {
-      $a_ = GeoUtils::haversine($a['point']['lat'], $a['point']['lng'], $lat, $lng);
-      $b_ = GeoUtils::haversine($b['point']['lat'], $b['point']['lng'], $lat, $lng);
-
-      if ($a_ == $b_) { return 0; }
-      return ($a_ < $b_) ? -1 : 1;
-    };
-  }
-
   public static function getClosestVertex($lat, $lng, $radius_in_m){
 
-    $ratio = $radius_in_m/_earth_radius;
-    $lat_rad = $lat*pi()/180;
-    $lng_rad = $lng*pi()/180;
-    $cos_lat_rad = cos($lat_rad);
-    $sin_lat_rad = sin($lat_rad);
+    global $DBConnection;
+    
+    $getClosest_query = sprintf("CALL getClosest(%F, %F, %d);",
+      $DBConnection->link->escape_string($lat),
+      $DBConnection->link->escape_string($lng),
+      $DBConnection->link->escape_string($radius_in_m));
 
-    $brng = (315/180)*pi(); // bearing is -45°
-    $NW_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
-    $NW_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($NW_lat*pi()/180)))* 180 / pi();
+    $res  = $DBConnection->link->multi_query($getClosest_query);
 
-    $brng = 135/180*pi(); // bearing is 135°
-    $SE_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
-    $SE_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($SE_lat*pi()/180)))* 180 / pi();
+    $closest = $DBConnection->link->use_result();
+    $closest = $closest->fetch_assoc();
 
-    $vertices = self::getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, null, null);
+    // Flush ....
+    while ($DBConnection->link->more_results() && $DBConnection->link->next_result());
+   
+    if ($closest == null || $closest == false) return null;
 
-    // If we have results
-    if (isset($vertices[0])){
+    return array(
+            'id' => intval($closest["id"]), 
+            'point' => array(
+              'lat' => floatval($closest["lat"]),
+              'lng' => floatval($closest["lng"]),
+              'alt' => intval($closest["alt"])
+            ),
+            'distance' => floatval($closest["distance"]),
+          );
 
-      // Sort (quick sort)
-      usort($vertices, self::build_sorter($lat, $lng));
-      
-      $closest = $vertices[0];
-      $closest['distance'] = GeoUtils::haversine($lat, $lng, $closest['point']['lat'], $closest['point']['lng']);
-
-      return $closest;
-
-    } else {
-
-      return null;
-
-    }
   }
 
 
@@ -309,8 +305,10 @@ class DBUtils {
    */
   public static function getTypes(){
 
+    global $DBConnection;
+    
     $getTypes_query = "SELECT `id`, `description`, `slug` from `types` where `editable` = 1;";
-    $queryResult = mysql_query($getTypes_query);
+    $queryResult = $DBConnection->link->query($getTypes_query);
 
     // Returns true if the query was well executed
     if (!$queryResult || $queryResult == false ) {
@@ -318,7 +316,7 @@ class DBUtils {
     } else {
       // Fetch the types
       $types = array();
-        while ($row = mysql_fetch_array($queryResult, MYSQL_ASSOC)) {
+        while ($row = $queryResult->fetch_assoc()) {
           array_push($types, array('id' => $row['id'], 'description' => $row['description'], 'slug' => $row['slug']));
         }
       }
@@ -333,65 +331,67 @@ class DBUtils {
    */
   public static function updateVertexCouple($start_id, $start_lat, $start_lng, $start_alt, $dest_id, $dest_lat, $dest_lng, $dest_alt, $edge_id){
 
+    global $DBConnection;
+    
     $startExistsAlready = self::getClosestVertex($start_lat, $start_lng, _closestPointRadius_edit);
     $destExistsAlready = self::getClosestVertex($dest_lat, $dest_lng, _closestPointRadius_edit);
 
     if ($startExistsAlready == null || intval($startExistsAlready['id']) == $start_id) {
       // Updating start vertex
       $updateVertex1_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
-                mysql_real_escape_string($start_lng),
-                mysql_real_escape_string($start_lat),
-                mysql_real_escape_string($start_alt),
-                mysql_real_escape_string($start_id));
+                $DBConnection->link->escape_string($start_lng),
+                $DBConnection->link->escape_string($start_lat),
+                $DBConnection->link->escape_string($start_alt),
+                $DBConnection->link->escape_string($start_id));
 
-      $updateVertex1_result = mysql_query($updateVertex1_query);
+      $updateVertex1_result = $DBConnection->link->query($updateVertex1_query);
     } else {
       // We must update all the edges that use this id with the new start_id
       $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `from_id` = %d WHERE `from_id` = %d;",
-              mysql_real_escape_string(intval($startExistsAlready['id'])),
-              mysql_real_escape_string($start_id));
+              $DBConnection->link->escape_string(intval($startExistsAlready['id'])),
+              $DBConnection->link->escape_string($start_id));
 
-      $changeEdge_result = mysql_query($changeEdge_query);
+      $changeEdge_result = $DBConnection->link->query($changeEdge_query);
 
       $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `to_id` = %d WHERE `to_id` = %d;",
-              mysql_real_escape_string(intval($startExistsAlready['id'])),
-              mysql_real_escape_string($start_id));
+              $DBConnection->link->escape_string(intval($startExistsAlready['id'])),
+              $DBConnection->link->escape_string($start_id));
 
-      $changeEdge_result = mysql_query($changeEdge_query);
+      $changeEdge_result = $DBConnection->link->query($changeEdge_query);
     }
 
     if ($destExistsAlready == null || intval($destExistsAlready['id']) == $dest_id) {
       // Updating destination vertex
       $updateVertex2_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
-                mysql_real_escape_string($dest_lng),
-                mysql_real_escape_string($dest_lat),
-                mysql_real_escape_string($dest_alt),
-                mysql_real_escape_string($dest_id));
+                $DBConnection->link->escape_string($dest_lng),
+                $DBConnection->link->escape_string($dest_lat),
+                $DBConnection->link->escape_string($dest_alt),
+                $DBConnection->link->escape_string($dest_id));
 
-      $updateVertex2_result = mysql_query($updateVertex2_query);
+      $updateVertex2_result = $DBConnection->link->query($updateVertex2_query);
     } else {
       // We must update all the edges that use this id with the new dest_id
       $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `from_id` = %d WHERE `from_id` = %d;",
-              mysql_real_escape_string(intval($destExistsAlready['id'])),
-              mysql_real_escape_string($dest_id));
+              $DBConnection->link->escape_string(intval($destExistsAlready['id'])),
+              $DBConnection->link->escape_string($dest_id));
 
-      $changeEdge_result = mysql_query($changeEdge_query);
+      $changeEdge_result = $DBConnection->link->query($changeEdge_query);
 
       $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `to_id` = %d WHERE `to_id` = %d;",
-              mysql_real_escape_string(intval($destExistsAlready['id'])),
-              mysql_real_escape_string($dest_id));
+              $DBConnection->link->escape_string(intval($destExistsAlready['id'])),
+              $DBConnection->link->escape_string($dest_id));
 
-      $changeEdge_result = mysql_query($changeEdge_query);
+      $changeEdge_result = $DBConnection->link->query($changeEdge_query);
     }
 
     // We should tag the edges containing these points as 'dirty'
     $tagEdgesAsDirty_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, WHERE `from_id` IN (%d,%d) OR `to_id` IN (%d,%d);",
-              mysql_real_escape_string($start_id),
-              mysql_real_escape_string($dest_id),
-              mysql_real_escape_string($start_id),
-              mysql_real_escape_string($dest_id));
+              $DBConnection->link->escape_string($start_id),
+              $DBConnection->link->escape_string($dest_id),
+              $DBConnection->link->escape_string($start_id),
+              $DBConnection->link->escape_string($dest_id));
 
-    $result = mysql_query($tagEdgesAsDirty_query);
+    $result = $DBConnection->link->query($tagEdgesAsDirty_query);
 
     return array(
       '1_updating_first_vertex' => $updateVertex1_result,
@@ -405,14 +405,16 @@ class DBUtils {
    */
   public static function deleteEdge($edge_id){
 
+    global $DBConnection;
+    
     // Get the two vertices of the edge
     $selectVertices = sprintf("SELECT `from_id`, `to_id` FROM `edges` WHERE `id` = %d;",
-                      mysql_real_escape_string($edge_id));
+                      $DBConnection->link->escape_string($edge_id));
 
-    $vertices = mysql_query($selectVertices);
+    $vertices = $DBConnection->link->query($selectVertices);
 
     if ($vertices != false) {
-      $row = mysql_fetch_array($vertices, MYSQL_ASSOC);
+      $row = $vertices->fetch_assoc();
       $from_id = intval($row['from_id']);
       $to_id = intval($row['to_id']);
     } else {
@@ -421,36 +423,36 @@ class DBUtils {
     
     // Deletes the edge
     $deleteEdge_query = sprintf("UPDATE `edges` SET `is_deleted` = 1, `is_dirty`= 1 WHERE `id` = %d;",
-              mysql_real_escape_string($edge_id));
-    $delete_result = mysql_query($deleteEdge_query);
+              $DBConnection->link->escape_string($edge_id));
+    $delete_result = $DBConnection->link->query($deleteEdge_query);
     
     // Checks if any edge still uses vertex with id 'from_id'
     $fromIdCheck_query = sprintf("SELECT `id` FROM `edges` WHERE `is_deleted` = 0 AND (`from_id` = %d OR `to_id`= %d);",
-              mysql_real_escape_string($from_id),
-              mysql_real_escape_string($from_id));
-    $fromIdCheck_result = mysql_query($fromIdCheck_query);
+              $DBConnection->link->escape_string($from_id),
+              $DBConnection->link->escape_string($from_id));
+    $fromIdCheck_result = $DBConnection->link->query($fromIdCheck_query);
 
-    if (mysql_num_rows($fromIdCheck_result) === 0){
+    if ($fromIdCheck_result->num_rows === 0){
 
       // the vertex is not used anymore
       $deleteFromId_query = sprintf("UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` = %d;",
-            mysql_real_escape_string($from_id));
-      $deleteFromId_result = mysql_query($deleteFromId_query);
+            $DBConnection->link->escape_string($from_id));
+      $deleteFromId_result = $DBConnection->link->query($deleteFromId_query);
 
     }
 
     // Checks if any edge still uses vertex with id 'to_id'
     $toIdCheck_query = sprintf("SELECT `id` FROM `edges` WHERE `is_deleted` = 0 AND (`from_id` = %d OR `to_id`= %d);",
-              mysql_real_escape_string($to_id),
-              mysql_real_escape_string($to_id));
-    $toIdCheck_result = mysql_query($toIdCheck_query);
+              $DBConnection->link->escape_string($to_id),
+              $DBConnection->link->escape_string($to_id));
+    $toIdCheck_result = $DBConnection->link->query($toIdCheck_query);
 
-    if (mysql_num_rows($toIdCheck_result) === 0){
+    if ($toIdCheck_result->num_rows === 0){
 
       // the vertex is not used anymore
       $deleteToId_query = sprintf("UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` = %d;",
-            mysql_real_escape_string($to_id));
-      $deleteToId_result = mysql_query($deleteToId_query);
+            $DBConnection->link->escape_string($to_id));
+      $deleteToId_result = $DBConnection->link->query($deleteToId_query);
 
     }
 
@@ -469,26 +471,28 @@ class DBUtils {
    */
   public static function cutEdge($start_id, $dest_id, $new_lat, $new_lng, $new_alt, $edge_id){
 
+    global $DBConnection;
+    
     $newVertexAlreadyExists = self::getClosestVertex($new_lat, $new_lng, _closestPointRadius_edit);
 
     if ($newVertexAlreadyExists == null) {
 
       // Creates the new vertex and retrieves its id
       $newVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), %d);",
-                mysql_real_escape_string($new_lng),
-                mysql_real_escape_string($new_lat),
-                mysql_real_escape_string($new_alt));
+                $DBConnection->link->escape_string($new_lng),
+                $DBConnection->link->escape_string($new_lat),
+                $DBConnection->link->escape_string($new_alt));
       $newVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
-              mysql_real_escape_string($new_lng),
-              mysql_real_escape_string($new_lat));
+              $DBConnection->link->escape_string($new_lng),
+              $DBConnection->link->escape_string($new_lat));
       
-      mysql_query('BEGIN');
-      $newVertex_insert_result = mysql_query($newVertex_query);
-      $newVertex_fetch_result  = mysql_query($newVertex_query_fetch);
-      mysql_query('COMMIT');
+      $DBConnection->link->query('BEGIN');
+      $newVertex_insert_result = $DBConnection->link->query($newVertex_query);
+      $newVertex_fetch_result  = $DBConnection->link->query($newVertex_query_fetch);
+      $DBConnection->link->query('COMMIT');
 
       if( $newVertex_fetch_result !== false){
-        $row = mysql_fetch_array($newVertex_fetch_result, MYSQL_ASSOC);
+        $row = $newVertex_fetch_result->fetch_assoc();
         $newVertex_id = intval($row['id']);
       } else {
         return false;
@@ -500,22 +504,22 @@ class DBUtils {
     
     // Gets the two previous vertices
     $getStartVertex_query = sprintf("SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` WHERE `id` = %d;",
-                            mysql_real_escape_string($start_id));
-    $getStartVertex_result = mysql_query($getStartVertex_query);
+                            $DBConnection->link->escape_string($start_id));
+    $getStartVertex_result = $DBConnection->link->query($getStartVertex_query);
     
     if ($getStartVertex_result !== false){
-      $row = mysql_fetch_array($getStartVertex_result, MYSQL_ASSOC);
+      $row = $getStartVertex_result->fetch_assoc();
       $start_lat = floatval($row['lat']);
       $start_lng = floatval($row['lng']);
       $start_alt = intval($row['alt']);
     } else { return false; }
 
     $getDestVertex_query = sprintf("SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` WHERE `id` = %d;",
-              mysql_real_escape_string($dest_id));
-    $getDestVertex_result = mysql_query($getDestVertex_query);
+              $DBConnection->link->escape_string($dest_id));
+    $getDestVertex_result = $DBConnection->link->query($getDestVertex_query);
     
     if ($getDestVertex_result !== false){
-      $row = mysql_fetch_array($getDestVertex_result, MYSQL_ASSOC);
+      $row = $getDestVertex_result->fetch_assoc();
       $dest_lat = floatval($row['lat']);
       $dest_lng = floatval($row['lng']);
       $dest_alt = intval($row['alt']);
@@ -528,20 +532,20 @@ class DBUtils {
     $startNew_grade = $new_alt - $start_alt;
 
     $startNew_query = sprintf("UPDATE `edges` SET `distance` = %F, `grade`= %d, `to_id`= %d, `is_dirty`= 0 WHERE `id` = %d;",
-              mysql_real_escape_string($startNew_distance),
-              mysql_real_escape_string($startNew_grade),
-              mysql_real_escape_string($newVertex_id),
-              mysql_real_escape_string($edge_id));
+              $DBConnection->link->escape_string($startNew_distance),
+              $DBConnection->link->escape_string($startNew_grade),
+              $DBConnection->link->escape_string($newVertex_id),
+              $DBConnection->link->escape_string($edge_id));
 
-    $startNew_result = mysql_query($startNew_query);
+    $startNew_result = $DBConnection->link->query($startNew_query);
 
     // Retrieves type that we are going to use for the new edge
     $getType_query = sprintf("SELECT `type` FROM `edges` WHERE `id` = %d;",
-                mysql_real_escape_string($edge_id));
-    $getType_result = mysql_query($getType_query);
+                $DBConnection->link->escape_string($edge_id));
+    $getType_result = $DBConnection->link->query($getType_query);
     
     if ($getType_result !== false){
-      $row = mysql_fetch_array($getType_result, MYSQL_ASSOC);
+      $row = $getType_result->fetch_assoc();
       $type = intval($row['type']);
     } else { return false; }
     
@@ -552,13 +556,13 @@ class DBUtils {
 
     $newDest_query = sprintf("INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`, `is_dirty`) 
                  VALUES ('%d', '%d', '%F', '%d', '%d', 0);",
-            mysql_real_escape_string($newVertex_id),
-            mysql_real_escape_string($dest_id),
-            mysql_real_escape_string($newDest_distance),
-            mysql_real_escape_string($newDest_grade),
-            mysql_real_escape_string($type), 0);
+            $DBConnection->link->escape_string($newVertex_id),
+            $DBConnection->link->escape_string($dest_id),
+            $DBConnection->link->escape_string($newDest_distance),
+            $DBConnection->link->escape_string($newDest_grade),
+            $DBConnection->link->escape_string($type), 0);
 
-    $newDest_result = mysql_query($newDest_query);
+    $newDest_result = $DBConnection->link->query($newDest_query);
 
     return array(
       '1_insert_new_vertex' => $newVertex_insert_result,
@@ -577,26 +581,28 @@ class DBUtils {
    */
   public static function addEdge($start_lat, $start_lng, $start_alt, $dest_lat, $dest_lng, $dest_alt, $type){
 
+    global $DBConnection;
+    
     $startExistsAlready = self::getClosestVertex($start_lat, $start_lng, _closestPointRadius_edit);
     $destExistsAlready = self::getClosestVertex($dest_lat, $dest_lng, _closestPointRadius_edit);
 
     // Create start vertex if it doesn't exist
     if ($startExistsAlready == null) {
       $startVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
-              mysql_real_escape_string($start_lng),
-              mysql_real_escape_string($start_lat),
-              mysql_real_escape_string($start_alt));
+              $DBConnection->link->escape_string($start_lng),
+              $DBConnection->link->escape_string($start_lat),
+              $DBConnection->link->escape_string($start_alt));
       $startVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
-              mysql_real_escape_string($start_lng),
-              mysql_real_escape_string($start_lat));
+              $DBConnection->link->escape_string($start_lng),
+              $DBConnection->link->escape_string($start_lat));
               
-      mysql_query('BEGIN');
-      $startVertex_insert_result = mysql_query($startVertex_query);
-      $startVertex_fetch_result  = mysql_query($startVertex_query_fetch);
-      mysql_query('COMMIT');
+      $DBConnection->link->query('BEGIN');
+      $startVertex_insert_result = $DBConnection->link->query($startVertex_query);
+      $startVertex_fetch_result  = $DBConnection->link->query($startVertex_query_fetch);
+      $DBConnection->link->query('COMMIT');
 
       if ($startVertex_fetch_result !== false){
-        $row = mysql_fetch_array($startVertex_fetch_result, MYSQL_ASSOC);
+        $row = $startVertex_fetch_result->fetch_assoc();
         $startVertex_id = intval($row['id']);
       } else { return false; }
       
@@ -608,20 +614,20 @@ class DBUtils {
     if ($destExistsAlready == null) {
 
       $destVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
-            mysql_real_escape_string($dest_lng),
-            mysql_real_escape_string($dest_lat),
-            mysql_real_escape_string($dest_alt));
+            $DBConnection->link->escape_string($dest_lng),
+            $DBConnection->link->escape_string($dest_lat),
+            $DBConnection->link->escape_string($dest_alt));
       $destVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
-              mysql_real_escape_string($dest_lng),
-              mysql_real_escape_string($dest_lat));
+              $DBConnection->link->escape_string($dest_lng),
+              $DBConnection->link->escape_string($dest_lat));
               
-      mysql_query('BEGIN');
-      $destVertex_insert_result = mysql_query($destVertex_query);
-      $destVertex_fetch_result  = mysql_query($destVertex_query_fetch);
-      mysql_query('COMMIT');
+      $DBConnection->link->query('BEGIN');
+      $destVertex_insert_result = $DBConnection->link->query($destVertex_query);
+      $destVertex_fetch_result  = $DBConnection->link->query($destVertex_query_fetch);
+      $DBConnection->link->query('COMMIT');
 
       if ($destVertex_fetch_result !== false){
-        $row = mysql_fetch_array($destVertex_fetch_result, MYSQL_ASSOC);
+        $row = $destVertex_fetch_result->fetch_assoc();
         $destVertex_id = intval($row['id']);
       } else { return false;}
       
@@ -635,14 +641,14 @@ class DBUtils {
 
     $createEdge_query = sprintf("INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`) 
                  VALUES ('%d', '%d', '%F', '%d', '%d');",
-            mysql_real_escape_string($startVertex_id),
-            mysql_real_escape_string($destVertex_id),
-            mysql_real_escape_string($distance),
-            mysql_real_escape_string($grade),
-            mysql_real_escape_string($type));
+            $DBConnection->link->escape_string($startVertex_id),
+            $DBConnection->link->escape_string($destVertex_id),
+            $DBConnection->link->escape_string($distance),
+            $DBConnection->link->escape_string($grade),
+            $DBConnection->link->escape_string($type));
 
     // Executes the query
-    $createEdge_result = mysql_query($createEdge_query);
+    $createEdge_result = $DBConnection->link->query($createEdge_query);
 
     return array(
       '1_start_alreadyExisted' => !empty($startExistsAlready)?true:false,
@@ -661,19 +667,21 @@ class DBUtils {
    */
   public static function consolidate(){
 
+    global $DBConnection;
+    
     // Finds orphan vertices and deletes them
     $findOrphans_query = "UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` NOT IN 
               (SELECT `from_id` AS `id` FROM `edges` UNION
                 SELECT `to_id` AS `id` FROM `edges`)";
 
     // Executes the query
-    $findOrphans_result = mysql_query($findOrphans_query);
+    $findOrphans_result = $DBConnection->link->query($findOrphans_query);
 
     // Finds edges of zero distance
     $zeroDistance_query = "UPDATE `edges` SET `is_deleted` = 1 WHERE `from_id` = `to_id`;";
 
     // Executes the query
-    $zeroDistance_result = mysql_query($zeroDistance_query);
+    $zeroDistance_result = $DBConnection->link->query($zeroDistance_query);
 
     // Find non-deleted edges linking to at least one deleted vertex
     $deletedInconsistencies_query = "UPDATE `edges` SET `is_deleted` = 1 WHERE `from_id` IN
@@ -681,23 +689,24 @@ class DBUtils {
                   (SELECT `id` FROM `vertices` WHERE `is_deleted` = 1)";
 
     // Executes the query
-    $deletedInconsistencies_result = mysql_query($deletedInconsistencies_query);
+    $deletedInconsistencies_result = $DBConnection->link->query($deletedInconsistencies_query);
 
     // Updates distances and grades
     $updateDistances_query = "SELECT consolidate() AS nb;";
     
     // Executes the query
-    mysql_query($updateDistances_query);
+    $updateDistances_result = $DBConnection->link->query($updateDistances_query);
 
     if ($updateDistances_result !== false) {
-      $row = mysql_fetch_array($updateDistances_result, MYSQL_ASSOC);
+      $row = $updateDistances_result->fetch_assoc();
       $updateDistances_result_nb = $row['nb'];
     } else $updateDistances_result_nb = false;
 
     return array(
       '1_find_orphans' => $findOrphans_result,
       '2_zero_distance' => $zeroDistance_result,
-      '3_delete_inconsistencies' => $deletedInconsistencies_result
+      '3_delete_inconsistencies' => $deletedInconsistencies_result,
+      '4_update_distances' => $ updateDistances_result
     );
   }
   

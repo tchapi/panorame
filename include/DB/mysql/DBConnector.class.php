@@ -8,7 +8,7 @@
 
 class DBConnector {
 
-  private $link; 
+  public $link; 
   private $server;
   private $username;
   private $password;
@@ -24,9 +24,9 @@ class DBConnector {
   
   public function connect() 
   { 
-      $this->link = mysql_connect($this->server, $this->username, $this->password); 
+      $this->link = new mysqli($this->server, $this->username, $this->password); 
       
-      if ( !($this->link) ) {
+      if (mysqli_connect_errno()) {
       
         $this->error();
         
@@ -39,9 +39,9 @@ class DBConnector {
 
   public function selectdb()
   {
-    $success	= mysql_select_db($this->dbname, $this->link);
+    $this->link->select_db($this->dbname);
     
-    if ( !$success ) {
+    if (mysqli_connect_errno()) {
    
       $this->error();
 
@@ -55,9 +55,10 @@ class DBConnector {
 
   public function error() 
   { 
+      
       // Closes the current connection
-      print 'MySQL Error : '.mysql_error();
-      mysql_close($this->link); 
+      printf("MySQL error: %s\n", mysqli_connect_error());
+      $this->link->close(); 
 
       die(0);
   }

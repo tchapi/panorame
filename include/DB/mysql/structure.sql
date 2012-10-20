@@ -22,6 +22,23 @@ SET time_zone = "+00:00";
 
 DELIMITER $$
 --
+-- Procedures
+--
+DROP PROCEDURE IF EXISTS `getClosest`$$
+CREATE DEFINER=`panorame`@`localhost` PROCEDURE `getClosest`(IN `orig_lat` double, IN `orig_lng` double, IN `max_radius`integer)
+    NO SQL
+SELECT 
+    `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt,
+    6371030 * 2 * ASIN(SQRT( POWER(SIN((orig_lat - abs(Y(`point`))) * pi()/180 / 2),2) + COS(orig_lat * pi()/180 ) * COS(abs (Y(`point`)) *  pi()/180) * POWER(SIN((orig_lng - X(`point`)) *  pi()/180 / 2), 2) ))
+    AS distance
+  FROM vertices
+  WHERE `is_deleted`= 0
+  HAVING distance < max_radius
+  ORDER BY distance limit 1$$
+
+-- --------------------------------------------------------
+
+--
 -- Functions
 --
 DROP FUNCTION IF EXISTS `consolidate`$$
@@ -69,6 +86,7 @@ BEGIN
   RETURN @count;
 
 END$$
+
 
 -- --------------------------------------------------------
 
