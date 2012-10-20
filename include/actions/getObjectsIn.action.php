@@ -19,20 +19,20 @@
 
     // Get POI Closest point
     $poi = array('lat' => $_POST['poi']['lat'], 'lng' => $_POST['poi']['lng']);
-    $closestVertex = Utils::getClosestVertex($poi['lat'], $poi['lng'], _closestPointRadius_search);
+    $closestVertex = DBUtils::getClosestVertex($poi['lat'], $poi['lng'], _closestPointRadius_search);
 
     // Get objects
     if ($type == 'vertices'){
 
-      $objects = Utils::getVerticesIn($bounds["NW_lat"], $bounds["NW_lng"], $bounds["SE_lat"], $bounds["SE_lng"], $closestVertex['point']['lat'], $closestVertex['point']['lng']);
+      $objects = DBUtils::getVerticesIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $closestVertex['point']['lat'], $closestVertex['point']['lng']);
     
     } elseif ($type == 'edges'){
 
-      $objects = Utils::getEdgesIn($bounds["NW_lat"], $bounds["NW_lng"], $bounds["SE_lat"], $bounds["SE_lng"], $closestVertex['point']['lat'], $closestVertex['point']['lng']);
+      $objects = DBUtils::getEdgesIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $closestVertex['point']['lat'], $closestVertex['point']['lng']);
 
     } elseif ($type == 'tree'){
 
-      $objects = Utils::getVerticesAndChildrenIn($bounds["NW_lat"], $bounds["NW_lng"], $bounds["SE_lat"], $bounds["SE_lng"], $closestVertex['point']['lat'], $closestVertex['point']['lng']);
+      $objects = DBUtils::getVerticesAndChildrenIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $closestVertex['point']['lat'], $closestVertex['point']['lng']);
 
     }
 
