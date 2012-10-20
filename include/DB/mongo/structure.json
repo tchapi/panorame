@@ -11,6 +11,12 @@ db.getCollection("edges_computed").ensureIndex({
 },[
   
 ]);
+db.getCollection("edges_computed").ensureIndex({
+  "start.point": "2d"
+});
+db.getCollection("edges_computed").ensureIndex({
+  "dest.point": "2d"
+});
 
 /** means indexes **/
 db.getCollection("means").ensureIndex({
