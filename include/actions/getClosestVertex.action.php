@@ -10,7 +10,7 @@
 
     $radius = isset($_POST['radius'])?intval($_POST['radius']):_closestPointRadius_search;
 
-    $result = Utils::getClosestVertex($lat, $lon, $radius);
+    $result = DBUtils::getClosestVertex($lat, $lon, $radius);
   
   } else {
   

@@ -70,21 +70,6 @@ BEGIN
 
 END$$
 
-DROP FUNCTION IF EXISTS `exportGIS`$$
-CREATE DEFINER=`panorame`@`localhost` FUNCTION `exportGIS`() RETURNS blob
-BEGIN
-
-  DECLARE export LONGBLOB;
-
-  SET @export := (SELECT GROUP_CONCAT(CONCAT("(",`id`, ", GEOMFROMTEXT('", ASTEXT(`point`),  "',4326),", `elevation`,  ",", `is_deleted` ,")")) AS inserts 
-FROM `vertices`);
-
-  RETURN @export;
-
-END$$
-
-DELIMITER ;
-
 -- --------------------------------------------------------
 
 --

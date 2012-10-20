@@ -14,7 +14,7 @@
 
     $edge_id  = intval($_POST['edge_id']);
 
-    $result = Utils::cutEdge($start_id, $dest_id, $new_lat, $new_lng, $new_alt, $edge_id);
+    $result = DBUtils::cutEdge($start_id, $dest_id, $new_lat, $new_lng, $new_alt, $edge_id);
 
     if ($result == null || $result == false){
 

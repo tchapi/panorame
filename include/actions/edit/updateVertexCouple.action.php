@@ -17,7 +17,7 @@
 
     $edge_id = intval($_POST['edge_id']);
 
-    $result = Utils::updateVertexCouple($start_id, $start_lat, $start_lng, $start_alt, $dest_id, $dest_lat, $dest_lng, $dest_alt, $edge_id);
+    $result = DBUtils::updateVertexCouple($start_id, $start_lat, $start_lng, $start_alt, $dest_id, $dest_lat, $dest_lng, $dest_alt, $edge_id);
   
     if ($result == null || $result == false){
 

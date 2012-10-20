@@ -6,7 +6,7 @@
 /*                                                     */
 /* *************************************************** */
 
-class DB {
+class DBConnector {
 
   private $link; 
   private $server;
@@ -70,6 +70,6 @@ class DB {
 /*                                                     */
 /* *************************************************** */
 
-$DBConnection = new DB($server, $user, $password, $database);
+$DBConnection = new DBConnector($server, $user, $password, $database);
 
 if ($DBConnection->connect()) $DBConnection->selectdb();

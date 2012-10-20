@@ -1,29 +1,6 @@
 <?php
 
-class Utils {
-
-  /*
-   * HAVERSINE function for distance between two points on Earth
-   */
-  public static function haversine($lat_1,$lng_1,$lat_2,$lng_2) {
-
-    $sin_lat   = sin(deg2rad($lat_2  - $lat_1)  / 2.0);
-    $sin2_lat  = $sin_lat * $sin_lat;
-
-    $sin_lng  = sin(deg2rad($lng_2 - $lng_1) / 2.0);
-    $sin2_lng = $sin_lng * $sin_lng;
-
-    $cos_lat_1 = cos($lat_1);
-    $cos_lat_2 = cos($lat_2);
-     
-    $sqrt      = sqrt($sin2_lat + ($cos_lat_1 * $cos_lat_2 * $sin2_lng));
-    
-    $distance  = 2.0 * _earth_radius * asin($sqrt);
-     
-    return $distance;
-
-  }
-
+class DBUtils {
 
   /*
    * GET The means availables and their respective speeds
@@ -62,38 +39,6 @@ class Utils {
       }
 
       return $means;
-
-  }
-  
-  /*
-   * Extends the given bounding box by _extendBoundsPointRadius, to allow for more smooth panning in the view
-   * Allows to have more routes in the view as well, by capilarity
-   */
-  public static function extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng){
-
-    $ratio = _extendBoundsPointRadius/_earth_radius;
-    
-    // Calculating new NW point
-    $lat_rad = $NW_lat*pi()/180;
-    $lng_rad = $NW_lng*pi()/180;
-    $cos_lat_rad = cos($lat_rad);
-    $sin_lat_rad = sin($lat_rad);
-
-    $brng = (315/180)*pi(); // bearing is -45°
-    $newNW_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
-    $newNW_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($newNW_lat*pi()/180)))* 180 / pi();
-
-    // Calculating new SE point
-    $lat_rad = $SE_lat*pi()/180;
-    $lng_rad = $SE_lng*pi()/180;
-    $cos_lat_rad = cos($lat_rad);
-    $sin_lat_rad = sin($lat_rad);
-
-    $brng = 135/180*pi(); // Bearing is 135°
-    $newSE_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
-    $newSE_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($newSE_lat*pi()/180)))* 180 / pi();
-
-    return array('NW_lat' => $newNW_lat, 'NW_lng' => $newNW_lng, 'SE_lat' => $newSE_lat, 'SE_lng' => $newSE_lng);
 
   }
   
@@ -207,7 +152,7 @@ class Utils {
   public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
     // Extends the bounds
-    $b = self::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
+    $b = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
 
     $getVerticesAndChildrenIn_query = sprintf("SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
                     group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,', \"secable\":', t.`secable`, '}')) AS children FROM `vertices` v
@@ -306,8 +251,8 @@ class Utils {
   public static function build_sorter($lat, $lng) {
     return function ($a, $b) use ($lat, $lng)
     {
-      $a_ = Utils::haversine($a['point']['lat'], $a['point']['lng'], $lat, $lng);
-      $b_ = Utils::haversine($b['point']['lat'], $b['point']['lng'], $lat, $lng);
+      $a_ = GeoUtils::haversine($a['point']['lat'], $a['point']['lng'], $lat, $lng);
+      $b_ = GeoUtils::haversine($b['point']['lat'], $b['point']['lng'], $lat, $lng);
 
       if ($a_ == $b_) { return 0; }
       return ($a_ < $b_) ? -1 : 1;
@@ -339,7 +284,7 @@ class Utils {
       usort($vertices, self::build_sorter($lat, $lng));
       
       $closest = $vertices[0];
-      $closest['distance'] = self::haversine($lat, $lng, $closest['point']['lat'], $closest['point']['lng']);
+      $closest['distance'] = GeoUtils::haversine($lat, $lng, $closest['point']['lat'], $closest['point']['lng']);
 
       return $closest;
 
@@ -579,7 +524,7 @@ class Utils {
     
     // -------------------------------
     // Update edge from start ---> new 
-    $startNew_distance = self::haversine($start_lat, $start_lng, $new_lat, $new_lng);
+    $startNew_distance = GeoUtils::haversine($start_lat, $start_lng, $new_lat, $new_lng);
     $startNew_grade = $new_alt - $start_alt;
 
     $startNew_query = sprintf("UPDATE `edges` SET `distance` = %F, `grade`= %d, `to_id`= %d, `is_dirty`= 0 WHERE `id` = %d;",
@@ -602,7 +547,7 @@ class Utils {
     
     // -------------------------------
     // Update edge from new ---> dest 
-    $newDest_distance = self::haversine($new_lat, $new_lng, $dest_lat, $dest_lng);
+    $newDest_distance = GeoUtils::haversine($new_lat, $new_lng, $dest_lat, $dest_lng);
     $newDest_grade = $dest_alt - $new_alt;
 
     $newDest_query = sprintf("INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`, `is_dirty`) 
@@ -685,7 +630,7 @@ class Utils {
     }
 
     // Creates the edge
-    $distance = self::haversine($start_lat, $start_lng, $dest_lat, $dest_lng);
+    $distance = GeoUtils::haversine($start_lat, $start_lng, $dest_lat, $dest_lng);
     $grade = $dest_alt - $start_alt;
 
     $createEdge_query = sprintf("INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`) 

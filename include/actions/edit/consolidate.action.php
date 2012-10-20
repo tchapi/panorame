@@ -3,7 +3,7 @@
   $app = '_BACKEND';
   include_once('../../config.php');
 
-  $result = Utils::consolidate();
+  $result = DBUtils::consolidate();
 
   if ($result == null || $result == false){
 
