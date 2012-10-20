@@ -687,7 +687,7 @@ class DBUtils {
     $updateDistances_query = "SELECT consolidate() AS nb;";
     
     // Executes the query
-    $updateDistances_result = mysql_query($updateDistances_query);
+    mysql_query($updateDistances_query);
 
     if ($updateDistances_result !== false) {
       $row = mysql_fetch_array($updateDistances_result, MYSQL_ASSOC);
@@ -697,8 +697,7 @@ class DBUtils {
     return array(
       '1_find_orphans' => $findOrphans_result,
       '2_zero_distance' => $zeroDistance_result,
-      '3_delete_inconsistencies' => $deletedInconsistencies_result,
-      '4_update_distances_and_grades' => $updateDistances_result_nb
+      '3_delete_inconsistencies' => $deletedInconsistencies_result
     );
   }
   
