@@ -87,7 +87,19 @@
         <div class="form-line">
           <label for="addEdge_continuous"><strong>Continous mode : </strong> </label> <input name="addEdge_continuous" id="addEdge_continuous" type="checkbox" value="0">
         </div>
-        <p class="muted well well-small"><b class="icon-info-sign"></b> <em>Mouse over an edge to make it editable (handles will appear).<br/>To delete an edge, right-click on it.<br/>Vertices will auto-merge under <?php echo _closestPointRadius_edit; ?>m.</em></p>
+        <p class="muted"><b class="icon-info-sign"></b> <em>Mouse over an edge to make it editable (handles will appear).<br/>To delete an edge, right-click on it.<br/>Vertices will auto-merge under <?php echo _closestPointRadius_edit; ?>m.</em></p>
+        <div class="form-line">
+          <p><b class="icon-list-alt"></b> <strong>Keyboard shortcuts :</strong></p>
+          <ul>
+            <li>a : <em>Toggle add edge</em></li>
+            <li>o : <em>Toggle overlays</em></li>
+            <li>m : <em>Toggle continuous</em></li>
+            <li>d : <em>Toggle drop pin</em></li>
+            <li>c : <em>Consolidate</em></li>
+            <li>l : <em>My location</em></li>
+            <li>esc : <em>Stop add edge</em></li>
+          </ul>
+        </div>
       </div>
       <div class="modal-footer">
         <button id="consolidate" class="btn btn-warning" ><b class="icon-random icon-white"></b> Consolidate</button>
@@ -113,6 +125,7 @@
   </body>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js" type="text/javascript"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
+  <script src="js/plugins/keymaster.min.js"></script>
 <?php if ($editMode !== true): ?>
   <script src="js/plugins/jquery.nouislider.min.js"></script>
   <?php echo $addedScript; ?>

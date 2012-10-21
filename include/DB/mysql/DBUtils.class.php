@@ -269,7 +269,7 @@ class DBUtils {
       $DBConnection->link->escape_string($lng),
       $DBConnection->link->escape_string($radius_in_m));
 
-    $res  = $DBConnection->link->multi_query($getClosest_query);
+    $res = $DBConnection->link->multi_query($getClosest_query);
 
     $closest = $DBConnection->link->use_result();
     $closest = $closest->fetch_assoc();

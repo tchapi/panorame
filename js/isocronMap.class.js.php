@@ -26,6 +26,7 @@ var isocronMap = function() {
 
     // Display
     this.displayData = true;
+
     // Initial limit 
     this.limit = 300;
 
@@ -78,11 +79,6 @@ var isocronMap = function() {
 
         mapsWrapper.setupEvents(this.options);
 
-        // We setup the events
-        $('#self').click($.proxy(function(){
-            this.setToUserPositionIfAvailable();
-        }, this));
-
         // Finally, we center the map at the user's position
         this.setToUserPositionIfAvailable();
 
@@ -90,21 +86,27 @@ var isocronMap = function() {
 
     this.setupVisual = function(){
 
-        var addPinButton  = $('#addPin');
-        var toggleDataOverlay = $('#toggleDataOverlay');
+        this.locateMe = $('#self');
+
+        this.locateMe.click($.proxy(function(){
+            this.setToUserPositionIfAvailable();
+        }, this));
+
+        this.addPinButton  = $('#addPin');
+        this.toggleDataOverlay = $('#toggleDataOverlay');
 
         $('.radiusType').tooltip({placement: 'bottom'});
-        toggleDataOverlay.tooltip({placement: 'bottom'});
+        this.toggleDataOverlay.tooltip({placement: 'bottom'});
 
-        toggleDataOverlay.click($.proxy(function(event){
+        this.toggleDataOverlay.click($.proxy(function(event){
 
             if (this.displayData == false){
-                toggleDataOverlay.toggleClass('icon-eye-close').toggleClass('icon-eye-open');
+                this.toggleDataOverlay.toggleClass('icon-eye-close').toggleClass('icon-eye-open');
                 mapsWrapper.displayDataOverlay();
                 mapsWrapper.displayClosestOverlay();
                 this.displayData = true;
             } else {
-                toggleDataOverlay.toggleClass('icon-eye-open').toggleClass('icon-eye-close');
+                this.toggleDataOverlay.toggleClass('icon-eye-open').toggleClass('icon-eye-close');
                 mapsWrapper.removeDataOverlay();
                 mapsWrapper.removeClosestOverlay();
                 this.displayData = false;
@@ -112,17 +114,17 @@ var isocronMap = function() {
 
         },this));
 
-        addPinButton.popover({placement: 'bottom'});
-        addPinButton.click($.proxy(function(event){
+        this.addPinButton.popover({placement: 'bottom'});
+        this.addPinButton.click($.proxy(function(event){
 
-            if (addPinButton.hasClass('active')){
+            if (this.addPinButton.hasClass('active')){
                 mapsWrapper.setAddPin(false);
-                addPinButton.html('<b class="icon-map-marker icon-white"></b> Drop Pin');
-                addPinButton.removeClass('active');
+                this.addPinButton.html('<b class="icon-map-marker icon-white"></b> Drop Pin');
+                this.addPinButton.removeClass('active');
             } else {
                 mapsWrapper.setAddPin(true);
-                addPinButton.html('<b class="icon-ok icon-white"></b> Finish');
-                addPinButton.addClass('active');
+                this.addPinButton.html('<b class="icon-ok icon-white"></b> Finish');
+                this.addPinButton.addClass('active');
             }
 
         },this));
@@ -130,30 +132,30 @@ var isocronMap = function() {
 <?php if ($editMode === true): ?>
         /* ------------------- ADMIN ------------------- */
 
-        var addEdgeButton     = $('#addEdge');
-        var consolidateButton = $('#consolidate');
+        this.addEdgeButton     = $('#addEdge');
+        this.consolidateButton = $('#consolidate');
         this.typeSelect       = $('#addEdge_type');
         this.autoReverse      = $('input[type=radio][name=addEdge_autoReverse]');
 
-        addEdgeButton.click($.proxy(function(event){
+        this.addEdgeButton.click($.proxy(function(event){
 
-            if (addEdgeButton.hasClass('active')){
+            if (this.addEdgeButton.hasClass('active')){
                 mapsWrapper.setAddEdge(false);
-                addEdgeButton.html('<b class="icon-plus-sign icon-white"></b> Add edges');
-                addEdgeButton.removeClass('active');
+                this.addEdgeButton.html('<b class="icon-plus-sign icon-white"></b> Add edges');
+                this.addEdgeButton.removeClass('active');
                 this.continuousMode.removeAttr('disabled');
                 this.setNotice('Now leaving adding mode', 'success');
             } else {
                 mapsWrapper.setAddEdge(true, this.continuousMode.is(':checked'));
-                addEdgeButton.html('<b class="icon-ok icon-white"></b> Finish');
-                addEdgeButton.addClass('active');
+                this.addEdgeButton.html('<b class="icon-ok icon-white"></b> Finish');
+                this.addEdgeButton.addClass('active');
                 this.continuousMode.attr('disabled', 'disabled');
                 this.setNotice('Now in adding mode', 'danger');
             }
 
         },this));
 
-        consolidateButton.click($.proxy(function(event){
+        this.consolidateButton.click($.proxy(function(event){
 
             databaseWrapper.consolidate($.proxy(function(data){
                 this.boundsHaveChanged();
@@ -179,6 +181,33 @@ var isocronMap = function() {
 
         this.notice = $('#notice');
         this.setNotice('Welcome', 'info');
+
+        // Keymaster
+        key('esc', $.proxy(function(){
+            mapsWrapper.setAddEdge(false);
+            this.addEdgeButton.html('<b class="icon-plus-sign icon-white"></b> Add edges');
+            this.addEdgeButton.removeClass('active');
+            this.continuousMode.removeAttr('disabled');
+            this.setNotice('Now leaving adding mode', 'success');
+        }, this));
+        key('a', $.proxy(function(){
+            this.addEdgeButton.trigger('click');
+        }, this));
+        key('o', $.proxy(function(){
+            this.toggleDataOverlay.trigger('click');
+        }, this));
+        key('c', $.proxy(function(){
+            this.consolidateButton.trigger('click');
+        }, this));
+        key('d', $.proxy(function(){
+            this.addPinButton.trigger('click');
+        }, this));
+        key('m', $.proxy(function(){
+            this.continuousMode.trigger('click');
+        }, this));
+        key('l', $.proxy(function(){
+            this.locateMe.trigger('click');
+        }, this));
         /* ------------------- ADMIN ------------------- */
 <?php else: ?>
         this.limitDiv     = $('#limitDiv');
