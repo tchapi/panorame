@@ -189,24 +189,18 @@ var isocronMap = function() {
             this.addEdgeButton.removeClass('active');
             this.continuousMode.removeAttr('disabled');
             this.setNotice('Now leaving adding mode', 'success');
+            mapsWrapper.setAddPin(false);
+            this.addPinButton.html('<b class="icon-map-marker icon-white"></b> Drop Pin');
+            this.addPinButton.removeClass('active');
         }, this));
         key('a', $.proxy(function(){
             this.addEdgeButton.trigger('click');
         }, this));
-        key('o', $.proxy(function(){
-            this.toggleDataOverlay.trigger('click');
-        }, this));
         key('c', $.proxy(function(){
             this.consolidateButton.trigger('click');
         }, this));
-        key('d', $.proxy(function(){
-            this.addPinButton.trigger('click');
-        }, this));
         key('m', $.proxy(function(){
             this.continuousMode.trigger('click');
-        }, this));
-        key('l', $.proxy(function(){
-            this.locateMe.trigger('click');
         }, this));
         /* ------------------- ADMIN ------------------- */
 <?php else: ?>
@@ -250,6 +244,16 @@ var isocronMap = function() {
         this.meanSelect.change($.proxy(function(e){this.recalculateGraph()}, this));
 
 <?php endif ?>
+
+        key('o', $.proxy(function(){
+            this.toggleDataOverlay.trigger('click');
+        }, this));
+        key('d', $.proxy(function(){
+            this.addPinButton.trigger('click');
+        }, this));
+        key('l', $.proxy(function(){
+            this.locateMe.trigger('click');
+        }, this));
 
     };
 
@@ -307,6 +311,9 @@ var isocronMap = function() {
                 this.data = data;
                 this.recalculateGraph();
                 
+            } else {
+                mapsWrapper.removeDataOverlay();
+                mapsWrapper.removeClosestOverlay();
             }
 
         }, this));
