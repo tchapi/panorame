@@ -25,7 +25,7 @@ DELIMITER $$
 -- Procedures
 --
 DROP PROCEDURE IF EXISTS `getClosest`$$
-CREATE DEFINER=`panorame`@`localhost` PROCEDURE `getClosest`(IN `orig_lat` double, IN `orig_lng` double, IN `max_radius` integer)
+CREATE DEFINER=`panorame`@`localhost` PROCEDURE `getClosest`(IN `orig_lat` DOUBLE, IN `orig_lng` DOUBLE, IN `max_radius` INT, IN `NW_lat` DOUBLE, IN `NW_lng` DOUBLE, IN `SE_lat` DOUBLE, IN `SE_lng` DOUBLE)
     NO SQL
 SELECT 
     `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt,
@@ -33,7 +33,8 @@ SELECT
     AS distance
   FROM vertices
   WHERE `is_deleted`= 0
-  HAVING distance < max_radius
+  AND MBRIntersects( `point`, GeomFromText(CONCAT("POLYGON((",NW_lng, " ",NW_lat, ", ",SE_lng, " ", SE_lat, ", ", NW_lng, " ", NW_lat, "))")) )
+--  HAVING distance < max_radius
   ORDER BY distance limit 1$$
 
 -- --------------------------------------------------------

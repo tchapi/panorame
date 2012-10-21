@@ -264,10 +264,16 @@ class DBUtils {
 
     global $DBConnection;
     
-    $getClosest_query = sprintf("CALL getClosest(%F, %F, %d);",
+    $bbox = GeoUtils::extendBBox($lat, $lng, $lat, $lng, $radius_in_m);
+
+    $getClosest_query = sprintf("CALL getClosest(%F, %F, %d, %F, %F, %F, %F);",
       $DBConnection->link->escape_string($lat),
       $DBConnection->link->escape_string($lng),
-      $DBConnection->link->escape_string($radius_in_m));
+      $DBConnection->link->escape_string($radius_in_m),
+      $DBConnection->link->escape_string($bbox['NW_lat']),
+      $DBConnection->link->escape_string($bbox['NW_lng']),
+      $DBConnection->link->escape_string($bbox['SE_lat']),
+      $DBConnection->link->escape_string($bbox['SE_lng']));
 
     $res = $DBConnection->link->multi_query($getClosest_query);
 
