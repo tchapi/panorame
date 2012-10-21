@@ -162,7 +162,7 @@ class DBUtils {
     global $DBConnection;
 
     // Extends the bounds
-    $b = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
+    $b = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, null);
 
     $getVerticesAndChildrenIn_query = sprintf("SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
                     group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,', \"secable\":', t.`secable`, '}')) AS children FROM `vertices` v
@@ -264,7 +264,7 @@ class DBUtils {
 
     global $DBConnection;
     
-    $bbox = GeoUtils::extendBBox($lat, $lng, $lat, $lng, $radius_in_m);
+    $bbox = GeoUtils::extendBBox($lat, $lng, $lat, $lng, $radius_in_m, null);
 
     $getClosest_query = sprintf("CALL getClosest(%F, %F, %d, %F, %F, %F, %F);",
       $DBConnection->link->escape_string($lat),

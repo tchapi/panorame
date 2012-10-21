@@ -101,7 +101,7 @@ class DBUtils {
     $db = $DBConnection->getDB();
 
     // Extends the bounds
-    $b = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
+    $b = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, null);
 
     $restrictArray = self::restrictToBBox(array(), 'edges', $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
     
@@ -143,7 +143,7 @@ class DBUtils {
   public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
     // Extends the bounds
-    $b = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng);
+    $b = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, null);
 
     global $DBConnection;
     $db = $DBConnection->getDB();
