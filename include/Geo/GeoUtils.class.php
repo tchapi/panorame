@@ -25,12 +25,14 @@ class GeoUtils {
   }
     
   /*
-   * Extends the given bounding box by _extendBoundsPointRadius, to allow for more smooth panning in the view
+   * Extends the given bounding box by $extent, to allow for more smooth panning in the view
    * Allows to have more routes in the view as well, by capilarity
    */
-  public static function extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng){
+  public static function extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, $extent){
 
-    $ratio = _extendBoundsPointRadius/_earth_radius;
+    if ($extent == null) $extent = _extendBoundsPointRadius;
+
+    $ratio = $extent/_earth_radius;
     
     // Calculating new NW point
     $lat_rad = $NW_lat*pi()/180;
