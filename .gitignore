@@ -1,3 +1,4 @@
 .DS_Store
 _INFO
 include/config.php
+js/min/panorame.min.js
