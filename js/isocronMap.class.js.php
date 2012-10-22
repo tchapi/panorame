@@ -119,7 +119,7 @@ var isocronMap = function() {
 
             if (this.addPinButton.hasClass('active')){
                 mapsWrapper.setAddPin(false);
-                this.addPinButton.html('<b class="icon-map-marker icon-white"></b> Drop Pin');
+                this.addPinButton.html('<b class="icon-map-marker icon-white"></b> Drop Pin (e)');
                 this.addPinButton.removeClass('active');
             } else {
                 mapsWrapper.setAddPin(true);
@@ -141,7 +141,7 @@ var isocronMap = function() {
 
             if (this.addEdgeButton.hasClass('active')){
                 mapsWrapper.setAddEdge(false);
-                this.addEdgeButton.html('<b class="icon-plus-sign icon-white"></b> Add edges');
+                this.addEdgeButton.html('<b class="icon-plus-sign icon-white"></b> Add edges (a)');
                 this.addEdgeButton.removeClass('active');
                 this.continuousMode.removeAttr('disabled');
                 this.setNotice('Now leaving adding mode', 'success');
@@ -190,17 +190,27 @@ var isocronMap = function() {
             this.continuousMode.removeAttr('disabled');
             this.setNotice('Now leaving adding mode', 'success');
             mapsWrapper.setAddPin(false);
+            this.addPinButton.popover('hide');
             this.addPinButton.html('<b class="icon-map-marker icon-white"></b> Drop Pin');
             this.addPinButton.removeClass('active');
         }, this));
         key('a', $.proxy(function(){
             this.addEdgeButton.trigger('click');
         }, this));
-        key('c', $.proxy(function(){
-            this.consolidateButton.trigger('click');
-        }, this));
-        key('m', $.proxy(function(){
+        key('z', $.proxy(function(){
             this.continuousMode.trigger('click');
+        }, this));
+        key('q', $.proxy(function(){
+            this.autoReverse[0].checked = true;
+        }, this));
+        key('s', $.proxy(function(){
+            this.autoReverse[1].checked = true;
+        }, this));
+        key('d', $.proxy(function(){
+            this.autoReverse[2].checked = true;
+        }, this));
+        key('f', $.proxy(function(){
+            this.autoReverse[3].checked = true;
         }, this));
         /* ------------------- ADMIN ------------------- */
 <?php else: ?>
@@ -245,13 +255,13 @@ var isocronMap = function() {
 
 <?php endif ?>
 
-        key('o', $.proxy(function(){
+        key('space', $.proxy(function(){
             this.toggleDataOverlay.trigger('click');
         }, this));
-        key('d', $.proxy(function(){
+        key('e', $.proxy(function(){
             this.addPinButton.trigger('click');
         }, this));
-        key('l', $.proxy(function(){
+        key('w', $.proxy(function(){
             this.locateMe.trigger('click');
         }, this));
 

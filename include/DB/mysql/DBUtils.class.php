@@ -399,6 +399,8 @@ class DBUtils {
 
     $result = $DBConnection->link->query($tagEdgesAsDirty_query);
 
+    self::consolidate();
+
     return array(
       '1_updating_first_vertex' => $updateVertex1_result,
       '2_updating_second_vertex' => $updateVertex2_result,
@@ -461,6 +463,8 @@ class DBUtils {
       $deleteToId_result = $DBConnection->link->query($deleteToId_query);
 
     }
+
+    self::consolidate();
 
     return array(
       '1_select_vertices' => ($vertices!==false)?true:false,
@@ -570,6 +574,8 @@ class DBUtils {
 
     $newDest_result = $DBConnection->link->query($newDest_query);
 
+    self::consolidate();
+
     return array(
       '1_insert_new_vertex' => $newVertex_insert_result,
       '2_fetch_new_vertex' => ($newVertex_fetch_result!==false)?true:false,
@@ -655,6 +661,8 @@ class DBUtils {
 
     // Executes the query
     $createEdge_result = $DBConnection->link->query($createEdge_query);
+
+    self::consolidate();
 
     return array(
       '1_start_alreadyExisted' => !empty($startExistsAlready)?true:false,
