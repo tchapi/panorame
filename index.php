@@ -91,6 +91,7 @@
         <div class="form-line">
           <p><b class="icon-list-alt"></b> <strong>Keyboard shortcuts :</strong></p>
           <ul>
+            <li><em>in (parenthesis) for each action</em></li>
             <li>space : <em>Toggle overlays</em></li>
             <li>esc : <em>Stop add edge & drop pin</em></li>
           </ul>
