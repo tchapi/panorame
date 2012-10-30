@@ -43,7 +43,7 @@
           <span class="add-on"><b class="icon-search"></b></span><input class="input-xlarge" id="searchInput" type="text" placeholder="What? Where?">
           <button id="self" class='btn btn-primary'><b class="icon-screenshot icon-white"></b> Me (w)</button>
         </div>
-        <button id="addPin" class='btn btn-inverse pull-left' data-title="Click the map to drop a pin" data-content="After you're done, click 'Finish' to acknowledge."><b class="icon-map-marker icon-white"></b> Drop Pin (e)</button>
+        <button id="addPin" class='btn btn-inverse pull-left' data-title="Click the map to drop a pin" data-content="After you're done, click 'Finish' to acknowledge."><b class="icon-map-marker icon-white"></b> Pin (e)</button>
         <ul id="multipleChoices" class="dropdown-menu"></ul>
       </div>
 
