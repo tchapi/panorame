@@ -37,11 +37,15 @@ The following tile providers are available :
 * MapQuest
  * MapQuest road tiles
 
+### Available Database providers [Work in Progress] ###
+
+Panorame data services are built upon two different DBMS : Mongo and MySQL, accessed via PHP::Mongo and mysqli.
+
 ### URL Construction ###
 
 The application can be accessed via :
 
-        http://panorame.tchap.me/?framework=[API]&provider=[PROVIDER]
+        http://panorame.tchap.me/?framework=[API]&provider=[PROVIDER]&dbms=[DATABASE]
 
 The parameters can be :
 
@@ -56,9 +60,13 @@ The parameters can be :
  + gmail-terrain
  + bing-road
  + bing-hybrid
++ `database` - _optional_ : The database provider amongst :
+ + mysql
+ + mongo
 
 If no framework is provided, __gmaps__ will be used by default.
 If no provider is provided, the default provider for each framework will be used by default.
+If no database is provided, __MySQL__ will be used by default.
 
 > _NB : Not all tile providers are compatible with Layering APIs._
 
@@ -84,6 +92,8 @@ Then, click on the "Add Edges" button in the admin panel. Edges are added in two
 
 When the edge is created, you can add another edge directly by re-clicking to setup a new start point. Clicking the "Finish" button in the admin panel will terminate your edge-adding session.
 
+> _NB : When in continuous mode, the ending point of an edge is automatically deemed starting point of the to-be-created edge.
+
 __Edge auto-reverse functionnality__
 
 By default, only one direction is created (from start to destination). In the admin panel, this behaviour can be amended by choosing a different one.
@@ -99,7 +109,7 @@ The edges are provided with three handles :
  - Two handles to change the start and end point
  - One handle to cut the edge in two and create two consequent edges
 
-These handles can be grabbed with a left-click.
+These handles appear when the mouse hovers an edge, and can be grabbed with a left-click.
 
 > _NB : If you drag a vertex in a radius of 5 m of an existing vertex, the latter vertex will be used (auto-merging)_. This applies to edge cutting as well.
 
@@ -111,13 +121,30 @@ Edges can be deleted with a right-click. There is no undo for this action.
 
 #### Consolidating ####
 
+_Consolidation is now an automatic task._
+
 What consolidating does :
 * find orphan vertices in the graph and soft-delete them
 * auto-merge vertices
 * recalculate edges distances and grades if a bias is detected after a change in a vertex affecting one or more edge
 
-> NB : Consolidating should be done at least after an edge was removed, after a vertex belonging to more than one edge was moved
+> NB : Consolidating is a deterministic operation in the database that is automatically done after each editing action 
 
-Consolidating is a deterministic operation in the database, thus can be done without consequences.
+
+#### Keyboard shortcuts ####
+
+Keyboard shortcuts are available to easily edit the edges :
+
+These shortcuts are available in `edit` and `normal` modes :
+* Pin my location : `w`
+* Toggle drop pin mode : `e`
+
+These shortcuts are available in `edit` mode only :
+* Toggle add edge mode : `a`
+* Toggle continuous mode : `z`
+* Toggle overlay view : `spacebar`
+* Stop add edge & drop pin : `escape`
+* Autoreverse type : `q` for None, `s` for Same, `d` for Cycles and `f` for Pedestrian only
+
 
 - - - -
