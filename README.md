@@ -10,7 +10,7 @@ A one-pager that instanciates various maps API and tile providers
 
 Various Layering API and Tile providers can be used to display map information.
 
-### Available Layering API s###
+### Available Layering APIs ###
 
 > _NB: Layering APIs are also called "frameworks" in the following text._
 
