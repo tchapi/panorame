@@ -1,8 +1,8 @@
 <?php
 
-  $app = '_BACKEND';
-  include_once('../../config.php');
 
+function doAction() {
+  
   if (isset($_POST['start_lat']) && isset($_POST['start_lng']) && isset($_POST['start_id']) && isset($_POST['dest_lat']) && isset($_POST['dest_lng']) && isset($_POST['dest_id']) && isset($_POST['edge_id'])){
 
     $start_lat = floatval($_POST['start_lat']);
@@ -37,5 +37,5 @@
     
   }
 
-  header('Content-type: application/json');
-  print json_encode($result);
+  return $result;
+}

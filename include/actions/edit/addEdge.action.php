@@ -1,7 +1,6 @@
 <?php
 
-  $app = '_BACKEND';
-  include_once('../../config.php');
+function doAction() {
 
   if (isset($_POST['start_lat']) && isset($_POST['dest_lat']) && isset($_POST['start_lng']) && isset($_POST['dest_lng'])){
 
@@ -35,5 +34,5 @@
     
   }
 
-  header('Content-type: application/json');
-  print json_encode($result);
+  return $result;
+}

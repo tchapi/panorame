@@ -30,12 +30,11 @@ var isocronMap = function() {
     // Initial limit 
     this.limit = 300;
 
-    this.insertScript = function(canvas, searchInput, addPinButton){
+    this.insertScript = function(canvas, searchInput){
 
         // We make it all asynchronous
         this.canvas = canvas;
         this.searchInput = searchInput;
-        this.addPinButton = addPinButton;
 
         var oScript    = document.createElement('script');
         oScript.type   = 'text/javascript';
@@ -119,7 +118,7 @@ var isocronMap = function() {
 
             if (this.addPinButton.hasClass('active')){
                 mapsWrapper.setAddPin(false);
-                this.addPinButton.html('<b class="icon-map-marker icon-white"></b> Drop Pin (e)');
+                this.addPinButton.html('<b class="icon-map-marker icon-white"></b> Pin (e)');
                 this.addPinButton.removeClass('active');
             } else {
                 mapsWrapper.setAddPin(true);
@@ -191,7 +190,7 @@ var isocronMap = function() {
             this.setNotice('Now leaving adding mode', 'success');
             mapsWrapper.setAddPin(false);
             this.addPinButton.popover('hide');
-            this.addPinButton.html('<b class="icon-map-marker icon-white"></b> Drop Pin (e)');
+            this.addPinButton.html('<b class="icon-map-marker icon-white"></b> Pin (e)');
             this.addPinButton.removeClass('active');
         }, this));
         key('a', $.proxy(function(){

@@ -1,9 +1,5 @@
 <?php
 
-  $app = '_BACKEND';
-  include_once('../../config.php');
-  include_once('../../Geo/GeoUtils.class.php');
-
   class Fill {
 
     private static function fillMySQLWithRandomStuff($limit){
@@ -171,7 +167,9 @@
 
     public static function export(){
 
-      switch(_engine){
+      global $database;
+
+      switch($database){
         case 'mysql':
           return self::exportMySQLToMongo();
           break;
@@ -186,7 +184,9 @@
 
     public static function fillWithRandomStuff($limit){
 
-      switch(_engine){
+      global $database;
+      
+      switch($database){
         case 'mysql':
           return self::fillMySQLWithRandomStuff($limit);
           break;
@@ -201,24 +201,26 @@
 
   };
 
+
+function doAction() {
+  
   if (isset($_GET['random']) && $_GET['random'] == 1){
 
     $numberOfEdgesToInsert = isset($_GET['n'])?intval($_GET['n']):0;
 
     if ($numberOfEdgesToInsert > 0 && $numberOfEdgesToInsert < 100000) {
       // Come on, INSERT SOME FUCKING VERTICES AND EDGES !!
-      header('Content-type: application/json');
-      print json_encode(array( 'number' => $numberOfEdgesToInsert, 'result' => Fill::fillWithRandomStuff($_GET['n'])));
+      return array( 'number' => $numberOfEdgesToInsert, 'result' => Fill::fillWithRandomStuff($_GET['n']));
     } else {
       // GO FUCK YOURSELF
-      header('Content-type: application/json');
-      print json_encode(array( 'number' => $numberOfEdgesToInsert, 'result' => array( 'state' => false, 'description' => 'Too many or too few!')));   
+      return array( 'number' => $numberOfEdgesToInsert, 'result' => array( 'state' => false, 'description' => 'Too many or too few!'));   
     }
 
   } elseif (isset($_GET['export']) && $_GET['export'] == 1){
 
     header('Content-type: text/plain');
-    print Fill::export();
+    return Fill::export();
 
   }
 
+}

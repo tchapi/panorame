@@ -4,19 +4,19 @@
 var databaseWrapper = function() {
 
 	/* ------------- Gobal paths -------------- */
-	var path = "include/actions/";
+	var path = "action/";
 
 	var actions = {
-		getObjectsIn: 		path + "getObjectsIn.action.php",
-		getClosestVertex: path + "getClosestVertex.action.php",
-		getMeansAndSpeeds:path + "getMeansAndSpeeds.action.php",
+		getObjectsIn: 		path + "getObjectsIn",
+		getClosestVertex: path + "getClosestVertex",
+		getMeansAndSpeeds:path + "getMeansAndSpeeds",
 		/* ADMIN */
-		getTypes: 				path + "edit/getTypes.action.php",
-		addEdge:   				path + "edit/addEdge.action.php",
-		deleteEdge:   		path + "edit/deleteEdge.action.php",
-		updateVertex: 		path + "edit/updateVertexCouple.action.php",
-		cutEdge: 					path + "edit/cutEdge.action.php",
-		consolidate: 			path + "edit/consolidate.action.php"
+		getTypes: 				path + "edit/getTypes",
+		addEdge:   				path + "edit/addEdge",
+		deleteEdge:   		path + "edit/deleteEdge",
+		updateVertex: 		path + "edit/updateVertexCouple",
+		cutEdge: 					path + "edit/cutEdge",
+		consolidate: 			path + "edit/consolidate"
 	};
 	/* ---------------------------------------- */
 
