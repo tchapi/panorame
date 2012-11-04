@@ -14,7 +14,6 @@
    * Credentials
    */
 
-  define('_dbengine', "mysql");
   define('_server'  , "localhost");
   define('_user'    , "panorame"); // tchap_panorame
   define('_password', "panorame"); // 8y3nP9922z6tu2en
