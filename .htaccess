@@ -1,0 +1,13 @@
+Options +FollowSymLinks
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  RewriteRule ^action/(.*) index.php?action=$1
+
+</IfModule>
+

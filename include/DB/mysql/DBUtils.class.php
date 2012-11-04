@@ -667,10 +667,10 @@ class DBUtils {
     return array(
       '1_start_alreadyExisted' => !empty($startExistsAlready)?true:false,
       '2_dest_alreadyExisted' => !empty($destExistsAlready)?true:false,
-      '3_start_insert' => $startVertex_insert_result,
-      '4_start_fetch' => ($startVertex_fetch_result!==false)?true:false,
-      '5_dest_insert' => $destVertex_insert_result,
-      '6_dest_fetch' => ($destVertex_fetch_result!==false)?true:false,
+      '3_start_insert' => isset($startVertex_insert_result) && $startVertex_insert_result,
+      '4_start_fetch' => (isset($startVertex_fetch_result) && $startVertex_fetch_result!==false)?true:false,
+      '5_dest_insert' => isset($destVertex_insert_result) && $destVertex_insert_result,
+      '6_dest_fetch' => (isset($destVertex_fetch_result) && $destVertex_fetch_result!==false)?true:false,
       '7_create_edge' => $createEdge_result
     );
 

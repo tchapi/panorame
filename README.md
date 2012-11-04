@@ -37,7 +37,7 @@ The following tile providers are available :
 * MapQuest
  * MapQuest road tiles
 
-### Available Database providers [Work in Progress] ###
+### Available Database engine providers ###
 
 Panorame data services are built upon two different DBMS : Mongo and MySQL, accessed via PHP::Mongo and mysqli.
 
@@ -45,7 +45,7 @@ Panorame data services are built upon two different DBMS : Mongo and MySQL, acce
 
 The application can be accessed via :
 
-        http://panorame.tchap.me/?framework=[API]&provider=[PROVIDER]&dbms=[DATABASE]
+        http://panorame.tchap.me/?framework=[API]&provider=[PROVIDER]&engine=[DATABASE]
 
 The parameters can be :
 
@@ -60,13 +60,13 @@ The parameters can be :
  + gmail-terrain
  + bing-road
  + bing-hybrid
-+ `database` - _optional_ : The database provider amongst :
++ `engine` - _optional_ : The database engine provider amongst :
  + mysql
  + mongo
 
 If no framework is provided, __gmaps__ will be used by default.
 If no provider is provided, the default provider for each framework will be used by default.
-If no database is provided, __MySQL__ will be used by default.
+If no engine is provided, __MySQL__ will be used by default.
 
 > _NB : Not all tile providers are compatible with Layering APIs._
 

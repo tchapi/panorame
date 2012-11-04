@@ -64,13 +64,3 @@ class DBConnector {
   }
   
 }
-
-/* *************************************************** */
-/*                                                     */
-/*                  CONNECTION ROUTINE                 */
-/*                                                     */
-/* *************************************************** */
-
-$DBConnection = new DBConnector($server, $user, $password, $database);
-
-if ($DBConnection->connect()) $DBConnection->selectdb();

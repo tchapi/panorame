@@ -1,8 +1,8 @@
 <?php
 
-  $app = '_BACKEND';
-  include_once('../../config.php');
 
+function doAction() {
+  
   if (isset($_POST['edge_id'])){
 
     $edge_id = intval($_POST['edge_id']);
@@ -27,5 +27,5 @@
     
   }
 
-  header('Content-type: application/json');
-  print json_encode($result);
+  return $result;
+}

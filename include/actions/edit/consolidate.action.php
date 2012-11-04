@@ -1,8 +1,7 @@
 <?php
 
-  $app = '_BACKEND';
-  include_once('../../config.php');
-
+function doAction() {
+  
   $result = DBUtils::consolidate();
 
   if ($result == null || $result == false){
@@ -14,5 +13,5 @@
 
   }
 
-  header('Content-type: application/json');
-  print json_encode($result);
+  return $result;
+}

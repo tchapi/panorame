@@ -1,7 +1,6 @@
 <?php
 
-  $app = '_BACKEND';
-  include_once('../config.php');
+function doAction() {
 
   if (isset($_POST['bounds']) && $_POST['bounds'] != null && isset($_POST['poi']) && isset($_POST['type'])){
 
@@ -51,5 +50,5 @@
     
   }
 
-  header('Content-type: application/json');
-  print json_encode($result);
+  return $result;
+}

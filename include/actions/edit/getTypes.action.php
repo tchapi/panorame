@@ -1,9 +1,7 @@
 <?php
 
-  $app = '_BACKEND';
-  include_once('../../config.php');
+function doAction(){
 
-  $result = DBUtils::getTypes();
+  return DBUtils::getTypes();
 
-  header('Content-type: application/json');
-  print json_encode($result);
+}
