@@ -1,53 +1,61 @@
+var states = {
+  unknown: "unknown",
+  waiting: "waiting",
+  success: "success",
+  error: {
+    timeout: "timeout",
+    permission_denied: "permission_denied",
+    position_unavailable: "position_unavailable",
+    unknow_error: "unknow_error",
+    unsupported: "unsupported"
+  }
+};
+
 var userPositionHelper = function() {
 
     // Default : None
     this.lat = 0;
     this.lng = 0;
 
-    this.info = "";
-
     this.callbackFunction = null;
+
+    this.state = states.unknown;
 
 };
 
-// Fonction de callback en cas de succès
+// Success callback function
 userPositionHelper.prototype.success = function(position) {
 
-  // Un nouvel objet LatLng pour Google Maps avec les paramètres de position
+  // We create a new object with lat and lng values
   this.lat = position.coords.latitude;
   this.lng = position.coords.longitude;
 
-  this.info = "Géolocalisation Réussie: " + this.lat + ' ' + this.lng;
-
-  this.notify();
+  this.state = states.success;
   this.callbackFunction.call(this.callbackContext, this.lat, this.lng, "Ma position");
 
 };
 
-// Fonction de callback en cas d’erreur
+// Failure callback function
 userPositionHelper.prototype.failure = function(error) {
 
-  this.info = "Erreur lors de la géolocalisation : ";
-
   switch(error.code) {
-      case error.TIMEOUT:
-        this.info += "Timeout !";
-        break;
-      case error.PERMISSION_DENIED:
-        this.info += "Vous n’avez pas donné la permission";
-        break;
-      case error.POSITION_UNAVAILABLE:
-        this.info += "La position n’a pu être déterminée";
-        break;
-      case error.UNKNOWN_ERROR:
-        this.info += "Erreur inconnue";
-        break;
-      default:
-        this.info += "Ce navigateur ne supporte pas la géolocalisation";
-        break;
+    case error.TIMEOUT:
+      this.state = states.error.timeout;
+      break;
+    case error.PERMISSION_DENIED:
+      this.state = states.error.permission_denied;
+      break;
+    case error.POSITION_UNAVAILABLE:
+      this.state = states.error.position_unavailable;
+      break;
+    case error.UNKNOWN_ERROR:
+      this.state = states.error.unknow_error;
+      break;
+    default:
+      this.state = states.error.unsupported;
+      break;
   }
 
-  this.notify();
   this.callbackFunction.call(this.callbackContext, null, null, null);
 
 };
@@ -56,6 +64,9 @@ userPositionHelper.prototype.update = function(callbackFunction, callbackContext
 
     this.callbackFunction = callbackFunction;
     this.callbackContext = callbackContext;
+
+    // For now on, we're waiting
+    this.state = states.waiting;
 
     if(navigator.geolocation) {
 
@@ -68,10 +79,6 @@ userPositionHelper.prototype.update = function(callbackFunction, callbackContext
     }
 };
 
+userPositionHelper.prototype.getState = function(){ return this.state; };
 userPositionHelper.prototype.getLat = function(){ return this.lat; };
 userPositionHelper.prototype.getLng = function(){ return this.lng; };
-userPositionHelper.prototype.getInfo = function(){ return this.info; };
-
-userPositionHelper.prototype.notify = function(){
-  console.log(this.info);
-};

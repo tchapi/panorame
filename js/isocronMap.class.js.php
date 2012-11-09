@@ -100,12 +100,12 @@ var isocronMap = function() {
         this.toggleDataOverlay.click($.proxy(function(event){
 
             if (this.displayData == false){
-                this.toggleDataOverlay.toggleClass('icon-eye-close').toggleClass('icon-eye-open');
+                this.toggleDataOverlay.html('view');
                 mapsWrapper.displayDataOverlay();
                 mapsWrapper.displayClosestOverlay();
                 this.displayData = true;
             } else {
-                this.toggleDataOverlay.toggleClass('icon-eye-open').toggleClass('icon-eye-close');
+                this.toggleDataOverlay.html('ban');
                 mapsWrapper.removeDataOverlay();
                 mapsWrapper.removeClosestOverlay();
                 this.displayData = false;
@@ -118,11 +118,11 @@ var isocronMap = function() {
 
             if (this.addPinButton.hasClass('active')){
                 mapsWrapper.setAddPin(false);
-                this.addPinButton.html('<b class="icon-map-marker icon-white"></b> Pin (e)');
+                this.addPinButton.find('span').html('geo');
                 this.addPinButton.removeClass('active');
             } else {
                 mapsWrapper.setAddPin(true);
-                this.addPinButton.html('<b class="icon-ok icon-white"></b> Finish');
+                this.addPinButton.find('span').html('ok');
                 this.addPinButton.addClass('active');
             }
 
@@ -286,7 +286,7 @@ var isocronMap = function() {
     this.updateCurrentPosition = function(lat, lng){
 
         this.position = {lat: lat, lng: lng};
-        $('#position span').html(Math.round(lat*this.digits)/this.digits + ' — ' + Math.round(lng*this.digits)/this.digits);
+        $('#infos .position span.position_coords').html(Math.round(lat*this.digits)/this.digits + ' — ' + Math.round(lng*this.digits)/this.digits);
         this.poiHasChanged();
 
     };
@@ -297,7 +297,7 @@ var isocronMap = function() {
 
         if (bounds == null) return null;
 
-        $('#position b').popover({placement: 'top', trigger: 'click', title:"Actual bounds",
+        $('#infos .position span.position_coords').popover({placement: 'top', trigger: 'click', title:"Actual bounds",
             content: 'NW : (' + Math.round(bounds.NW_lat*this.digits)/this.digits + ', ' + Math.round(bounds.NW_lng*this.digits)/this.digits + ')<br/>' +
                      'SE : (' + Math.round(bounds.SE_lat*this.digits)/this.digits + ', ' + Math.round(bounds.SE_lng*this.digits)/this.digits + ')<br/>'
         });
@@ -313,7 +313,7 @@ var isocronMap = function() {
 <?php else: ?>
         databaseWrapper.getObjectsIn(this.getBounds(), 'tree', this.position, $.proxy(function(data){
 <?php endif ?>            
-            $('#objects span').html(data.count);
+            $('#infos .objects span.obj_count').html(data.count);
             
             if (data !== null && data.closest != null) {
 

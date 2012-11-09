@@ -10,22 +10,16 @@
 <?php include(_PATH.'include/templates/partials/_header.php'); ?>
     </header>
 
-<?php if ($parameters['editMode'] === true): ?>
-    <!-- adminPanel -->
-<?php include(_PATH.'include/templates/partials/_adminPanel.php'); ?>
-<?php endif ?>
+    <div id="page">
 
-    <!-- canvas -->
-    <div id="mapCanvas">
+      <div id="content">
+<?php include(_PATH.'include/templates/pages/_map.php'); ?>
+      </div>
+
       <div class="loader_back">
         <div class="loader"></div>
       </div>
     </div>
-    
-    <!-- footer -->
-    <footer class='row-fluid'>
-<?php include(_PATH.'include/templates/partials/_footer.php'); ?>
-    </footer>
 
   </body>
 <?php include(_PATH.'include/templates/partials/_scripts.php'); ?>
