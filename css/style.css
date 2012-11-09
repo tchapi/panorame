@@ -29,7 +29,7 @@
   -ms-font-feature-settings: "liga" 1, "dlig" 1;
   -o-font-feature-settings: "liga" 1, "dlig" 1;
   font-feature-settings: "liga" 1, "dlig" 1;
-  font-size: 1.5em;
+  font-size: 1.3em;
 }
 .lsf-icon:before {
   content:attr(title);
@@ -63,33 +63,58 @@
 }
 
 header {
-	height: 30px;
-	width: 100%;
+	height: 50px;
 	position: absolute;
 	top:0;
-	padding: 10px 0;
 	border-bottom: 1px solid gray;
 }
-  header h1          	{ margin:0; line-height: 32px; font-size: 31px; }
-  header h1 span		  { color: gray;}
-  header #logo       	{ padding: 0 0 0 10px; }
-  header #actionForm 	{ padding: 0 10px 0 0; }
-  header #addPin		  { margin-left: 10px; }
-  header #limitDiv 	  { padding: 5px 0 5px 10px; height: 18px; width: 300px; margin-right: 10px;}
-  header #limitSlider { margin: 4px 10px; }
-  header #toggleDataOverlay {margin: 0px 8px 0 0; cursor: pointer;}
-  header #mean		    {margin-right: 10px;}
-  header #mean select {width: 150px;}
+  #header {padding: 10px; height: 30px;}
+  #header h1           { margin:0; line-height: 32px; font-size: 31px; }
+  #header #pages ul    { list-style-type: none;}
+  #header #pages ul li { display: inline; border-left: 1px solid #ccc;}
+  #header #pages ul li:first-child { border: none;}
 
 #infos {position: absolute; bottom: 10px; left: 10px;}
 #infos .position, #infos .objects { cursor: pointer;}
 
-#page { position:absolute; width: 100%; top:51px; bottom:0; background: url("/img/bg_tile.jpg"); box-shadow: 0 0 10px black inset;}
+#page { position:absolute; width: 100%; top:51px; bottom:0; background: url("/img/bg_tile.jpg"); }
 #content { position: absolute; z-index: 1; width: 100%; height: 100%;}
+
+#content::after{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    content: "";
+    z-index: 2;
+    pointer-events: none; /* "all" disables mouse access to image */
+    -moz-box-shadow: inset 0 0 25px rgba(0,0,0,1); /* Mozilla Settings */
+    -webkit-box-shadow: inset 0 0 25px rgba(0,0,0,1); /* Webkit Setting */
+}
 
 /* PAGES */
   /* Map */
-  #mapCanvas { width: 100%; height: 100%; background: transparent !important;}
+
+  #toolbar {
+    height: 30px;
+    width: 100%;
+    position: absolute;
+    top:0px;
+    padding: 10px 0;
+    background: #ddd;
+    border-bottom: 1px solid gray;
+  }
+
+  #toolbar #actionForm  { padding: 0 10px 0 0; }
+  #toolbar #addPin      { margin-left: 10px; }
+  #toolbar #limitDiv    { padding: 5px 0 5px 10px; height: 18px; width: 300px; margin-right: 10px;}
+  #toolbar #limitSlider { margin: 4px 10px; }
+  #toolbar #toggleDataOverlay {margin: 0px 8px 0 0; cursor: pointer;}
+  #toolbar #mean        {margin-right: 10px;}
+  #toolbar #mean select {width: 150px;}
+
+  #mapCanvas { position:absolute; width: 100%; top:51px; bottom:0; background: transparent !important;}
   #mapCanvas img { max-width: none; } /* Twitter bootstrap fails with GMAPS */
   #mapCanvas label { width: auto; display:inline; }  /* Twitter bootstrap fails with GMAPS */
 
