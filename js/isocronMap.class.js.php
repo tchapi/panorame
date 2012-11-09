@@ -273,7 +273,11 @@ var isocronMap = function() {
         var min = Math.floor(this.limit / 60);
         var sec = this.limit - min*60;
 
-        return ( (min==0?'':min + 'm ') + (sec==0?'':sec + 's'));
+        if (sec < 10) {
+            sec = '0' + sec;
+        }
+
+        return ( (min==0?'':min + '\' ') + sec + '\'\'');
 
     };
 
