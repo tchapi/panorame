@@ -4,6 +4,7 @@
 <?php if ($parameters['editMode'] !== true): ?>
 <script src="js/plugins/jquery.nouislider.min.js"></script>
 <?php echo $parameters['addedScript']; ?>
+<script src="js/plugins/select2.min.js"></script>
 <?php endif ?>
 <script src="js/helpers/userPositionHelper.js" type="text/javascript"></script>
 <script src="js/isocronMap.class.js.php<?php if ($parameters['editMode'] === true) echo '?edit=1'; ?>" type="text/javascript"></script>
