@@ -297,7 +297,7 @@ var isocronMap = function() {
 
         if (bounds == null) return null;
 
-        $('#infos .position span.position_coords').popover({placement: 'top', trigger: 'click', title:"Actual bounds",
+        $('#infos .position span.position_coords').popover({placement: 'right', trigger: 'click', title:"Actual bounds",
             content: 'NW : (' + Math.round(bounds.NW_lat*this.digits)/this.digits + ', ' + Math.round(bounds.NW_lng*this.digits)/this.digits + ')<br/>' +
                      'SE : (' + Math.round(bounds.SE_lat*this.digits)/this.digits + ', ' + Math.round(bounds.SE_lng*this.digits)/this.digits + ')<br/>'
         });
