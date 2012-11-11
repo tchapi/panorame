@@ -85,18 +85,31 @@ var isocronMap = function() {
 
     this.setupVisual = function(){
 
+        /* Locate me button */
         this.locateMe = $('#self');
 
         this.locateMe.click($.proxy(function(){
             this.setToUserPositionIfAvailable();
         }, this));
 
+        /* Add pin button */
         this.addPinButton  = $('#addPin');
+        this.addPinButton.click($.proxy(function(event){
+
+            if (this.addPinButton.hasClass('active')){
+                mapsWrapper.setAddPin(false);
+                this.addPinButton.find('span').html('geo');
+                this.addPinButton.removeClass('active');
+            } else {
+                mapsWrapper.setAddPin(true);
+                this.addPinButton.find('span').html('ok');
+                this.addPinButton.addClass('active');
+            }
+
+        },this));
+
+        /* Toggle data overlay button */
         this.toggleDataOverlay = $('#toggleDataOverlay');
-
-        $('.radiusType').tooltip({placement: 'bottom'});
-        this.toggleDataOverlay.tooltip({placement: 'bottom'});
-
         this.toggleDataOverlay.click($.proxy(function(event){
 
             if (this.displayData == false){
@@ -113,21 +126,7 @@ var isocronMap = function() {
 
         },this));
 
-        this.addPinButton.popover({placement: 'bottom'});
-        this.addPinButton.click($.proxy(function(event){
-
-            if (this.addPinButton.hasClass('active')){
-                mapsWrapper.setAddPin(false);
-                this.addPinButton.find('span').html('geo');
-                this.addPinButton.removeClass('active');
-            } else {
-                mapsWrapper.setAddPin(true);
-                this.addPinButton.find('span').html('ok');
-                this.addPinButton.addClass('active');
-            }
-
-        },this));
-
+        /* Language selector */
         this.lang = $('#lang');
         function format(L) {
             if (!L.id) return L.text; // optgroup
@@ -223,17 +222,22 @@ var isocronMap = function() {
         }, this));
         /* ------------------- ADMIN ------------------- */
 <?php else: ?>
-        this.limitDiv     = $('#limitDiv');
-        this.limitSlider  = $('#limitSlider');
+        /* Time knob */
+        this.timeInput    = $('#time');
         this.limitValue   = $('#limitValue');
+        this.timeInput.val(this.limit/10);
 
-        this.limitSlider.noUiSlider('init', {
-            knobs: 1,
-            connect: "lower",
-            scale: [0, 600],
-            start: this.limit,
-            change:$.proxy(function(){
-                this.limit = this.limitSlider.noUiSlider('value')[1];
+        this.timeInput.knob({
+          min:0,
+          max:100,
+          inline: false,
+          height: 100,
+          displayPrevious: true,
+          displayInput: false,
+          angleOffset:-90,
+          angleArc:180,
+          change: $.proxy(function(v){
+                this.limit = v*10;
                 this.limitValue.html(this.getLimit());
                 this.rangeHasChanged();
             }, this)
@@ -241,6 +245,7 @@ var isocronMap = function() {
 
         this.limitValue.html(this.getLimit());
 
+        /* Mean of transportation selector */
         this.meanSelect = $('#meanSelector');
         this.meansAndSpeeds = [];
 
@@ -250,20 +255,23 @@ var isocronMap = function() {
             $.each(data, $.proxy(function(key, value) {   
                 
                 this.meanSelect
-                     .append($("<option></option>")
+                     .append($('<button type="button" class="btn lsf tooltip-trigger" data-original-title="'+value.description+'"></button>')
                      .attr("value",value.id)
-                     .text(value.description)); 
+                     .text(value.slug).tooltip({placement: 'bottom'})); 
 
                 this.meansAndSpeeds[value.id] = value.explorables;
 
             }, this));
+            this.meanSelect.children(":first").addClass('active');
 
         }, this));
 
-        this.meanSelect.change($.proxy(function(e){this.recalculateGraph()}, this));
+        /* FIX */
+        this.meanSelect.click($.proxy(function(e){this.recalculateGraph()}, this));
 
 <?php endif ?>
-
+    
+        /* Keyboard shortcuts */
         key('space', $.proxy(function(){
             this.toggleDataOverlay.trigger('click');
         }, this));
@@ -273,6 +281,9 @@ var isocronMap = function() {
         key('w', $.proxy(function(){
             this.locateMe.trigger('click');
         }, this));
+
+        /* Create all tooltips */
+        $('.tooltip-trigger').tooltip({placement: 'bottom'});
 
     };
 
@@ -389,7 +400,7 @@ var isocronMap = function() {
 
     this.calculateCost = function(startingCost, distance, grade, type){
 
-        var speeds = this.meansAndSpeeds[this.meanSelect.find(':selected').val()][type];
+        var speeds = this.meansAndSpeeds[this.meanSelect.find('.active').val()][type];
 
         return startingCost + Math.max(0, distance*speeds[0] + grade*speeds[1]);
        
@@ -397,7 +408,7 @@ var isocronMap = function() {
 
     this.isExplorable = function(type){
 
-        return (this.meansAndSpeeds[this.meanSelect.find(':selected').val()][type] != null);
+        return (this.meansAndSpeeds[this.meanSelect.find('.active').val()][type] != null);
 
     };
 

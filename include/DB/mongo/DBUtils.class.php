@@ -24,7 +24,7 @@ class DBUtils {
         $explorables[$explorable['type_id']] = array($explorable['flat_speed'], $explorable['grade_speed']);
       }
 
-      array_push($means, array('id' => $mean['_id'], 'description' => $mean['description'], 'explorables' => $explorables));
+      array_push($means, array('id' => $mean['_id'], 'slug' => $mean['slug'], 'description' => $mean['description'], 'explorables' => $explorables));
     
     }
 

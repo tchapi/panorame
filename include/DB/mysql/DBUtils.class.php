@@ -9,7 +9,7 @@ class DBUtils {
 
     global $DBConnection;
 
-    $getMeansAndSpeeds_query = "SELECT m.`id` AS id, m.`description` AS description, GROUP_CONCAT(CONCAT('{\"type_id\":', s.`type_id`, ', \"speeds\": [', s.`flat_speed`, ',', s.`grade_speed`, ']}')) AS explorables
+    $getMeansAndSpeeds_query = "SELECT m.`id` AS id, m.`description` AS description, m.`slug` AS slug, GROUP_CONCAT(CONCAT('{\"type_id\":', s.`type_id`, ', \"speeds\": [', s.`flat_speed`, ',', s.`grade_speed`, ']}')) AS explorables
                        FROM `means` m
                        LEFT JOIN `speeds` s ON (m.`id`= s.`mean_id`)
                        GROUP BY mean_id ";
@@ -35,7 +35,7 @@ class DBUtils {
             }
           }
 
-          array_push($means, array('id' => $row['id'], 'description' => $row['description'], 'explorables' => $explorables));
+          array_push($means, array('id' => $row['id'], 'slug' => $row['slug'], 'description' => $row['description'], 'explorables' => $explorables));
         
         }
       }

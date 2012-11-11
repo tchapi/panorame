@@ -74,8 +74,8 @@ header {
 	position: absolute;
 	top:0;
 }
-  #header    { padding: 10px; height: 30px; margin: 0 84px 0 0;}
-  #header h1 { margin:0; line-height: 32px; font-size: 31px; }
+  #header    { padding: 10px; height: 30px; margin: 0 84px 0 0; border-bottom: 4px solid #08C;}
+  #header h1 { margin:0; line-height: 32px; font-size: 30px; font-weight: lighter; }
   #header #pages ul {
     font-size: 16px;
     margin: 4px 20px 0 0;
@@ -91,55 +91,50 @@ header {
     right: 0;
     top: 0;
     background: #EEE;
-    border-left: 1px solid #DDD;
+    border-bottom: 4px solid #CCC;
     height: 30px;
-    width: 62px;
+    width: 64px;
     padding: 10px;
   }
   div.select2-search {display: none;}
   img.flag{ margin: -3px 0 0 0; }
 
-#infos {position: absolute; bottom: 10px; left: 10px;}
+#infos {position: absolute; bottom: 10px; left: 10px; z-index:2;}
 #infos .position, #infos .objects { cursor: pointer;}
 
-#page { position:absolute; width: 100%; top:50px; bottom:0; background: url("/img/bg_tile.jpg"); }
-#content { position: absolute; z-index: 1; width: 100%; height: 100%;}
-
-#content::after{
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    content: "";
-    z-index: 2;
-    pointer-events: none; /* "all" disables mouse access to image */
-    -moz-box-shadow: inset 0 0 25px rgba(0,0,0,1); /* Mozilla Settings */
-    -webkit-box-shadow: inset 0 0 25px rgba(0,0,0,1); /* Webkit Setting */
-}
+#page { position:absolute; width: 100%; top:54px; bottom:0; background: url("/img/bg_tile.jpg"); }
 
 /* PAGES */
   /* Map */
 
   #toolbar {
     height: 30px;
-    width: 100%;
-    position: absolute;
-    top:0px;
-    padding: 10px 0;
+    padding: 10px;
     background: #ddd;
     border-bottom: 1px solid gray;
   }
 
-  #toolbar #actionForm  { padding: 0 10px 0 0; }
-  #toolbar #addPin      { margin-left: 10px; }
-  #toolbar #limitDiv    { padding: 5px 0 5px 10px; height: 18px; width: 300px; margin-right: 10px;}
-  #toolbar #limitSlider { margin: 4px 10px; }
   #toolbar #toggleDataOverlay {margin: 0px 8px 0 0; cursor: pointer;}
-  #toolbar #mean        {margin-right: 10px;}
+  #toolbar #mean        {margin-right: 10px; }
+  #toolbar #meanSelector button {font-size:27px;}
   #toolbar #mean select {width: 150px;}
 
-  #mapCanvas { position:absolute; width: 100%; top:51px; bottom:0; background: transparent !important;}
+  #timeController {z-index:3; position: absolute; bottom:0; left: 50%; margin-left: -50px; overflow: hidden;}
+    #timeController #limitValue {position:absolute; top: 74px; right: 50%; margin-right: -32px; font-size: 19px}
+
+  #mapCanvas { position:absolute; z-index: 1; width: 100%; top:51px; bottom:0; background: transparent !important;}
+  #mapCanvas::after{
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      content: "";
+      z-index: 2;
+      pointer-events: none; /* "all" disables mouse access to image */
+      -moz-box-shadow: inset 0 0 25px rgba(0,0,0,1); /* Mozilla Settings */
+      -webkit-box-shadow: inset 0 0 25px rgba(0,0,0,1); /* Webkit Setting */
+  }
   #mapCanvas img { max-width: none; } /* Twitter bootstrap fails with GMAPS */
   #mapCanvas label { width: auto; display:inline; }  /* Twitter bootstrap fails with GMAPS */
 
