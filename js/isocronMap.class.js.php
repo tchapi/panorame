@@ -236,6 +236,8 @@ var isocronMap = function() {
           displayInput: false,
           angleOffset:-90,
           angleArc:180,
+          ticks: 40,
+          canvasBgColor: '#FFF',
           change: $.proxy(function(v){
                 this.limit = v*10;
                 this.limitValue.html(this.getLimit());

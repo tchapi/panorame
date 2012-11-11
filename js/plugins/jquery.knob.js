@@ -97,6 +97,7 @@
                     displayInput : this.$.data('displayinput') == null || this.$.data('displayinput'),
                     displayPrevious : this.$.data('displayprevious'),
                     fgColor : this.$.data('fgcolor') || '#87CEEB',
+                    canvasBgColor : this.$.data('canvasbgcolor') || false,
                     inline : false,
 
                     // Hooks
@@ -106,11 +107,11 @@
                     release : null, // function (value) {}
 
                     // Ticks
-                    tickColor : this.$.data('tickColor') || '#ccc',
-                    ticks : this.$.data('ticks') || 40,
-                    tickLength : this.$.data('tickLength') || 25,
-                    tickWidth : this.$.data('tickWidth') || 0.01,
-                    tickFgColor : this.$.data('fgcolor') || '#08C',
+                    ticks : this.$.data('ticks') || 0,
+                    tickColor : this.$.data('tickcolor') || '#ccc',
+                    tickLength : this.$.data('ticklength') || this.$.data('thickness')*0.8 || 0.25,
+                    tickWidth : this.$.data('tickwidth') || 0.01,
+                    tickFgColor : this.$.data('tickfgcolor') || '#08c',
                 }, this.o
             );
 
@@ -547,6 +548,7 @@
             this.cursorExt = this.o.cursor / 100;
             this.xy = this.w2;
             this.lineWidth = this.xy * this.o.thickness;
+            this.tickLength = this.xy * this.o.tickLength;
             this.radius = this.xy - this.lineWidth / 2;
 
             this.o.angleOffset
@@ -611,18 +613,20 @@
 
             c.lineWidth = this.lineWidth;
 
+            if (this.o.canvasBgColor !== false) {
+                c.beginPath();
+                    c.fillStyle = this.o.canvasBgColor;
+                    c.arc(this.xy, this.xy, this.radius, 0, 360, true);
+                c.fill();
+            }
+
             this.o.cursor
                 && (sat = eat - this.cursorExt)
                 && (eat = eat + this.cursorExt);
 
             c.beginPath();
-                c.fillStyle = '#FFFFFF';
-                c.arc(this.xy, this.xy, this.radius, 0, 360, true);
-            c.fill();
-
-            c.beginPath();
                 c.strokeStyle = this.o.bgColor;
-                c.arc(this.xy, this.xy, this.radius-20, this.endAngle, this.startAngle, true);
+                c.arc(this.xy, this.xy, this.radius, this.endAngle, this.startAngle, true);
             c.stroke();
 
             if (this.o.displayPrevious) {
@@ -634,41 +638,42 @@
 
                 c.beginPath();
                     c.strokeStyle = this.pColor;
-                    c.arc(this.xy, this.xy, this.radius-20, sa, ea, false);
+                    c.arc(this.xy, this.xy, this.radius, sa, ea, false);
                 c.stroke();
                 r = (this.cv == this.v);
             }
 
             c.beginPath();
                 c.strokeStyle = r ? this.o.fgColor : this.fgColor ;
-                c.arc(this.xy, this.xy, this.radius-20, sat, eat, false);
+                c.arc(this.xy, this.xy, this.radius, sat, eat, false);
             c.stroke();
 
-            var ticks = this.o.ticks;
-            var tw = this.o.tickWidth;
-            var halfPi = .5 * Math.PI;
-            var twoPi = halfPi * 4;
-            var step = twoPi / ticks;
+            if (this.o.ticks != 0){
 
-            c.lineWidth = this.o.tickLength;
-            for(var tick = 0; tick < ticks; tick++) {
+                var halfPi = .5 * Math.PI,
+                    twoPi = halfPi * 4,
+                    step = this.angleArc / this.o.ticks;
 
-                c.beginPath();
+                c.lineWidth = this.tickLength;
 
-                var tick_sa = step * tick - halfPi;
+                for(var tick = 0; tick < this.o.ticks; tick++) {
 
-                if( sat + tick_sa < eat) {
-                    c.strokeStyle = this.o.tickFgColor;
-                }else{
-                    c.strokeStyle = this.o.tickColor;
+                    var tick_sa = step * tick;
+
+                    if (tick_sa > this.angleArc) continue;
+                    
+                    c.beginPath();
+
+                    if (sat + tick_sa < eat) {
+                        c.strokeStyle = this.o.tickFgColor;
+                    } else {
+                        c.strokeStyle = this.o.tickColor;
+                    }
+
+                    c.arc(this.xy, this.xy, this.radius, sat + tick_sa, sat + tick_sa + this.o.tickWidth, false);
+                    c.stroke();
                 }
-
-                c.arc(this.xy, this.xy, this.radius-20, sat + tick_sa - tw, sat + tick_sa , false);
-                c.stroke();
             }
-
-
-
         };
 
         this.cancel = function () {
