@@ -108,22 +108,23 @@ header {
   /* Map */
 
   #toolbar {
-    height: 30px;
+    height: 50px;
     padding: 10px;
     background: #ddd;
     border-bottom: 1px solid gray;
   }
 
-  #toolbar #toggleDataOverlay {margin: 0px 8px 0 0; cursor: pointer;}
-  #toolbar #mean        {margin-right: 10px; }
-  #toolbar #meanSelector button {font-size:27px;}
-  #toolbar #mean select {width: 150px;}
+    #toolbar #toggleDataOverlay {margin: 0px 8px 0 0; cursor: pointer;}
+    #toolbar #mean, #toolbar #speed        {margin-right: 10px; display: inline-block;}
+    #toolbar #meanSelector button {font-size:27px;}
+    #toolbar #mean select {width: 150px;}
+    #toolbar .toolTitle { font-weight: bold; font-size: 12px;}
 
   #timeController {z-index:3; position: absolute; bottom:0; left: 50%; margin-left: -112px; overflow: hidden;}
     #timeController #limitValue {position:absolute; top: 78px; right: 50%; margin-right: -44px; font-size: 31px; color: #DDD;}
     #timeController #limitValue span {font-size: 26px; color: #777;}
 
-  #mapCanvas { position:absolute; z-index: 1; width: 100%; top:51px; bottom:0; background: transparent !important;}
+  #mapCanvas { position:absolute; z-index: 1; width: 100%; top:71px; bottom:0; background: transparent !important;}
   #mapCanvas::after{
       position: absolute;
       top: 0;

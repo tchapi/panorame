@@ -235,7 +235,7 @@ var isocronMap = function() {
             $.each(data, $.proxy(function(key, value) {   
                 
                 this.meanSelect
-                     .append($('<button type="button" class="btn lsf tooltip-trigger" data-original-title="'+value.description+'"></button>')
+                     .append($('<button type="button" class="btn lsf"></button>')
                      .attr("value",value.id)
                      .text(value.slug).tooltip({placement: 'bottom'})); 
 
