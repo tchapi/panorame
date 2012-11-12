@@ -94,6 +94,11 @@ var mapsWrapper = function(type) {
 
     this.setAddPin = function(booleanValue){
         this.addPin = booleanValue;
+        if (booleanValue === true) {
+            this.map.setOptions({draggableCursor: 'crosshair'});
+        } else {
+            this.map.setOptions({draggableCursor: 'default'});
+        }
     };
 
 <?php if ($editMode === true): ?>

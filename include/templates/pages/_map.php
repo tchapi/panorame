@@ -4,7 +4,7 @@
       <div class="input-prepend input-append" id="searchForm">
         <input class="input-xlarge" id="searchInput" type="text" placeholder="What? Where?">
         <button class="btn btn-primary tooltip-trigger" id="self" data-original-title="Locate me (w)"><span class="lsf">location</span></button>
-        <button class="btn tooltip-trigger" id="addPin " data-original-title="Choose a place by clicking on the map"><span class="lsf">geo</span></button>
+        <button class="btn btn-success tooltip-trigger" id="addPin" data-original-title="Choose a place by clicking on the map"><span class="lsf">geo</span></button>
       </div>
       <ul id="multipleChoices" class="dropdown-menu"></ul>
     </div>
