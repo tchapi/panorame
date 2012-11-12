@@ -611,12 +611,22 @@
                 , sa, ea                    // Previous angles
                 , r = 1;
 
+            var gradient = c.createLinearGradient(0,0,170,0);
+                gradient.addColorStop(0,"#7ea8d0");
+                gradient.addColorStop(0.5,"#7e4dba");
+                gradient.addColorStop(1,"#bd3d9e");
+
+            var prev_gradient = c.createLinearGradient(0,0,170,0);
+                prev_gradient.addColorStop(0,"#bec8d1");
+                prev_gradient.addColorStop(0.5,"#9c84ba");
+                prev_gradient.addColorStop(1,"#bd75ab");
+
             c.lineWidth = this.lineWidth;
 
             if (this.o.canvasBgColor !== false) {
                 c.beginPath();
                     c.fillStyle = this.o.canvasBgColor;
-                    c.arc(this.xy, this.xy, this.radius, 0, 360, true);
+                    c.arc(this.xy, this.xy, this.radius+this.lineWidth/2, 0, 360, true);
                 c.fill();
             }
 
@@ -626,7 +636,7 @@
 
             c.beginPath();
                 c.strokeStyle = this.o.bgColor;
-                c.arc(this.xy, this.xy, this.radius, this.endAngle, this.startAngle, true);
+                c.arc(this.xy, this.xy, this.radius-1, this.endAngle, this.startAngle, true);
             c.stroke();
 
             if (this.o.displayPrevious) {
@@ -637,15 +647,15 @@
                     && (ea = ea + this.cursorExt);
 
                 c.beginPath();
-                    c.strokeStyle = this.pColor;
-                    c.arc(this.xy, this.xy, this.radius, sa, ea, false);
+                    c.strokeStyle = prev_gradient; //this.pColor;
+                    c.arc(this.xy, this.xy, this.radius-1, sa, ea, false);
                 c.stroke();
                 r = (this.cv == this.v);
             }
 
             c.beginPath();
-                c.strokeStyle = r ? this.o.fgColor : this.fgColor ;
-                c.arc(this.xy, this.xy, this.radius, sat, eat, false);
+                c.strokeStyle = gradient; //r ? this.o.fgColor : this.fgColor ;
+                c.arc(this.xy, this.xy, this.radius-1, sat, eat, false);
             c.stroke();
 
             if (this.o.ticks != 0){
@@ -670,7 +680,7 @@
                         c.strokeStyle = this.o.tickColor;
                     }
 
-                    c.arc(this.xy, this.xy, this.radius, sat + tick_sa, sat + tick_sa + this.o.tickWidth, false);
+                    c.arc(this.xy, this.xy, this.radius-1, sat + tick_sa, sat + tick_sa + this.o.tickWidth, false);
                     c.stroke();
                 }
             }

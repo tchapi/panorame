@@ -236,10 +236,13 @@ var isocronMap = function() {
           displayInput: false,
           angleOffset:-90,
           angleArc:180,
-          ticks: 40,
-          canvasBgColor: '#FFF',
+          ticks: 30,
+          tickLength: 0.25,
+          canvasBgColor: '#000',
+          tickColor: 'rgba(0,0,0,0.1)',
+          tickFgColor: 'rgba(0,0,0,0.3)',
           change: $.proxy(function(v){
-                this.limit = v*10;
+                this.limit = Math.max(0,v*10);
                 this.limitValue.html(this.getLimit());
                 this.rangeHasChanged();
             }, this)
@@ -300,7 +303,10 @@ var isocronMap = function() {
             sec = '0' + sec;
         }
 
-        return ( (min==0?'':min + '\' ') + sec + '\'\'');
+        if (min < 10) {
+            min = '0' + min;
+        }
+        return ( min + '\'<span>' + sec + '\"</span>');
 
     };
 
