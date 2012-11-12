@@ -94,37 +94,11 @@ var isocronMap = function() {
 
         /* Add pin button */
         this.addPinButton  = $('#addPin');
-        this.addPinButton.click($.proxy(function(event){
-
-            if (this.addPinButton.hasClass('active')){
-                mapsWrapper.setAddPin(false);
-                this.addPinButton.find('span').html('geo');
-                this.addPinButton.removeClass('active');
-            } else {
-                mapsWrapper.setAddPin(true);
-                this.addPinButton.find('span').html('ok');
-                this.addPinButton.addClass('active');
-            }
-
-        },this));
+        this.addPinButton.click($.proxy(this.toggleAddPin,this));
 
         /* Toggle data overlay button */
-        this.toggleDataOverlay = $('#toggleDataOverlay');
-        this.toggleDataOverlay.click($.proxy(function(event){
-
-            if (this.displayData == false){
-                this.toggleDataOverlay.html('view');
-                mapsWrapper.displayDataOverlay();
-                mapsWrapper.displayClosestOverlay();
-                this.displayData = true;
-            } else {
-                this.toggleDataOverlay.html('ban');
-                mapsWrapper.removeDataOverlay();
-                mapsWrapper.removeClosestOverlay();
-                this.displayData = false;
-            }
-
-        },this));
+        this.toggleDataOverlayButton = $('#toggleDataOverlay');
+        this.toggleDataOverlayButton.click($.proxy(this.toggleDataOverlay,this));
 
         /* Language selector */
         this.lang = $('#lang');
@@ -226,6 +200,7 @@ var isocronMap = function() {
         this.timeInput    = $('#time');
         this.limitValue   = $('#limitValue');
         this.timeInput.val(this.limit/10);
+        this.limitValue.html(this.getLimit());
 
         this.timeInput.knob({
           min:0,
@@ -247,8 +222,6 @@ var isocronMap = function() {
                 this.rangeHasChanged();
             }, this)
         });
-
-        this.limitValue.html(this.getLimit());
 
         /* Mean of transportation selector */
         this.meanSelect = $('#meanSelector');
@@ -290,6 +263,34 @@ var isocronMap = function() {
         /* Create all tooltips */
         $('.tooltip-trigger').tooltip({placement: 'bottom'});
 
+    };
+
+    this.toggleAddPin = function(){
+
+        if (this.addPinButton.hasClass('active')){
+            mapsWrapper.setAddPin(false);
+            this.addPinButton.find('span').html('geo');
+            this.addPinButton.removeClass('active');
+        } else {
+            mapsWrapper.setAddPin(true);
+            this.addPinButton.find('span').html('ok');
+            this.addPinButton.addClass('active');
+        }
+    };
+
+    this.toggleDataOverlay = function(){
+
+        if (this.displayData == false){
+            this.toggleDataOverlay.html('view');
+            mapsWrapper.displayDataOverlay();
+            mapsWrapper.displayClosestOverlay();
+            this.displayData = true;
+        } else {
+            this.toggleDataOverlay.html('ban');
+            mapsWrapper.removeDataOverlay();
+            mapsWrapper.removeClosestOverlay();
+            this.displayData = false;
+        }
     };
 
     this.getLimit = function(){

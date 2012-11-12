@@ -14,7 +14,7 @@
   </div>
 </div>
 <div id="corner">
-  <select id="lang" class="pull-right">
+  <select id="lang" class="pull-right hide">
     <option value="FR">Français</option>
     <option value="US">English</option>
     <option value="ES">Español</option>
