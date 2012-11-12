@@ -89,6 +89,7 @@ var isocronMap = function() {
         this.locateMe = $('#self');
 
         this.locateMe.click($.proxy(function(){
+            this.toggleAddPin(false);
             this.setToUserPositionIfAvailable();
         }, this));
 
@@ -265,9 +266,9 @@ var isocronMap = function() {
 
     };
 
-    this.toggleAddPin = function(){
+    this.toggleAddPin = function(booleanValue){
 
-        if (this.addPinButton.hasClass('active')){
+        if (this.addPinButton.hasClass('active') || booleanValue === false){
             mapsWrapper.setAddPin(false);
             this.addPinButton.find('span').html('geo');
             this.addPinButton.removeClass('active');
@@ -278,9 +279,9 @@ var isocronMap = function() {
         }
     };
 
-    this.toggleDataOverlay = function(){
+    this.toggleDataOverlay = function(booleanValue){
 
-        if (this.displayData == false){
+        if (this.displayData == false || booleanValue === true){
             this.toggleDataOverlay.html('view');
             mapsWrapper.displayDataOverlay();
             mapsWrapper.displayClosestOverlay();
