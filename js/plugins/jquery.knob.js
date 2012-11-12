@@ -100,6 +100,9 @@
                     canvasBgColor : this.$.data('canvasbgcolor') || false,
                     inline : false,
 
+                    // Canvas extend
+                    extendCanvasRatio : this.$.data('extendCanvasRatio') || 1,
+
                     // Hooks
                     draw : null, // function () {}
                     change : null, // function (value) {}
@@ -154,14 +157,14 @@
             (!this.o.displayInput) && this.$.hide();
 
             this.$c = $('<canvas width="' +
-                            this.o.width + 'px" height="' +
-                            this.o.height + 'px"></canvas>');
+                            this.o.width*this.o.extendCanvasRatio + 'px" height="' +
+                            this.o.height*this.o.extendCanvasRatio + 'px"></canvas>');
             this.c = this.$c[0].getContext("2d");
 
             this.$
                 .wrap($('<div style="' + (this.o.inline ? 'display:inline;' : '') +
-                        'width:' + this.o.width + 'px;height:' +
-                        this.o.height + 'px;"></div>'))
+                        'width:' + this.o.width*this.o.extendCanvasRatio + 'px;height:' +
+                        this.o.height*this.o.extendCanvasRatio + 'px;"></div>'))
                 .before(this.$c);
 
             if (this.v instanceof Object) {
@@ -194,8 +197,8 @@
             var d = true,
                 c = document.createElement('canvas');
 
-            c.width = s.o.width;
-            c.height = s.o.height;
+            c.width = s.o.width*this.o.extendCanvasRatio;
+            c.height = s.o.height*this.o.extendCanvasRatio;
             s.g = c.getContext('2d');
 
             s.clear();
@@ -546,10 +549,10 @@
             this.$.val(this.v);
             this.w2 = this.o.width / 2;
             this.cursorExt = this.o.cursor / 100;
-            this.xy = this.w2;
-            this.lineWidth = this.xy * this.o.thickness;
-            this.tickLength = this.xy * this.o.tickLength;
-            this.radius = this.xy - this.lineWidth / 2;
+            this.xy = this.w2 * this.o.extendCanvasRatio;
+            this.lineWidth = this.w2 * this.o.thickness;
+            this.tickLength = this.w2 * this.o.tickLength;
+            this.radius = this.w2 - this.lineWidth / 2;
 
             this.o.angleOffset
             && (this.o.angleOffset = isNaN(this.o.angleOffset) ? 0 : this.o.angleOffset);
@@ -573,15 +576,15 @@
 
             this.o.displayInput
                 && this.i.css({
-                        'width' : ((this.o.width / 2 + 4) >> 0) + 'px'
-                        ,'height' : ((this.o.width / 3) >> 0) + 'px'
+                        'width' : ((this.o.width*this.o.extendCanvasRatio / 2 + 4) >> 0) + 'px'
+                        ,'height' : ((this.o.width*this.o.extendCanvasRatio / 3) >> 0) + 'px'
                         ,'position' : 'absolute'
                         ,'vertical-align' : 'middle'
-                        ,'margin-top' : ((this.o.width / 3) >> 0) + 'px'
-                        ,'margin-left' : '-' + ((this.o.width * 3 / 4 + 2) >> 0) + 'px'
+                        ,'margin-top' : ((this.o.width*this.o.extendCanvasRatio / 3) >> 0) + 'px'
+                        ,'margin-left' : '-' + ((this.o.width*this.o.extendCanvasRatio * 3 / 4 + 2) >> 0) + 'px'
                         ,'border' : 0
                         ,'background' : 'none'
-                        ,'font' : 'bold ' + ((this.o.width / s) >> 0) + 'px Arial'
+                        ,'font' : 'bold ' + ((this.o.width*this.o.extendCanvasRatio / s) >> 0) + 'px Arial'
                         ,'text-align' : 'center'
                         ,'color' : this.o.fgColor
                         ,'padding' : '0px'
@@ -611,6 +614,8 @@
                 , sa, ea                    // Previous angles
                 , r = 1;
 
+
+            /* START specific */
             var gradient = c.createLinearGradient(0,0,170,0);
                 gradient.addColorStop(0,"#7ea8d0");
                 gradient.addColorStop(0.5,"#7e4dba");
@@ -620,6 +625,10 @@
                 prev_gradient.addColorStop(0,"#bec8d1");
                 prev_gradient.addColorStop(0.5,"#9c84ba");
                 prev_gradient.addColorStop(1,"#bd75ab");
+
+            c.shadowColor = "rgba(0,0,0,0.5)";
+            c.shadowBlur = 20;
+            /* END specific */
 
             c.lineWidth = this.lineWidth;
 
@@ -636,7 +645,7 @@
 
             c.beginPath();
                 c.strokeStyle = this.o.bgColor;
-                c.arc(this.xy, this.xy, this.radius-1, this.endAngle, this.startAngle, true);
+                c.arc(this.xy, this.xy, this.radius, this.endAngle, this.startAngle, true);
             c.stroke();
 
             if (this.o.displayPrevious) {
@@ -648,14 +657,14 @@
 
                 c.beginPath();
                     c.strokeStyle = prev_gradient; //this.pColor;
-                    c.arc(this.xy, this.xy, this.radius-1, sa, ea, false);
+                    c.arc(this.xy, this.xy, this.radius, sa, ea, false);
                 c.stroke();
                 r = (this.cv == this.v);
             }
 
             c.beginPath();
                 c.strokeStyle = gradient; //r ? this.o.fgColor : this.fgColor ;
-                c.arc(this.xy, this.xy, this.radius-1, sat, eat, false);
+                c.arc(this.xy, this.xy, this.radius, sat, eat, false);
             c.stroke();
 
             if (this.o.ticks != 0){
@@ -680,7 +689,7 @@
                         c.strokeStyle = this.o.tickColor;
                     }
 
-                    c.arc(this.xy, this.xy, this.radius-1, sat + tick_sa, sat + tick_sa + this.o.tickWidth, false);
+                    c.arc(this.xy, this.xy, this.radius, sat + tick_sa, sat + tick_sa + this.o.tickWidth, false);
                     c.stroke();
                 }
             }

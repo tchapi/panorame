@@ -214,6 +214,7 @@ var isocronMap = function() {
           angleArc:180,
           ticks: 30,
           tickLength: 0.25,
+          extendCanvasRatio: 1.12,
           canvasBgColor: '#000',
           tickColor: 'rgba(0,0,0,0.1)',
           tickFgColor: 'rgba(0,0,0,0.3)',
