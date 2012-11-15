@@ -39,13 +39,15 @@ var mapsWrapper = function(type) {
                 break;
         }
 
+        this.infoBubble = new nokia.maps.map.component.InfoBubbles();
+
         var options = {
             center: [genericOptions.center.lat, genericOptions.center.lng],
             zoomLevel: 16,
             components: [ 
                 new nokia.maps.map.component.Behavior(),
-                new nokia.maps.map.component.ZoomBar()
-                // add kinetics
+                new nokia.maps.map.component.ZoomBar(),
+                this.infoBubble
             ],
         };
 
@@ -82,22 +84,30 @@ var mapsWrapper = function(type) {
 
     this.setupEvents = function(genericOptions){
 
+        /* Geocoding */
+        this.searchManager = nokia.places.search.manager;
+
         $('#'+genericOptions.searchInput).keyup($.proxy(function(){
 
             if (event.target.value == "" || event.keyCode == 27) {
                 $('#multipleChoices').hide();
                 $('#'+genericOptions.searchInput).blur();
             } else {
-/*
-                var geocodeRequest = {where:event.target.value, count:10, callback:$.proxy(function(response, userData){
+
+                this.searchManager.geoCode({
+                    searchTerm: event.target.value,
+                    limit: 10,
+                    onComplete: $.proxy(function (data, requestStatus, requestId) {
 
                     var results = "";
-                    if (!response) return false;
-                    
-                    for (i = 0; i < response.results.length; i++) {
-                        var location = response.results[i];
-                          results += '<li lat="'+ location.location.latitude +'" lng="'+ location.location.longitude +'"> ';
-                          results += location.name +'</li>';
+                    if (requestStatus != "OK") return false;
+
+                    // The function findPlaces() and reverseGeoCode() of  return results in slightly different formats
+                    locations = data.results ? data.results.items : [data.location];    
+
+                    for (i = 0; i < locations.length; i++) {
+                        results += '<li lat="'+ locations[i].position.latitude +'" lng="'+ locations[i].position.longitude +'"> ';
+                        results += locations[i].address.text +'</li>';
                     }
 
                     if (results != "") {
@@ -110,8 +120,8 @@ var mapsWrapper = function(type) {
                       }, this));
                     }
 
-                }, this)};
-                this.searchManager.geocode(geocodeRequest); */
+                }, this)});
+                
             }
         }, this));
 
@@ -129,7 +139,7 @@ var mapsWrapper = function(type) {
 
         if (this.map && lat != null && lng != null) {
 
-            this.position = new nokia.maps.geo.Coordinate(lat, lng);
+            this.position = new nokia.maps.geo.Coordinate(parseFloat(lat), parseFloat(lng));
             this.map.setCenter(this.position, 'default');
             
             // Creates the marker & infoWindow
@@ -140,23 +150,14 @@ var mapsWrapper = function(type) {
             this.marker = new nokia.maps.map.Marker(this.position, {icon: this.standardPinImage, visibility: true, draggable: false, height: 50, width: 34, anchor: new nokia.maps.util.Point(17, 42) });
 
             this.map.objects.add(this.marker);
-/*
+
             if (description != null){
                 // Displays the infoWindow
-               if (!this.infoWindow) {
-                    this.infoWindow = new Microsoft.Maps.Infobox(this.position);
-                    this.map.entities.push(this.infoWindow);
-                } else {
-                    this.infoWindow.setLocation(this.position)
-                }
-                this.infoWindow.setOptions({ title:description, zIndex: 10});
-                this.infoWindow.setOptions({ visible:true });
+                this.infoWindow = this.infoBubble.openBubble(description, this.position);
             } else {
-                if (this.infoWindow) this.infoWindow.setOptions({ visible:false });
+                if (this.infoWindow) this.infoBubble.closeBubble(this.infoWindow);
             }
 
-            this.marker.setOptions({infobox: this.infoWindow});
-*/
             this.positionCallback(lat, lng);
         }
 
@@ -199,8 +200,8 @@ var mapsWrapper = function(type) {
             } else { continue; }
 
             currentLine = new nokia.maps.map.Polyline([
-                new nokia.maps.geo.Coordinate(startPoint.lat, startPoint.lng),
-                new nokia.maps.geo.Coordinate(destPoint.lat, destPoint.lng)
+                new nokia.maps.geo.Coordinate(parseFloat(startPoint.lat), parseFloat(startPoint.lng)),
+                new nokia.maps.geo.Coordinate(parseFloat(destPoint.lat), parseFloat(destPoint.lng))
             ], { pen: {
                 strokeColor: this.colorsForType[edges[i].type], 
                 lineWidth: this.thicknessesForType[edges[i].type]
@@ -217,7 +218,7 @@ var mapsWrapper = function(type) {
 
     this.setClosestOverlay = function(closestPoint, display){
 
-        var position = new nokia.maps.geo.Coordinate(closestPoint.lat, closestPoint.lng);
+        var position = new nokia.maps.geo.Coordinate(parseFloat(closestPoint.lat), parseFloat(closestPoint.lng));
 
         if (this.closestPoint != null && position.equals(this.closestPoint.coordinate) ) {
             return; // we will not display again
