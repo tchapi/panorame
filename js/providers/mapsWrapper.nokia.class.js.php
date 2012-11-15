@@ -64,8 +64,11 @@ var mapsWrapper = function(type) {
         this.closestPointPinImage = genericOptions.closestPointPinImage;
 
         /*Click for adding pins*/
-        this.map.addListener("click", $.proxy(function(e){
-            var converted = nokia.maps.map.pixelToGeo(e.displayX, e.displayY);
+        var TOUCH = nokia.maps.dom.Page.browser.touch,
+            CLICK = TOUCH ? "tap" : "click";
+
+        this.map.addListener(CLICK, $.proxy(function(e){
+            var converted = this.map.pixelToGeo(e.displayX, e.displayY);
             if (this.addPin == true) this.setPosition(converted.latitude, converted.longitude, null);
         },this));
 
@@ -130,12 +133,13 @@ var mapsWrapper = function(type) {
             this.map.setCenter(this.position, 'default');
             
             // Creates the marker & infoWindow
-            if (!this.marker) {
-                this.marker = new nokia.maps.map.Marker(this.position, {icon: this.standardPinImage, visibility: true, draggable: false, height: 50, width: 34, anchor: new nokia.maps.util.Point(25, 16) });
-                this.map.objects.add(this.marker);
-            } else {
-                this.marker.coordinate = this.position;
+            if (this.marker) {
+                this.marker.destroy();
             }
+            
+            this.marker = new nokia.maps.map.Marker(this.position, {icon: this.standardPinImage, visibility: true, draggable: false, height: 50, width: 34, anchor: new nokia.maps.util.Point(17, 42) });
+
+            this.map.objects.add(this.marker);
 /*
             if (description != null){
                 // Displays the infoWindow
@@ -177,8 +181,6 @@ var mapsWrapper = function(type) {
         var count = edges.length;
         var startPoint = null, destPoint = null;
         var currentLine = null;
-/*
-        this.edgesCollection = new Microsoft.Maps.EntityCollection();
 
         for(var i = 0; i < count; i++) {
 
@@ -196,18 +198,19 @@ var mapsWrapper = function(type) {
                 
             } else { continue; }
 
-            currentLine = new Microsoft.Maps.Polyline([
-                new Microsoft.Maps.Location(startPoint.lat, startPoint.lng),
-                new Microsoft.Maps.Location(destPoint.lat, destPoint.lng)
-            ], {
-                strokeColor:new Microsoft.Maps.Color.fromHex(this.colorsForType[edges[i].type]), 
-                strokeThickness: this.thicknessesForType[edges[i].type],
-                //zIndex: this.zIndexesForType[edges[i].type] // not working ;(
-            });
-            this.edgesCollection.push(currentLine);
+            currentLine = new nokia.maps.map.Polyline([
+                new nokia.maps.geo.Coordinate(startPoint.lat, startPoint.lng),
+                new nokia.maps.geo.Coordinate(destPoint.lat, destPoint.lng)
+            ], { pen: {
+                strokeColor: this.colorsForType[edges[i].type], 
+                lineWidth: this.thicknessesForType[edges[i].type]
+            }});
+            
+            // Pushes the line into the array
+            this.edges.push(currentLine);
 
         };
-*/
+ 
         if (display === true) this.displayDataOverlay();
 
     };
@@ -216,11 +219,11 @@ var mapsWrapper = function(type) {
 
         var position = new nokia.maps.geo.Coordinate(closestPoint.lat, closestPoint.lng);
 
-        if (this.closestPoint != null && position.equals(this.closestPoint) ) {
+        if (this.closestPoint != null && position.equals(this.closestPoint.coordinate) ) {
             return; // we will not display again
         } else {
             this.removeClosestOverlay();
-            this.closestPoint = new nokia.maps.map.Marker(position, {icon: this.closestPointPinImage, visibility: true, draggable: false, height: 50, width: 34, anchor: new nokia.maps.util.Point(25, 16) });
+            this.closestPoint = new nokia.maps.map.Marker(position, {icon: this.closestPointPinImage, visibility: true, draggable: false, height: 50, width: 34, anchor: new nokia.maps.util.Point(17,42) });
             if (display == true) this.displayClosestOverlay();
         }
 
@@ -228,30 +231,34 @@ var mapsWrapper = function(type) {
 
     this.displayDataOverlay = function(){
 
-        if (this.edgesCollection) {
-            this.map.entities.push(this.edgesCollection);
+        if (this.edges) {
+            for (i in this.edges) {
+                this.map.objects.add(this.edges[i]);
+            }
         }
     };
 
     this.displayClosestOverlay = function(){
 
-        if (this.closestPoint) {
-            this.map.entities.push(this.closestPoint);
+        if (this.closestPoint){
+            this.map.objects.add(this.closestPoint);
         }
 
     };
 
     this.removeDataOverlay = function(){
 
-        if (this.edgesCollection) {
-            this.map.entities.remove(this.edgesCollection);
+        if (this.edges) {
+            for (i in this.edges) {
+              this.map.objects.remove(this.edges[i]);
+            }
         }
     };
 
     this.removeClosestOverlay = function(){
 
-        if (this.closestPoint) {
-            this.map.entities.remove(this.closestPoint);
+        if (this.closestPoint){
+            this.map.objects.remove(this.closestPoint);
         }
 
     };
