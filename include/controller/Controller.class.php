@@ -81,6 +81,7 @@ class Controller {
         case 'mapquest':
         case 'gmaps':
         case 'bing':
+        case 'nokia':
         case 'openlayers':
           self::$parameters['framework'] = $_GET['framework'];
           break;
@@ -99,6 +100,9 @@ class Controller {
         case 'gmaps-road':
         case 'gmaps-hybrid':
           if ($_GET['framework'] == 'openlayers') self::$parameters['addedScript'] = "<script src='http://maps.google.com/maps/api/js?v=3.7&sensor=false'></script>";
+        case 'nokia-terrain':
+        case 'nokia-road':
+        case 'nokia-hybrid':
         case 'bing-road':
         case 'bing-hybrid':
         case 'osmaps':
