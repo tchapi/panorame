@@ -14,7 +14,7 @@
       <div class="toolTitle">Pick your vehicle !</div>
     <?php if ($parameters['editMode'] === true): ?> 
       <div id="editMode" class="alert alert-warning pull-right"><span id="toggleDataOverlay" data-original-title="Toggle overlays" class="lsf pull-left">view</span> <strong>Editing mode</strong></div>
-      <div id="notice" class="alert alert-info pull-right"><span class="icon-info-sign pull-left"></span> <strong></strong></div> 
+      <div id="notice" class="alert alert-info pull-right"><span class="lsf">info</span> <strong></strong></div> 
     <?php else: ?>
       <div id="mean">
         <div class="btn-group" data-toggle="buttons-radio" id="meanSelector"></div>
@@ -30,6 +30,14 @@
 
     <div class="span5" id="pois">
       <div class="toolTitle">What are you looking for ?</div>
+      <div id="places">
+        <ul>
+          <!-- EXAMPLES -->
+          <li><input type='checkbox' id="restaurants" name="places"/><label for="restaurants"><span class="lsf">meal</span> Restaurants</label></li>
+          <li><input type='checkbox' id="bars" name="places"/><label for="bars"><span class="lsf">coffee</span> Bars</label></li>
+          <li><input type='checkbox' id="shops" name="places"/><label for="shops"><span class="lsf">gift</span> Shops</label></li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
