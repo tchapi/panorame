@@ -244,11 +244,14 @@ var isocronMap = function() {
 
             }, this));
             this.meanSelect.children(":first").addClass('active');
+            this.selectedMean = this.meansAndSpeeds[1];
 
         }, this));
 
-        /* FIX */
-        this.meanSelect.click($.proxy(function(e){this.recalculateGraph()}, this));
+        this.meanSelect.mouseup($.proxy(function(e){ 
+            this.selectedMean = this.meansAndSpeeds[e.target.value];
+            this.recalculateGraph();
+        }, this));
 
 <?php endif ?>
     
@@ -412,7 +415,7 @@ var isocronMap = function() {
 
     this.calculateCost = function(startingCost, distance, grade, type){
 
-        var speeds = this.meansAndSpeeds[this.meanSelect.find('.active').val()][type];
+        var speeds = this.selectedMean[type];
 
         return startingCost + Math.max(0, distance*speeds[0] + grade*speeds[1]);
        
@@ -420,7 +423,7 @@ var isocronMap = function() {
 
     this.isExplorable = function(type){
 
-        return (this.meansAndSpeeds[this.meanSelect.find('.active').val()][type] != null);
+        return (this.selectedMean[type] != null);
 
     };
 

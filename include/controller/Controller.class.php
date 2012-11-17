@@ -69,6 +69,7 @@ class Controller {
 
   public static function getParameters(){
 
+    /* DEFAULTS */
     self::$parameters['addedScript'] = "";
     self::$parameters['framework']   = "gmaps";
     self::$parameters['provider']    = "";
