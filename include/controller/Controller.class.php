@@ -69,6 +69,8 @@ class Controller {
 
   public static function getParameters(){
 
+    global $constants;
+    
     /* DEFAULTS */
     self::$parameters['addedScript'] = "";
     self::$parameters['framework']   = "gmaps";
@@ -78,12 +80,12 @@ class Controller {
 
 
     /** FRAMEWORK = API Provider */
-    if (isset($_GET['framework']) && in_array($_GET['framework'], $_constants['frameworks'])){
+    if (isset($_GET['framework']) && in_array($_GET['framework'], $constants['frameworks'])){
       self::$parameters['framework'] = $_GET['framework'];
     }
 
     /** PROVIDER = Tiles Provider */ 
-    if (isset($_GET['provider']) && in_array($_GET['provider'], $_constants['providers'])){
+    if (isset($_GET['provider']) && in_array($_GET['provider'], $constants['providers'])){
       self::$parameters['provider'] = $_GET['provider'];
       if ($_GET['framework'] == 'openlayers') self::$parameters['addedScript'] = "<script src='http://maps.google.com/maps/api/js?v=3.7&sensor=false'></script>";
     }
@@ -91,7 +93,7 @@ class Controller {
     /** ENGINE = Database engine */
     $cookieName = "panorame_engine";
 
-    if (isset($_GET['engine']) && in_array($_GET['engine'], $_constants['engines'])){
+    if (isset($_GET['engine']) && in_array($_GET['engine'], $constants['engines'])){
       self::$parameters['engine'] = $_GET['engine'];
     }
 
