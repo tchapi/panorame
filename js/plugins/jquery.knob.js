@@ -93,15 +93,14 @@
                                 || 0,
                     thickness : this.$.data('thickness') || 0.35,
                     width : this.$.data('width') || 200,
-                    height : this.$.data('height') || 200,
+                    height : this.$.data('height') || this.$.data('width') || 200,
                     displayInput : this.$.data('displayinput') == null || this.$.data('displayinput'),
                     displayPrevious : this.$.data('displayprevious'),
                     fgColor : this.$.data('fgcolor') || '#87CEEB',
+                    shadow : this.$.data('shadow') || 0,
+                    shadowColor : this.$.data('shadowcolor') || 'rgba(0,0,0,0.5)',
                     canvasBgColor : this.$.data('canvasbgcolor') || false,
                     inline : false,
-
-                    // Canvas extend
-                    extendCanvasRatio : this.$.data('extendCanvasRatio') || 1,
 
                     // Hooks
                     draw : null, // function () {}
@@ -156,15 +155,17 @@
 
             (!this.o.displayInput) && this.$.hide();
 
+            this.realSize = { width: this.o.width + this.o.shadow, height: this.o.height + this.o.shadow };
+
             this.$c = $('<canvas width="' +
-                            this.o.width*this.o.extendCanvasRatio + 'px" height="' +
-                            this.o.height*this.o.extendCanvasRatio + 'px"></canvas>');
+                            this.realSize.width + 'px" height="' +
+                            this.realSize.height + 'px"></canvas>');
             this.c = this.$c[0].getContext("2d");
 
             this.$
                 .wrap($('<div style="' + (this.o.inline ? 'display:inline;' : '') +
-                        'width:' + this.o.width*this.o.extendCanvasRatio + 'px;height:' +
-                        this.o.height*this.o.extendCanvasRatio + 'px;"></div>'))
+                        'width:' + this.realSize.width + 'px;height:' +
+                        this.realSize.height + 'px;"></div>'))
                 .before(this.$c);
 
             if (this.v instanceof Object) {
@@ -197,8 +198,8 @@
             var d = true,
                 c = document.createElement('canvas');
 
-            c.width = s.o.width*this.o.extendCanvasRatio;
-            c.height = s.o.height*this.o.extendCanvasRatio;
+            c.width = s.o.width + s.o.shadow;
+            c.height = s.o.height + s.o.shadow;
             s.g = c.getContext('2d');
 
             s.clear();
@@ -354,11 +355,15 @@
             if (this.o.cancel) this.eH = this.o.cancel;
             if (this.o.release) this.rH = this.o.release;
 
-            if (this.o.displayPrevious) {
-                this.pColor = this.h2rgba(this.o.fgColor, "0.4");
-                this.fgColor = this.h2rgba(this.o.fgColor, "0.6");
-            } else {
-                this.fgColor = this.o.fgColor;
+            if (!(this.o.fgColor instanceof Array)) {
+
+                if (this.o.displayPrevious) {
+                    this.pColor = this.h2rgba(this.o.fgColor, "0.4");
+                    this.fgColor = this.h2rgba(this.o.fgColor, "0.6");
+                } else {
+                    this.fgColor = this.o.fgColor;
+                }
+
             }
 
             return this;
@@ -434,8 +439,8 @@
             var a, ret;
 
             a = Math.atan2(
-                        x - (this.x + this.w2)
-                        , - (y - this.y - this.w2)
+                        x - (this.x + this.xy)
+                        , - (y - this.y - this.xy)
                     ) - this.angleOffset;
 
             if(this.angleArc != this.PI2 && (a < 0) && (a > -0.5)) {
@@ -549,7 +554,7 @@
             this.$.val(this.v);
             this.w2 = this.o.width / 2;
             this.cursorExt = this.o.cursor / 100;
-            this.xy = this.w2 * this.o.extendCanvasRatio;
+            this.xy = this.realSize.width / 2;
             this.lineWidth = this.w2 * this.o.thickness;
             this.tickLength = this.w2 * this.o.tickLength;
             this.radius = this.w2 - this.lineWidth / 2;
@@ -576,15 +581,15 @@
 
             this.o.displayInput
                 && this.i.css({
-                        'width' : ((this.o.width*this.o.extendCanvasRatio / 2 + 4) >> 0) + 'px'
-                        ,'height' : ((this.o.width*this.o.extendCanvasRatio / 3) >> 0) + 'px'
+                        'width' : ((this.realSize.width / 2 + 4) >> 0) + 'px'
+                        ,'height' : ((this.realSize.width / 3) >> 0) + 'px'
                         ,'position' : 'absolute'
                         ,'vertical-align' : 'middle'
-                        ,'margin-top' : ((this.o.width*this.o.extendCanvasRatio / 3) >> 0) + 'px'
-                        ,'margin-left' : '-' + ((this.o.width*this.o.extendCanvasRatio * 3 / 4 + 2) >> 0) + 'px'
+                        ,'margin-top' : ((this.realSize.width / 3) >> 0) + 'px'
+                        ,'margin-left' : '-' + ((this.realSize.width * 3 / 4 + 2) >> 0) + 'px'
                         ,'border' : 0
                         ,'background' : 'none'
-                        ,'font' : 'bold ' + ((this.o.width*this.o.extendCanvasRatio / s) >> 0) + 'px Arial'
+                        ,'font' : 'bold ' + ((this.realSize.width / s) >> 0) + 'px Arial'
                         ,'text-align' : 'center'
                         ,'color' : this.o.fgColor
                         ,'padding' : '0px'
@@ -614,28 +619,29 @@
                 , sa, ea                    // Previous angles
                 , r = 1;
 
-
-            /* START specific */
-            var gradient = c.createLinearGradient(0,0,170,0);
-                gradient.addColorStop(0,"#7ea8d0");
-                gradient.addColorStop(0.5,"#7e4dba");
-                gradient.addColorStop(1,"#bd3d9e");
-
-            var prev_gradient = c.createLinearGradient(0,0,170,0);
-                prev_gradient.addColorStop(0,"#bec8d1");
-                prev_gradient.addColorStop(0.5,"#9c84ba");
-                prev_gradient.addColorStop(1,"#bd75ab");
-
-            c.shadowColor = "rgba(0,0,0,0.5)";
-            c.shadowBlur = 20;
-            /* END specific */
+            var halfPi = .5 * Math.PI,
+                twoPi = halfPi * 4;
 
             c.lineWidth = this.lineWidth;
+
+            if (this.o.fgColor instanceof Array){
+
+                this.fgColor = c.createLinearGradient(0,0,170,0);
+                if (this.o.displayPrevious) { this.pColor = c.createLinearGradient(0,0,170,0); }
+                for (var i = 0; i < this.o.fgColor.length; i=i+2) {
+                    this.fgColor.addColorStop(this.o.fgColor[i], this.o.fgColor[i+1]);
+                    if (this.o.displayPrevious) { this.pColor.addColorStop(this.o.fgColor[i],this.h2rgba(this.o.fgColor[i+1], "0.5")); }
+                };
+                
+            }
+
+            c.shadowBlur  = this.o.shadow;
+            c.shadowColor = this.o.shadowColor;
 
             if (this.o.canvasBgColor !== false) {
                 c.beginPath();
                     c.fillStyle = this.o.canvasBgColor;
-                    c.arc(this.xy, this.xy, this.radius+this.lineWidth/2, 0, 360, true);
+                    c.arc(this.xy, this.xy, this.radius, 0, twoPi, true);
                 c.fill();
             }
 
@@ -656,22 +662,19 @@
                     && (ea = ea + this.cursorExt);
 
                 c.beginPath();
-                    c.strokeStyle = prev_gradient; //this.pColor;
+                    c.strokeStyle = this.pColor;
                     c.arc(this.xy, this.xy, this.radius, sa, ea, false);
                 c.stroke();
-                r = (this.cv == this.v);
             }
 
             c.beginPath();
-                c.strokeStyle = gradient; //r ? this.o.fgColor : this.fgColor ;
+                c.strokeStyle = this.fgColor ;
                 c.arc(this.xy, this.xy, this.radius, sat, eat, false);
             c.stroke();
 
             if (this.o.ticks != 0){
 
-                var halfPi = .5 * Math.PI,
-                    twoPi = halfPi * 4,
-                    step = this.angleArc / this.o.ticks;
+                var step = this.angleArc / this.o.ticks;
 
                 c.lineWidth = this.tickLength;
 

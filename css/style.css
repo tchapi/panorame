@@ -120,7 +120,7 @@ header {
     #toolbar #mean select {width: 150px;}
     #toolbar .toolTitle { font-weight: bold; font-size: 12px;}
 
-  #timeController {z-index:3; position: absolute; bottom:0; left: 50%; margin-left: -112px; overflow: hidden;}
+  #timeController {z-index:3; position: absolute; bottom:0; left: 50%; margin-left: -112px; overflow: hidden; height: 110px;}
     #timeController #limitValue {position:absolute; top: 78px; right: 50%; margin-right: -44px; font-size: 31px; color: #DDD;}
     #timeController #limitValue span {font-size: 26px; color: #777;}
 

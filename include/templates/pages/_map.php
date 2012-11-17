@@ -36,7 +36,7 @@
 
 <div id="timeController">
   <div id="limitValue"></div>
-  <input id="time" value="0" />
+  <input id="time" value="0" style="display:none" />
 </div>
 
 <?php if ($parameters['editMode'] === true): ?>
