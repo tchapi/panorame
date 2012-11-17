@@ -1,5 +1,7 @@
 <?php
 
+require_once(_PATH.'include/controller/constants.php');
+
 class Controller {
 
   /** Defaults */
@@ -75,56 +77,21 @@ class Controller {
 
 
     /** FRAMEWORK = API Provider */
-    if (isset($_GET['framework'])){
-
-      switch ($_GET['framework']) {
-        case 'mapquest':
-        case 'gmaps':
-        case 'bing':
-        case 'nokia':
-        case 'openlayers':
-          self::$parameters['framework'] = $_GET['framework'];
-          break;
-        default:
-          self::$parameters['framework'] = "gmaps";
-          break;
-      }
-
+    if (isset($_GET['framework']) && in_array($_GET['framework'], $_constants['frameworks'])){
+      self::$parameters['framework'] = $_GET['framework'];
     }
 
     /** PROVIDER = Tiles Provider */ 
-    if (isset($_GET['provider'])){
-
-      switch ($_GET['provider']) {
-        case 'gmaps-terrain':
-        case 'gmaps-road':
-        case 'gmaps-hybrid':
-          if ($_GET['framework'] == 'openlayers') self::$parameters['addedScript'] = "<script src='http://maps.google.com/maps/api/js?v=3.7&sensor=false'></script>";
-        case 'nokia-terrain':
-        case 'nokia-road':
-        case 'nokia-hybrid':
-        case 'bing-road':
-        case 'bing-hybrid':
-        case 'osmaps':
-        case 'mapquest':
-          self::$parameters['provider'] = $_GET['provider'];
-          break;
-      }
-
+    if (isset($_GET['provider']) && in_array($_GET['provider'], $_constants['providers'])){
+      self::$parameters['provider'] = $_GET['provider'];
+      if ($_GET['framework'] == 'openlayers') self::$parameters['addedScript'] = "<script src='http://maps.google.com/maps/api/js?v=3.7&sensor=false'></script>";
     }
 
     /** ENGINE = Database engine */
     $cookieName = "panorame_engine";
 
-    if (isset($_GET['engine'])){
-
-      switch($_GET['engine']){
-        case 'mysql':
-        case 'mongo':
-          self::$parameters['engine'] = $_GET['engine'];
-          break;
-      }
-
+    if (isset($_GET['engine']) && in_array($_GET['engine'], $_constants['engines'])){
+      self::$parameters['engine'] = $_GET['engine'];
     }
 
 
