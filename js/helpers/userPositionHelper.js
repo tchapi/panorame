@@ -19,7 +19,7 @@ var userPositionHelper = function() {
 
     this.callbackFunction = null;
 
-    this.state = states.unknown;
+    this.setState(states.unknown);
 
 };
 
@@ -30,7 +30,7 @@ userPositionHelper.prototype.success = function(position) {
   this.lat = position.coords.latitude;
   this.lng = position.coords.longitude;
 
-  this.state = states.success;
+  this.setState(states.success);
   this.callbackFunction.call(this.callbackContext, this.lat, this.lng, "Ma position");
 
 };
@@ -40,19 +40,19 @@ userPositionHelper.prototype.failure = function(error) {
 
   switch(error.code) {
     case error.TIMEOUT:
-      this.state = states.error.timeout;
+      this.setState(states.error.timeout);
       break;
     case error.PERMISSION_DENIED:
-      this.state = states.error.permission_denied;
+      this.setState(states.error.permission_denied);
       break;
     case error.POSITION_UNAVAILABLE:
-      this.state = states.error.position_unavailable;
+      this.setState(states.error.position_unavailable);
       break;
     case error.UNKNOWN_ERROR:
-      this.state = states.error.unknow_error;
+      this.setState(states.error.unknow_error);
       break;
     default:
-      this.state = states.error.unsupported;
+      this.setState(states.error.unsupported);
       break;
   }
 
@@ -60,13 +60,14 @@ userPositionHelper.prototype.failure = function(error) {
 
 };
 
-userPositionHelper.prototype.update = function(callbackFunction, callbackContext){
+userPositionHelper.prototype.update = function(callbackFunction, callbackContext, notifyFunction){
 
     this.callbackFunction = callbackFunction;
+    this.notifyFunction = notifyFunction;
     this.callbackContext = callbackContext;
 
     // For now on, we're waiting
-    this.state = states.waiting;
+    this.setState(states.waiting);
 
     if(navigator.geolocation) {
 
@@ -77,6 +78,15 @@ userPositionHelper.prototype.update = function(callbackFunction, callbackContext
       this.failure({code: 0});
 
     }
+};
+
+userPositionHelper.prototype.setState = function(state){ 
+  
+  this.state = state;
+  var timeout = 0 + (state=="waiting"?500:0); // So the waiting popup doesn't show straight away
+
+  if (this.notifyFunction !== null && this.notifyFunction != undefined) window.setTimeout(this.notifyFunction, timeout); 
+
 };
 
 userPositionHelper.prototype.getState = function(){ return this.state; };

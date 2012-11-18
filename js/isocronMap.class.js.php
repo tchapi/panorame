@@ -88,6 +88,7 @@ var isocronMap = function() {
 
         /* Locate me button */
         this.locateMe = $('#self');
+        this.needsLocationPopIn = $("#locationRequest");
 
         this.locateMe.click($.proxy(function(){
             this.toggleAddPin(false);
@@ -320,9 +321,19 @@ var isocronMap = function() {
 
     };
 
+    this.notifyLocationRequest = function() {
+
+        if (this.userPosition.getState() == states.waiting) {  
+            this.needsLocationPopIn.modal('show');
+        } else {
+            this.needsLocationPopIn.modal('hide');
+        }
+
+    };
+
     this.setToUserPositionIfAvailable = function(){
 
-        this.userPosition.update(mapsWrapper.setPosition, mapsWrapper);
+        this.userPosition.update(mapsWrapper.setPosition, mapsWrapper, $.proxy(this.notifyLocationRequest, this));
 
     };
 
