@@ -7,9 +7,9 @@
   <!-- Pages -->
   <div id="pages" class="pull-right">
     <ul>
-      <li><a href="#">About</a></li>
-      <li><a href="#">Contact</a></li>
-      <li><a href="#" class="blog">Blog</a></li>
+      <li><a href="/page/about">About</a></li>
+      <li><a href="/page/contact">Contact</a></li>
+      <li><a href="/page/blog" class="blog">Blog</a></li>
     </ul>
   </div>
 </div>

@@ -120,7 +120,7 @@ var isocronMap = function() {
         this.lang = $('#lang');
         function format(L) {
             if (!L.id) return L.text; // optgroup
-            return "<img class='flag' src='img/flags/" + L.id + ".png'/>";
+            return "<img class='flag' src='/img/flags/" + L.id + ".png'/>";
         }
         this.lang.select2({
             formatResult: format,

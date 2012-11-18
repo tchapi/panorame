@@ -71,6 +71,13 @@ class Controller {
 
     global $constants;
     
+
+    if (isset($_GET['page']) && in_array($_GET['page'], $constants['pages']) ){
+      self::$parameters['page'] = $_GET['page'];
+    } else {
+      self::$parameters['page'] = 'map';
+    }
+
     /* DEFAULTS */
     self::$parameters['addedScript'] = "";
     self::$parameters['framework']   = "gmaps";
