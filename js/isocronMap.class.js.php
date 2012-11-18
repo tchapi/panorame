@@ -410,14 +410,26 @@ var isocronMap = function() {
             null,
             this.displayData
         );
-<?php else: ?>
-        mapsWrapper.setDataOverlay(
-            this.dijkstra(this.data.tree, this.position, this.data.closest),
-            this.limit,
-            this.displayData
-        );
-<?php endif ?>
         mapsWrapper.setClosestOverlay(this.data.closest.point, this.displayData);
+<?php else: ?>
+    
+        var edges = this.dijkstra(this.data.tree, this.position, this.data.closest);
+        
+        if (edges != false) {
+
+            mapsWrapper.setDataOverlay(
+                edges,
+                this.limit,
+                this.displayData
+            );
+            mapsWrapper.setClosestOverlay(this.data.closest.point, this.displayData);
+
+        } else {
+            mapsWrapper.removeDataOverlay();
+            mapsWrapper.removeClosestOverlay();
+        }
+
+<?php endif ?>
 
     };
 
@@ -463,7 +475,7 @@ var isocronMap = function() {
 
         // closest is in the tree <-- thanks to polygon(NW, SE, POI) in DBUtils
         var nodeId = closestPoint.id;
-        var node = treeCopy[nodeId];
+        if (!(node = treeCopy[nodeId])) return false; // if closest is not in tree, return
         
         node.cost = closestPoint.distance;
         node.path = [];
