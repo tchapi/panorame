@@ -10,22 +10,23 @@
       <ul id="multipleChoices" class="dropdown-menu"></ul>
     </div>
 
-    <div class="span3" id="actionForm">
-      <div class="toolTitle">Pick your vehicle !</div>
-    <?php if ($parameters['editMode'] === true): ?> 
+<?php if ($parameters['editMode'] === true): ?> 
+    <div class="span8">  
       <div id="editMode" class="alert alert-warning pull-right"><span id="toggleDataOverlay" data-original-title="Toggle overlays" class="lsf pull-left">view</span> <strong>Editing mode</strong></div>
       <div id="notice" class="alert alert-info pull-right"><span class="lsf">info</span> <strong></strong></div> 
-    <?php else: ?>
+    </div>
+<?php else: ?>
+    <div class="span3" id="actionForm">
+      <div class="toolTitle">Pick your vehicle ... and your speed :</div>
       <div id="mean" style="display: none">
-        <div class="btn-group" data-toggle="buttons-radio" id="meanSelector"></div>
+        <div class="btn-group btn-info" data-toggle="buttons-radio" id="meanSelector"></div>
       </div>
       <div id="speed" style="display: none">
         <div class="btn-group" data-toggle="buttons-radio" id="speedSelector">
-          <button type="button" class="btn btn-info lsf active" value="-1">minus</button>
-          <button type="button" class="btn btn-info lsf" value="1">plus</button>
+          <button type="button" class="btn active" value="-1"><span class="lsf">time</span> slow</button>
+          <button type="button" class="btn" value="1"><span class="lsf">dashboard</span> fast</button>
         </div>
       </div>
-    <?php endif ?>
     </div>
 
     <div class="span5" id="pois">
@@ -39,6 +40,7 @@
         </ul>
       </div>
     </div>
+<?php endif ?>
   </div>
 </section>
 

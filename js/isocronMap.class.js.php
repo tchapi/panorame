@@ -253,7 +253,7 @@ var isocronMap = function() {
             $.each(data, $.proxy(function(key, value) {   
                 
                 this.meanSelect
-                     .append($('<button type="button" class="btn lsf"></button>')
+                     .append($('<button type="button" class="btn btn-info lsf"></button>')
                      .attr("value",value.id)
                      .text(value.slug).tooltip({placement: 'bottom'})); 
 
@@ -276,10 +276,10 @@ var isocronMap = function() {
     
         /* Keyboard shortcuts */
         key('space', $.proxy(function(){
-            this.toggleDataOverlay.trigger('click');
+            this.toggleDataOverlay();
         }, this));
         key('e', $.proxy(function(){
-            this.addPinButton.trigger('click');
+            this.toggleAddPin()
         }, this));
         key('w', $.proxy(function(){
             this.locateMe.trigger('click');
@@ -306,12 +306,12 @@ var isocronMap = function() {
     this.toggleDataOverlay = function(booleanValue){
 
         if (this.displayData == false || booleanValue === true){
-            this.toggleDataOverlay.html('view');
+            this.toggleDataOverlayButton.html('view');
             mapsWrapper.displayDataOverlay();
             mapsWrapper.displayClosestOverlay();
             this.displayData = true;
         } else {
-            this.toggleDataOverlay.html('ban');
+            this.toggleDataOverlayButton.html('ban');
             mapsWrapper.removeDataOverlay();
             mapsWrapper.removeClosestOverlay();
             this.displayData = false;
@@ -414,7 +414,7 @@ var isocronMap = function() {
 <?php else: ?>
     
         var edges = this.dijkstra(this.data.tree, this.position, this.data.closest);
-        
+
         if (edges != false) {
 
             mapsWrapper.setDataOverlay(
