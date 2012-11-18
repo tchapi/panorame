@@ -5,7 +5,5 @@
 <link href="css/plugins/select2.css" rel="stylesheet">
 <link href="css/style.css" rel="stylesheet">
 <?php if ($parameters['editMode'] === true): ?>
-<link href="css/admin.css" rel="stylesheet">  
-<?php else: ?>
-<link href="css/plugins/nouislider.css" rel="stylesheet">
+<link href="css/admin.css" rel="stylesheet"> 
 <?php endif ?>

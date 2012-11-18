@@ -16,10 +16,10 @@
       <div id="editMode" class="alert alert-warning pull-right"><span id="toggleDataOverlay" data-original-title="Toggle overlays" class="lsf pull-left">view</span> <strong>Editing mode</strong></div>
       <div id="notice" class="alert alert-info pull-right"><span class="lsf">info</span> <strong></strong></div> 
     <?php else: ?>
-      <div id="mean">
+      <div id="mean" style="display: none">
         <div class="btn-group" data-toggle="buttons-radio" id="meanSelector"></div>
       </div>
-      <div id="speed">
+      <div id="speed" style="display: none">
         <div class="btn-group" data-toggle="buttons-radio" id="speedSelector">
           <button type="button" class="btn btn-info lsf active" value="-1">minus</button>
           <button type="button" class="btn btn-info lsf" value="1">plus</button>

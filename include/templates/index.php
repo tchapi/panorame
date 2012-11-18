@@ -16,7 +16,7 @@
 <?php include(_PATH.'include/templates/pages/_map.php'); /* Default template */?>
       </div>
 
-      <div class="loader_back"><div class="loader"></div></div>
+      <div id="mainLoader" class="loader_back"><div class="loader"></div></div>
     </div>
 
   </body>

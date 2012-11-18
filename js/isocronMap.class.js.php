@@ -81,10 +81,23 @@ var isocronMap = function() {
 
         // Finally, we center the map at the user's position
         this.setToUserPositionIfAvailable();
-
     };
 
     this.setupVisual = function(){
+
+        /* Loaders */
+
+        var opts = {
+          lines: 13, // The number of lines to draw
+          length: 6, // The length of each line
+          width: 2, // The line thickness
+          radius: 17, // The radius of the inner circle
+          rotate: 0, // The rotation offset
+          color: '#FFF', // #rgb or #rrggbb
+          hwaccel: true,
+          zIndex: 0
+        };
+        this.spinner = new Spinner(opts).spin(document.getElementById('mainLoader'));
 
         /* Locate me button */
         this.locateMe = $('#self');
@@ -251,6 +264,8 @@ var isocronMap = function() {
             this.selectedMean = this.meansAndSpeeds[1];
 
         }, this));
+
+        $("#mean, #speed").fadeIn();
 
         this.meanSelect.mouseup($.proxy(function(e){ 
             this.selectedMean = this.meansAndSpeeds[e.target.value];
