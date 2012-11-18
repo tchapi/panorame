@@ -20,6 +20,7 @@ The following APIs are actually available in panorame :
 * Bing Maps
 * Open Layers
 * MapQuest
+* Nokia Maps (here.com)
 
 ### Available Tile providers ###
 
@@ -36,6 +37,10 @@ The following tile providers are available :
  * Open Street Maps road tiles
 * MapQuest
  * MapQuest road tiles
+* Nokia (here.com)
+ * Road
+ * Terrain
+ * Hybrid
 
 ### Available Database engine providers ###
 
@@ -54,12 +59,16 @@ The parameters can be :
  + bing
  + openlayers
  + mapquest
-+ `provider` - _optional_ : The tile provider amongst :
+ + nokia
++ `provider` - _optional_ : The alternative tile provider amongst :
  + gmail-road
  + gmail-hybrid
  + gmail-terrain
  + bing-road
  + bing-hybrid
+ + nokia-road
+ + nokia-hybrid
+ + nokia-terrain
 + `engine` - _optional_ : The database engine provider amongst :
  + mysql
  + mongo
