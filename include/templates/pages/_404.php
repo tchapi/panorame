@@ -1,12 +1,15 @@
-<div id="top" class="about">
+<div id="top" class="404">
   <div class="hero-unit">
-    <h1>Panora.me</h1>
-    <h2>Accurate distance-search for maniacs</h2>
-    <p><a class="btn btn-success btn-large" href="#"><span class="lsf">playmedia</span> Watch the tour</a></p>
+    <h1>Oooops</h1>
+    <h2>Looks like we had a problem</h2>
+    <p><a class="btn btn-success btn-large" href="/"><span class="lsf">arrowleft</span> Go back home safe</a>
+       or <a class="btn btn-info btn-large" href="mailto:contact@panorame.com"><span class="lsf">mail</span> Help us resolve this</a></p>
   </div>
 </div>
-<div id="paragraphs" class="about">
+<div id="paragraphs" class="404">
   <div class="inside">
+
+  <h4><span class="lsf">book</span> While you're here ... read on to learn more about maps ...</h4>
 
   <h3>The standard Lorem Ipsum passage, used since the 1500s</h3>
 

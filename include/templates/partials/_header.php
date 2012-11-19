@@ -7,6 +7,7 @@
   <!-- Pages -->
   <div id="pages" class="pull-right">
     <ul>
+      <li class="active"><a href="/" class="home">Map</a></li>
       <li><a href="/page/about">About</a></li>
       <li><a href="/page/contact">Contact</a></li>
       <li><a href="/page/blog" class="blog">Blog</a></li>
