@@ -1,6 +1,6 @@
 <section class="row-fluid">
   <div id="toolbar">
-    <div class="span4">
+    <div class="span4" id="addressForm">
       <div class="toolTitle">Choose your starting point .. </div>
       <div class="input-prepend input-append" id="searchForm">
         <input class="input-xlarge" id="searchInput" type="text" placeholder="What? Where?">
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <div class="span5" id="pois">
+    <div class="pull-left" id="pois">
       <div class="toolTitle">What are you looking for ?</div>
       <div id="places">
         <ul>
