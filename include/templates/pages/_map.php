@@ -19,7 +19,7 @@
     <div class="span3" id="actionForm">
       <div class="toolTitle">Pick your vehicle ... and your speed :</div>
       <div id="mean" style="display: none">
-        <div class="btn-group btn-info" data-toggle="buttons-radio" id="meanSelector"></div>
+        <div class="btn-group" data-toggle="buttons-radio" id="meanSelector"></div>
       </div>
       <div id="speed" style="display: none">
         <div class="btn-group" data-toggle="buttons-radio" id="speedSelector">
