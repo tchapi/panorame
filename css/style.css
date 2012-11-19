@@ -94,6 +94,7 @@ header {
 #infos .position, #infos .objects { cursor: pointer;}
 
 #page { position:absolute; width: 100%; top:54px; bottom:0; background: url("/img/bg_tile.jpg"); }
+#content {z-index: 1; position:absolute; width: 100%; top:0; bottom:0;}
 
 /* PAGES */
   /* Map */
@@ -150,6 +151,16 @@ header {
     #multipleChoices li { cursor: pointer; }
     #multipleChoices li:hover { background: lightGrey; }	
 
+
+  /* Generic */
+  #top {background-color: black; height: 280px; color: white; text-shadow: 1px -1px 10px black;}
+  #paragraphs {width: 100%; background: #08C; color: white;}
+  #top .hero-unit {background: none; max-width: 900px; margin: auto; padding: 40px 15px;}
+  #paragraphs .inside {background: none; max-width: 900px; margin: auto; padding: 15px;}
+
+  /* Specific */
+  #top.contact {background: url('/img/bg/bg_contact.png') no-repeat center center black;}  
+  #top.about {background: url('/img/bg/bg_about.png') no-repeat center center black;}  
 
 /* Loader */
 

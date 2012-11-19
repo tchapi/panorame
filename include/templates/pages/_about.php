@@ -1,7 +1,8 @@
-<div id="top" class="contact">
+<div id="top" class="about">
   <div class="hero-unit">
-    <h1>Contact us</h1>
-    <p>The team is listening.</p>
+    <h1>Panora.me</h1>
+    <h2>Accurate distance-search for maniacs</h2>
+    <p><a class="btn btn-success btn-large" href="#">Watch the tour</a></p>
   </div>
 </div>
 <div id="paragraphs" class="about">

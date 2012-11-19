@@ -74,6 +74,8 @@ class Controller {
 
     if (isset($_GET['page']) && in_array($_GET['page'], $constants['pages']) ){
       self::$parameters['page'] = $_GET['page'];
+    } else if (isset($_GET['page'])) {
+      self::$parameters['page'] = '404';
     } else {
       self::$parameters['page'] = 'map';
     }
