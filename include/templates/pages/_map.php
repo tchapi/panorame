@@ -58,14 +58,16 @@
   
 </div>
 
-<div id="timeController">
-  <div id="limitValue"></div>
-  <input id="time" value="0" style="display:none" />
-</div>
-
 <?php if ($parameters['editMode'] === true): ?>
 <!-- adminPanel -->
 <?php include(_PATH.'include/templates/partials/_adminPanel.php'); ?>
+<?php else: ?>
+<!-- timeController -->
+<div id="timeController">
+  <div class="lsf tooltip-trigger active" id="toggleDataOverlay" data-original-title="Toggle overlay">view</div>
+  <div id="limitValue"></div>
+  <input id="time" value="0" style="display:none" />
+</div>
 <?php endif ?>
 
 <!-- canvas -->

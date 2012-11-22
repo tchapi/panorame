@@ -293,12 +293,12 @@ var isocronMap = function() {
     this.toggleDataOverlay = function(booleanValue){
 
         if (this.displayData == false || booleanValue === true){
-            this.toggleDataOverlayButton.html('view');
+            this.toggleDataOverlayButton.addClass('active');
             mapsWrapper.displayDataOverlay();
             mapsWrapper.displayClosestOverlay();
             this.displayData = true;
         } else {
-            this.toggleDataOverlayButton.html('ban');
+            this.toggleDataOverlayButton.removeClass('active');
             mapsWrapper.removeDataOverlay();
             mapsWrapper.removeClosestOverlay();
             this.displayData = false;
