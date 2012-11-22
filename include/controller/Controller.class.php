@@ -146,6 +146,8 @@ class Controller {
 
   public static function render($templateName, $actionResult){
 
+    global $constants;
+    
     $parameters = self::$parameters;
     $data = $actionResult;
 
@@ -163,7 +165,8 @@ class Controller {
 
         echo json_encode(array(
           'title' => _name . " | " . $parameters['page']['name'],
-          'html' => $data
+          'slug'  => $parameters['page']['slug'],
+          'html'  => $data
         ));
 
       } else {

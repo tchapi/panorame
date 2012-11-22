@@ -6,9 +6,10 @@ $constants = array(
     'providers'  => array('nokia-terrain', 'nokia-road', 'nokia-hybrid', 'bing-road', 'bing-hybrid', 'osmaps', 'mapquest', 'gmaps-terrain', 'gmaps-road', 'gmaps-hybrid'),
     'engine'     => array('mysql','mongo'),
     'pages'      => array(
-      array('slug' =>'contact', 'name' => 'Contact Us'),
-      array('slug' =>'about', 'name' => 'About Us'),
-      array('slug' =>'blog', 'name' => 'The Blog'),
+      array('slug' =>'map', 'name' => 'Home', 'home' => true),
+      array('slug' =>'contact', 'name' => 'Contact'),
+      array('slug' =>'about', 'name' => 'About'),
+      array('slug' =>'blog', 'name' => 'Blog'),
     )
 
   );

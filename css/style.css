@@ -73,11 +73,36 @@ header {
   }
   #header #pages ul li { 
     display: inline; 
+    position: relative;
     border-left: 1px solid #eee;
     padding: 5px 10px 5px 14px;
   }
   #header #pages ul li:first-child { border: none;}
   #header #pages ul li a.home { color: black;}
+  #header #pages ul li:hover:after{
+    width: 0px;
+    height: 0px;
+    content: "";
+    border-style: solid;
+    border-width: 0 8px 8px 8px;
+    border-color: transparent transparent #ccc transparent;
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    margin-left: -4px;
+  }
+  #header #pages ul li.active:after{
+    width: 0px;
+    height: 0px;
+    content: "";
+    border-style: solid;
+    border-width: 0 8px 8px 8px;
+    border-color: transparent transparent #0088cc transparent;
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    margin-left: -4px;
+  }
   #corner{
     position: absolute;
     right: 0;

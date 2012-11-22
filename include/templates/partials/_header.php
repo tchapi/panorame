@@ -7,10 +7,9 @@
   <!-- Pages -->
   <div id="pages" class="pull-right">
     <ul>
-      <li class="active"><a href="/" class="home">Map</a></li>
-      <li><a href="/page/about">About</a></li>
-      <li><a href="/page/contact">Contact</a></li>
-      <li><a href="/page/blog" class="blog">Blog</a></li>
+<?php foreach($constants['pages'] as $page): ?>
+      <li class="item <?php echo $page['slug']; ?><?php if ($parameters['page']['slug'] == $page['slug']) echo ' active'; ?>"><a href="<?php echo (isset($page['home'])&&$page['home']===true)?"/":"/page/".$page['slug']; ?>"><?php echo $page['name']; ?></a></li>
+<?php endforeach; ?>
     </ul>
   </div>
 </div>

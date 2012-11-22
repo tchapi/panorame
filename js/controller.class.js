@@ -8,6 +8,8 @@
     return arguments.callee._singletonInstance;
     arguments.callee._singletonInstance = this;
 
+    this.menu = $('#pages').find('.item');
+
     this.init = function() {
 
         /* Language selector */
@@ -37,30 +39,37 @@
 
         /* Menu for ajax loading */
         this.menus = $('#pages li a');
-        this.menus.click(function(e){
+        this.menus.click($.proxy(function(e){
 
-          $('#content').empty();
           var urlPath = e.target.href;
 
-          $.post(urlPath, {ajax: 1}, function(data){
+          $.post(urlPath, {ajax: 1}, $.proxy(function(data){
 
-            $('#content').html(data.html);
-            document.title = data.title
-            window.history.pushState({"html": data.html, "title": data.title},"", urlPath);
+            this.refresh(data.html, data.title, data.slug);
+            window.history.pushState({"html": data.html, "title": data.title, "slug": data.slug},"", urlPath);
 
-          });
+          }, this));
 
           e.preventDefault();
           return false;
 
-        });
+        }, this));
 
-        window.onpopstate = function(e){
+        window.onpopstate = $.proxy(function(e){
           if(e.state){
-            $('#content').html(e.state.html);
-            document.title = e.state.title;
+            this.refresh(e.state.html, e.state.title, e.state.slug);
           }
-        };
+        }, this);
+
+    };
+
+    this.refresh = function(html, title, slug) {
+
+      $('#content').html(html);
+      document.title = title;
+
+      this.menu.removeClass('active');
+      this.menu.closest('.' + slug).addClass('active');
 
     };
 
