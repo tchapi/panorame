@@ -13,7 +13,7 @@
     <div id="page">
 
       <div id="content">
-<?php include(_PATH.'include/templates/pages/_'.$parameters['page'].'.php'); ?>
+<?php include(_PATH.'include/templates/pages/_'.$parameters['page']['slug'].'.php'); ?>
       </div>
 
       <div id="mainLoader" class="loader_back"><div class="loader"></div></div>

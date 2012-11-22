@@ -32,7 +32,35 @@
           hwaccel: true,
           zIndex: 0
         };
-        this.spinner = new Spinner(opts).spin(document.getElementById('mainLoader'));
+        this.mainLoader = document.getElementById('mainLoader');
+        this.spinner = new Spinner(opts).spin(this.mainLoader);
+
+        /* Menu for ajax loading */
+        this.menus = $('#pages li a');
+        this.menus.click(function(e){
+
+          $('#content').empty();
+          var urlPath = e.target.href;
+
+          $.post(urlPath, {ajax: 1}, function(data){
+
+            $('#content').html(data.html);
+            document.title = data.title
+            window.history.pushState({"html": data.html, "title": data.title},"", urlPath);
+
+          });
+
+          e.preventDefault();
+          return false;
+
+        });
+
+        window.onpopstate = function(e){
+          if(e.state){
+            $('#content').html(e.state.html);
+            document.title = e.state.title;
+          }
+        };
 
     };
 

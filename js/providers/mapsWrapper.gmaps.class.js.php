@@ -19,6 +19,10 @@ var mapsWrapper = function(type) {
 
         this.ownCallback = true;
         this.delay = 0;
+        
+        /* In case it's already been loaded */
+        if (typeof google !== 'undefined') return '';
+
         return "http://maps.googleapis.com/maps/api/js?sensor=false&key=" + genericOptions.apiKeys.gmaps + "&libraries=places" + 
                "&callback=isocronMap.init";
 

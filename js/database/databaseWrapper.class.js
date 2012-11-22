@@ -4,7 +4,7 @@
 var databaseWrapper = function() {
 
 	/* ------------- Gobal paths -------------- */
-	var path = "action/";
+	var path = "/action/";
 
 	var actions = {
 		getObjectsIn: 		path + "getObjectsIn",

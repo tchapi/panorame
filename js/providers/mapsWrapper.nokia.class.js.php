@@ -17,6 +17,10 @@ var mapsWrapper = function(type) {
 
         this.ownCallback = false;
         this.delay = 500;
+
+        /* In case it's already been loaded */
+        if (typeof nokia !== 'undefined') return '';
+
         return "http://api.maps.nokia.com/2.2.3/jsl.js?with=maps,positioning,placesdata";
 
     };

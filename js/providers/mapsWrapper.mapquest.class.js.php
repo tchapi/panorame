@@ -17,6 +17,10 @@ var mapsWrapper = function(type) {
 
         this.ownCallback = false;
         this.delay = 0;
+
+        /* In case it's already been loaded */
+        if (typeof MQA !== 'undefined') return '';
+
         return "http://www.mapquestapi.com/sdk/js/v7.0.s/mqa.toolkit.js?key=" + genericOptions.apiKeys.mapquest;
 
     };

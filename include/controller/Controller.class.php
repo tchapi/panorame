@@ -7,17 +7,18 @@ class Controller {
   /** Defaults */
   static private $parameters   = array();
   static private $action       = null;
+  static private $ajaxRequest  = false;
 
   public static function process(){
 
     date_default_timezone_set('Europe/Paris');
 
-    /** Is an Ajax request ?
-    if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-      self::$useTemplate = false;
+    /** Is an Ajax request ? */
+    if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' && 
+       isset($_POST['ajax']) && $_POST['ajax'] == 1) {
+      self::$ajaxRequest = true;
     }
-    */
-
+    
     if (!self::login()) {
       self::render('login', null);
       return;
@@ -70,14 +71,26 @@ class Controller {
   public static function getParameters(){
 
     global $constants;
-    
 
-    if (isset($_GET['page']) && in_array($_GET['page'], $constants['pages']) ){
-      self::$parameters['page'] = $_GET['page'];
-    } else if (isset($_GET['page'])) {
-      self::$parameters['page'] = '404';
+    /* PAGES */
+    if (isset($_GET['page'])) {
+    
+      $exists = false;
+      foreach($constants['pages'] as $page){
+        if ($page['slug'] == $_GET['page']) {
+          $exists = $page;
+          break;
+        }
+      }
+
+      if ($exists !== false) {
+        self::$parameters['page'] = $page;
+      } else {
+        self::$parameters['page'] = array('slug' => '404', 'name' => '404');
+      }
+
     } else {
-      self::$parameters['page'] = 'map';
+      self::$parameters['page'] =  array('slug' => 'map', 'name' => 'Home');
     }
 
     /* DEFAULTS */
@@ -140,8 +153,25 @@ class Controller {
     
       header('X-Panorame-Engine: '.self::$parameters['engine']);
       header('X-Powered-By: tchap');
-      include(_PATH.'include/templates/'.$templateName.'.php');
-    
+      
+      if (self::$ajaxRequest === true && isset($parameters['page'])) {
+
+        ob_start();
+          header('Content-Type: application/json');
+          include(_PATH.'include/templates/pages/_'.$parameters['page']['slug'].'.php');
+        $data = ob_get_clean();
+
+        echo json_encode(array(
+          'title' => _name . " | " . $parameters['page']['name'],
+          'html' => $data
+        ));
+
+      } else {
+
+        include(_PATH.'include/templates/'.$templateName.'.php');
+
+      }
+
     } else {
 
       throw new Exception ('No action nor template to render');

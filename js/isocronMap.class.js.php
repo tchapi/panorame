@@ -39,11 +39,23 @@ var isocronMap = function() {
 
         var oScript    = document.createElement('script');
         oScript.type   = 'text/javascript';
-        oScript.src    = mapsWrapper.getUrl({apiKeys: this.apiKeys, instance: this});
-        if (!mapsWrapper.ownCallback)
-            oScript.onload = $.proxy(function(){setTimeout("isocronMap.init()", mapsWrapper.delay);}, this);
 
-        document.body.appendChild(oScript);
+        var url = mapsWrapper.getUrl({apiKeys: this.apiKeys, instance: this});
+
+        if (url == "") {
+
+            return this.init();
+
+        } else {
+
+            oScript.src  = url;
+            
+            if (!mapsWrapper.ownCallback)
+                oScript.onload = $.proxy(function(){setTimeout("isocronMap.init()", mapsWrapper.delay);}, this);
+
+            document.body.appendChild(oScript);
+
+        }
 
     };
 

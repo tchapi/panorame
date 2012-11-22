@@ -94,11 +94,11 @@
   databaseWrapper = new databaseWrapper();
 
   // Wraps all that and fires
-  window.onload = function() { 
+  $(document).ready(function() { 
     isocronMap.insertScript(
       "mapCanvas", 
       "searchInput"
     );
-  };
+  });
 
 </script>

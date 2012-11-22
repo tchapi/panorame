@@ -1,4 +1,4 @@
-<div id="top" class="404">
+<div id="top" class="ohmy">
   <div class="hero-unit">
     <h1>Oooops</h1>
     <h2>Looks like we had a problem</h2>
@@ -6,7 +6,7 @@
        or <a class="btn btn-info btn-large" href="mailto:contact@panorame.com"><span class="lsf">mail</span> Help us resolve this</a></p>
   </div>
 </div>
-<div id="paragraphs" class="404">
+<div id="paragraphs" class="ohmy">
   <div class="inside">
 
   <h4><span class="lsf">book</span> While you're here ... read on to learn more about maps ...</h4>

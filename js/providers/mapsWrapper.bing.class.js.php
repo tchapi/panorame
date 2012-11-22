@@ -17,6 +17,10 @@ var mapsWrapper = function(type) {
 
         this.ownCallback = false;
         this.delay = 1000;
+
+        /* In case it's already been loaded */
+        if (typeof Microsoft !== 'undefined') return '';
+
         return "http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0";
 
     };

@@ -17,6 +17,10 @@ var mapsWrapper = function(type) {
 
         this.ownCallback = false;
         this.delay = 0;
+
+        /* In case it's already been loaded */
+        if (typeof OpenLayers !== 'undefined') return '';
+
         return "http://openlayers.org/api/OpenLayers.js";
 
     };
