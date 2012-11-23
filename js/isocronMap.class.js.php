@@ -31,6 +31,9 @@ var isocronMap = function() {
     // Initial limit 
     this.limit = 300;
 
+    // Speed slow multiplier
+    this.slowness = 0.35;
+
     this.insertScript = function(canvas, searchInput){
 
         // We make it all asynchronous
@@ -232,6 +235,7 @@ var isocronMap = function() {
 
         /* Mean of transportation selector */
         this.meanSelect = $('#meanSelector');
+        this.speedSelect = $('#speedSelector');
         this.meansAndSpeeds = [];
 
         // Insert means and speed values
@@ -253,9 +257,14 @@ var isocronMap = function() {
         }, this));
 
         $("#mean, #speed").fadeIn();
+        this.selectedSpeed = 1;
 
         this.meanSelect.mouseup($.proxy(function(e){ 
             this.selectedMean = this.meansAndSpeeds[e.target.value];
+            this.recalculateGraph();
+        }, this));
+        this.speedSelect.mouseup($.proxy(function(e){ 
+            this.selectedSpeed = e.target.value;
             this.recalculateGraph();
         }, this));
 
@@ -445,7 +454,7 @@ var isocronMap = function() {
 
         var speeds = this.selectedMean[type];
 
-        return startingCost + Math.max(0, distance*speeds[0] + grade*speeds[1]);
+        return startingCost + Math.max(0, (distance*speeds[0] + grade*speeds[1])*(1 + this.slowness*(1-this.selectedSpeed)));
        
     };
 

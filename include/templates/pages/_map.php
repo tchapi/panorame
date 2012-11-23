@@ -23,8 +23,8 @@
       </div>
       <div id="speed" style="display: none">
         <div class="btn-group" data-toggle="buttons-radio" id="speedSelector">
-          <button type="button" class="btn active" value="-1"><span class="lsf">time</span> slow</button>
-          <button type="button" class="btn" value="1"><span class="lsf">dashboard</span> fast</button>
+          <button type="button" class="btn lsf" value="0">time slow</button>
+          <button type="button" class="btn active lsf" value="1">dashboard fast</button>
         </div>
       </div>
     </div>
