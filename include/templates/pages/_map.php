@@ -32,12 +32,12 @@
     <div class="pull-left" id="pois">
       <div class="toolTitle">What are you looking for ?</div>
       <div id="places">
-        <ul>
-          <!-- EXAMPLES -->
-          <li><input type='checkbox' id="restaurants" name="places"/><label for="restaurants"><span class="lsf">meal</span> Restaurants</label></li>
-          <li><input type='checkbox' id="bars" name="places"/><label for="bars"><span class="lsf">coffee</span> Bars</label></li>
-          <li><input type='checkbox' id="shops" name="places"/><label for="shops"><span class="lsf">gift</span> Shops</label></li>
-        </ul>
+        <select id="poiChooser" multiple="multiple" style="display: none; width: 210px;">
+        </select>
+        <select id="poiSorter" style="display: none; width: 100px;">
+          <option>Ratings</option>
+          <option>Price</option>
+        </select>
       </div>
     </div>
 <?php endif ?>
@@ -55,7 +55,6 @@
   <div class="modal-footer">
     <a href="#" data-toggle="modal" data-target="#locationRequest" class="btn btn-primary">Dismiss</a>
   </div>
-  
 </div>
 
 <?php if ($parameters['editMode'] === true): ?>

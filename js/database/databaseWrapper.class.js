@@ -10,6 +10,7 @@ var databaseWrapper = function() {
 		getObjectsIn: 		path + "getObjectsIn",
 		getClosestVertex: path + "getClosestVertex",
 		getMeansAndSpeeds:path + "getMeansAndSpeeds",
+		getPOIs: 				  path + "getPOIs",
 		/* ADMIN */
 		getTypes: 				path + "edit/getTypes",
 		addEdge:   				path + "edit/addEdge",
@@ -28,6 +29,12 @@ var databaseWrapper = function() {
 	this.getMeansAndSpeeds = function(callback){
 
 		$.post(actions.getMeansAndSpeeds, callback);
+
+	};
+
+	this.getPOIs = function(callback){
+
+		$.post(actions.getPOIs, callback);
 
 	};
 

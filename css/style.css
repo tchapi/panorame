@@ -120,7 +120,7 @@ header {
 #infos .position, #infos .objects { cursor: pointer;}
 
 #page { position:absolute; width: 100%; top:54px; bottom:0; background: url("/img/bg_tile.jpg"); }
-#content {z-index: 1; position:absolute; width: 100%; top:0; bottom:0;}
+#content { position:absolute; width: 100%; top:0; bottom:0;}
 
 /* PAGES */
   /* Map */
@@ -138,11 +138,6 @@ header {
     #toolbar #meanSelector button {font-size:27px;}
     #toolbar #mean select {width: 150px;}
     #toolbar .toolTitle { font-weight: bold; font-size: 12px;}
-
-    #toolbar #places ul {margin: 0; padding: 5px 0;}
-    #toolbar #places input {margin: 0 5px 0 0;}
-    #toolbar #places li {margin-right: 10px;}
-    #toolbar #places li, #toolbar #places label {display: inline; cursor: pointer;}
 
     #toolbar #addressForm {min-width: 350px;}
     #toolbar #actionForm  {min-width: 300px;}

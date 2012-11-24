@@ -117,6 +117,50 @@ var isocronMap = function() {
         this.toggleDataOverlayButton = $('#toggleDataOverlay');
         this.toggleDataOverlayButton.click($.proxy(this.toggleDataOverlay,this));
 
+        /* Poi Chooser */
+        this.POIs = $("#poiChooser");
+        this.POISort = $("#poiSorter");
+
+        // Insert means and speed values
+        databaseWrapper.getPOIs($.proxy(function(data){
+
+            $.each(data, $.proxy(function(key, value) {   
+                
+                var currentOptGroup = $('<optgroup>')
+                     .attr('data-cat',1)
+                     .attr("data-icon",value.icon)
+                     .attr("label",value.label).appendTo(this.POIs); 
+
+                $.each(value.items, $.proxy(function(key, item){
+                    currentOptGroup
+                     .append($('<option>')
+                     .attr("data-icon",value.icon)
+                     .attr('value', key)
+                     .text(item));
+                }, this));
+
+            }, this));
+            
+        }, this));
+
+        /* POIs Chooser type */
+        function formatResult(state) {
+            if ($(state.element).data('icon') && $(state.element).data('cat') == "1")
+                return "<span class='lsf'>" + $(state.element).data('icon') + "</span> " + state.text;
+            else
+                return state.text;
+        }
+        function formatSelection(state) {
+            return "<span class='lsf " + $(state.element).data('class') + "'>" + $(state.element).data('icon') + "</span> " + state.text;
+        }
+        this.POIs.select2({
+            maximumSelectionSize: 3,
+            placeholder: "Type anything !",
+            formatResult: formatResult,
+            formatSelection: formatSelection,
+        });
+        this.POISort.select2();
+
 <?php if ($editMode === true): ?>
         /* ------------------- ADMIN ------------------- */
 

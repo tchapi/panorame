@@ -93,6 +93,27 @@ class Controller {
       self::$parameters['page'] =  array('slug' => 'map', 'name' => 'Home');
     }
 
+    /* Short links */
+    if (self::$parameters['page']['slug'] == 'map') {
+
+      $lat = isset($_GET['lat'])?floatval($_GET['lat']):null;
+      $lng = isset($_GET['lng'])?floatval($_GET['lng']):null;
+
+      $mean   = isset($_GET['v'])?trim($_GET['v']):null;
+        // Check if mean is in the range of correct values
+
+      $speed  = isset($_GET['s'])?intval($_GET['s']):null;
+        if ($speed != 0) $speed = 1;
+
+      $time   = isset($_GET['t'])?max(0,intval($_GET['t'])):null;
+        // check if its in the range of authorized values
+      
+      $poi = isset($_GET['i'])?explode(',', trim($_GET['i'])):null;
+
+      $slug = isset($_GET['slug'])?floatval($_GET['slug']):null;
+
+    }
+
     /* DEFAULTS */
     self::$parameters['addedScript'] = "";
     self::$parameters['framework']   = "gmaps";
@@ -120,6 +141,7 @@ class Controller {
     }
 
 
+    /* Action */
     if (isset($_GET['action'])){
 
       self::$action = $_GET['action'];
