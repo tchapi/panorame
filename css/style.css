@@ -120,7 +120,8 @@ header {
 #infos .position, #infos .objects { cursor: pointer;}
 
 #page { position:absolute; width: 100%; top:54px; bottom:0; background: url("/img/bg_tile.jpg"); }
-#content { position:absolute; width: 100%; top:0; bottom:0;}
+  #page #locationRequest {margin-top: -115px;}
+#content { z-index: 2; position:absolute; width: 100%; top:0; bottom:0;}
 
 /* PAGES */
   /* Map */
