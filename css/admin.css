@@ -23,3 +23,7 @@ footer{
 	margin: 5px;
 	padding-top: 4px;
 }
+
+#display_type{
+	width: 160px;
+}

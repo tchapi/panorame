@@ -11,9 +11,15 @@
     </div>
 
 <?php if ($parameters['editMode'] === true): ?> 
-    <div class="span8">  
-      <div id="editMode" class="alert alert-warning pull-right"><span id="toggleDataOverlay" data-original-title="Toggle overlays" class="lsf pull-left">view</span> <strong>Editing mode</strong></div>
-      <div id="notice" class="alert alert-info pull-right"><span class="lsf">info</span> <strong></strong></div> 
+    <div class="span2">
+      <div class="toolTitle">Display only this type :</div>
+      <select id="display_type">
+      </select>
+    </div>
+    <div class="span6">
+      <div class="toolTitle">&nbsp;</div>  
+      <div id="editMode" class="alert alert-warning pull-left"><span id="toggleDataOverlay" data-original-title="Toggle overlays" class="lsf pull-left">view</span> <strong>Editing mode</strong></div>
+      <div id="notice" class="alert alert-info pull-left"><span class="lsf">info</span> <strong></strong></div> 
     </div>
 <?php else: ?>
     <div class="span3" id="actionForm">

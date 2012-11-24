@@ -125,7 +125,7 @@ class DBUtils {
   /*
    * GET ALL THE EDGES in given bounds expressed as two LAT / LNG couples for NW and SE
    */
-  public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+  public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $restrictToType, $POI_lat, $POI_lng){
 
   	global $DBConnection;
     $db = $DBConnection->getDB();
@@ -133,7 +133,14 @@ class DBUtils {
     // Extends the bounds
     $b = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, null);
 
-    $restrictArray = self::restrictToBBox(array(), 'edges', $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
+    // Restrict to a type ?
+    if ($restrictToType == null || $restrictToType == 0) {
+      $restrictArray = array();
+    } else {
+      $restrictArray = array('type' => $restrictToType);
+    }
+
+    $restrictArray = self::restrictToBBox($restrictArray, 'edges', $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
     
     $edges = iterator_to_array($db->edges_computed->find($restrictArray));
 

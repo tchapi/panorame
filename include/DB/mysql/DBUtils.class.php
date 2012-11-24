@@ -242,7 +242,7 @@ class DBUtils {
   /*
    * GET ALL THE EDGES in given bounds expressed as two LAT / LNG couples for NW and SE
    */
-  public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+  public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $restrictToType, $POI_lat, $POI_lng){
 
     global $DBConnection;
     
@@ -255,6 +255,8 @@ class DBUtils {
 
     $getEdgesIn_query  = self::restrictForEdgeBBox($getEdgesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
     $getEdgesIn_query .= " AND e.`is_deleted` = 0";
+
+    if ($restrictToType != null && $restrictToType != 0) $getEdgesIn_query .= " AND e.`type` = ".intval($restrictToType);
     
     $queryResult = $DBConnection->link->query($getEdgesIn_query);
 

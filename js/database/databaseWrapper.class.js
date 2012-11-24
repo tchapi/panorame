@@ -21,9 +21,9 @@ var databaseWrapper = function() {
 	};
 	/* ---------------------------------------- */
 
-	this.getObjectsIn = function(bounds, type, poi, callback){
+	this.getObjectsIn = function(bounds, type, restrictToType, poi, callback){
 
-		$.post(actions.getObjectsIn, {bounds: bounds, type: type, poi: poi}, callback);
+		$.post(actions.getObjectsIn, {bounds: bounds, type: type, restrictToType: restrictToType, poi: poi}, callback);
 	};
 
 	this.getMeansAndSpeeds = function(callback){

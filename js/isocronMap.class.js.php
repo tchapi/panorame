@@ -167,6 +167,7 @@ var isocronMap = function() {
         this.addEdgeButton     = $('#addEdge');
         this.consolidateButton = $('#consolidate');
         this.typeSelect       = $('#addEdge_type');
+        this.typeSelectDisplay= $('#display_type')
         this.autoReverse      = $('input[type=radio][name=addEdge_autoReverse]');
 
         this.addEdgeButton.click($.proxy(function(event){
@@ -199,14 +200,29 @@ var isocronMap = function() {
         // Insert types in admin
         databaseWrapper.getTypes($.proxy(function(data){
 
+            this.typeSelectDisplay
+                     .append($("<option></option>")
+                     .attr("value","null")
+                     .attr("rel", 0)
+                     .text("All paths"));
+
             $.each(data, $.proxy(function(key, value) {   
-                 this.typeSelect
+                this.typeSelect
+                     .append($("<option></option>")
+                     .attr("value",key)
+                     .attr("rel", value.id)
+                     .text("(" + value.id + ") "+ value.slug));
+                this.typeSelectDisplay
                      .append($("<option></option>")
                      .attr("value",key)
                      .attr("rel", value.id)
                      .text("(" + value.id + ") "+ value.slug)); 
             }, this));
 
+        }, this));
+
+        this.typeSelectDisplay.change($.proxy(function(e){
+            this.getDataAndRecalculateGraph();
         }, this));
 
         this.continuousMode = $('#addEdge_continuous');
@@ -418,9 +434,9 @@ var isocronMap = function() {
     this.getDataAndRecalculateGraph = function(){
 
 <?php if ($editMode === true): ?>
-        databaseWrapper.getObjectsIn(this.getBounds(), 'edges', this.position, $.proxy(function(data){
+        databaseWrapper.getObjectsIn(this.getBounds(), 'edges', $("#display_type").find(':selected').attr('rel'), this.position, $.proxy(function(data){
 <?php else: ?>
-        databaseWrapper.getObjectsIn(this.getBounds(), 'tree', this.position, $.proxy(function(data){
+        databaseWrapper.getObjectsIn(this.getBounds(), 'tree', null, this.position, $.proxy(function(data){
 <?php endif ?>            
             $('#infos .objects span.obj_count').html(data.count);
             
@@ -660,7 +676,7 @@ var isocronMap = function() {
             this.notice.hide();
         } else {
             this.notice.html(' <strong>' + messageClass.toUpperCase() + '</strong> : ' + message);
-            this.notice.removeClass().addClass('pull-right alert alert-' + messageClass);
+            this.notice.removeClass().addClass('pull-left alert alert-' + messageClass);
             this.notice.show();
         }
 

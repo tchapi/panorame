@@ -14,6 +14,7 @@ function doAction() {
         $type = 'vertices';
     }
 
+    $restrictToType = $_POST['restrictToType'];
     $bounds = $_POST['bounds'];
 
     // Get POI Closest point
@@ -27,7 +28,7 @@ function doAction() {
     
     } elseif ($type == 'edges'){
 
-      $objects = DBUtils::getEdgesIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $closestVertex['point']['lat'], $closestVertex['point']['lng']);
+      $objects = DBUtils::getEdgesIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $restrictToType, $closestVertex['point']['lat'], $closestVertex['point']['lng']);
 
     } elseif ($type == 'tree'){
 
