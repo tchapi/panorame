@@ -199,11 +199,9 @@ var mapsWrapper = function(type) {
             this.marker.setIcon(new google.maps.MarkerImage(this.standardPinImage, null, null, new google.maps.Point(14,44)));
 
             if (description != null){
-                // Displays the infoWindow
-                this.infoWindow.setContent('<div>' + description + '</div>');
-                this.infoWindow.open(this.map, this.marker);
-            } else {
-                this.infoWindow.close();
+            
+                // TODO, display the address / description somewhere?
+
             }
 
             this.positionCallback(lat, lng);

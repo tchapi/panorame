@@ -16,7 +16,7 @@ var mapsWrapper = function(type) {
     this.getUrl = function(genericOptions){
 
         this.ownCallback = false;
-        this.delay = 500;
+        this.delay = 1000;
 
         /* In case it's already been loaded */
         if (typeof nokia !== 'undefined') return '';
@@ -156,10 +156,9 @@ var mapsWrapper = function(type) {
             this.map.objects.add(this.marker);
 
             if (description != null){
-                // Displays the infoWindow
-                this.infoWindow = this.infoBubble.openBubble(description, this.position);
-            } else {
-                if (this.infoWindow) this.infoBubble.closeBubble(this.infoWindow);
+            
+                // TODO, display the address / description somewhere?
+
             }
 
             this.positionCallback(lat, lng);

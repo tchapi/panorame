@@ -153,20 +153,10 @@ var mapsWrapper = function(type) {
             this.map.entities.push(this.marker);
 
             if (description != null){
-                // Displays the infoWindow
-               if (!this.infoWindow) {
-                    this.infoWindow = new Microsoft.Maps.Infobox(this.position);
-                    this.map.entities.push(this.infoWindow);
-                } else {
-                    this.infoWindow.setLocation(this.position)
-                }
-                this.infoWindow.setOptions({ title:description, zIndex: 10});
-                this.infoWindow.setOptions({ visible:true });
-            } else {
-                if (this.infoWindow) this.infoWindow.setOptions({ visible:false });
-            }
+            
+                // TODO, display the address / description somewhere?
 
-            this.marker.setOptions({infobox: this.infoWindow});
+            }
 
             this.positionCallback(lat, lng);
         }

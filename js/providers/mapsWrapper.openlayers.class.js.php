@@ -174,17 +174,9 @@ var mapsWrapper = function(type) {
             this.map.panTo(this.position);    
    
             if (description != null){
-                // Displays the infoWindow
-                if (!this.infoWindow) {
-                    this.infoWindow = new OpenLayers.Popup.FramedCloud("Popup", this.position, null, description, null, true);
-                    this.map.addPopup(this.infoWindow);
-                } else {
-                    this.infoWindow.lonlat = this.position;
-                    this.infoWindow.updatePosition();
-                    this.infoWindow.show();
-                }
-            } else{
-                if (this.infoWindow) this.infoWindow.hide(); 
+            
+                // TODO, display the address / description somewhere?
+
             }
 
             this.positionCallback(lat, lng);

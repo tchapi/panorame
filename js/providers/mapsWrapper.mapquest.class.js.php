@@ -147,9 +147,9 @@ var mapsWrapper = function(type) {
             this.map.slideMapToPoint(this.map.llToPix({lat:lat, lng:lng}));
 
             if (description != null){
-                // Displays the infoWindow
-                this.marker.setInfoContentHTML(description);
-                this.marker.toggleInfoWindow();
+            
+                // TODO, display the address / description somewhere?
+
             }
             
             this.positionCallback(lat, lng);
