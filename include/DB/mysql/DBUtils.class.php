@@ -69,7 +69,7 @@ class DBUtils {
           $items = array();
 
           if ($row["items"] != null) {
-            $items = json_decode('{'.$row["items"].'}');
+            $items = json_decode('{'.$row["items"].'}', true);
             array_push($pois, array('id' => $row['id'], 'label' => $row['label'], 'icon' => $row['icon'], 'items' => $items));
           }
 
