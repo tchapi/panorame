@@ -16,6 +16,9 @@
 <?php include(_PATH.'include/templates/pages/_'.$parameters['page']['slug'].'.php'); ?>
       </div>
 
+<!-- modal for location -->
+<?php include(_PATH.'include/templates/partials/_locationModal.php'); ?>
+
       <div id="mainLoader" class="loader_back"><div class="loader"></div></div>
     </div>
 

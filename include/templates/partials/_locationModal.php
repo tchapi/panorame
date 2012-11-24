@@ -1,12 +1,12 @@
-<div class="modal hide fade">
+<div id="locationRequest" class='modal hide fade'>
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h3>Oops ...</h3>
+    <h3><span class="lsf">geo</span> Tell us where you are</h3>
   </div>
   <div class="modal-body">
-    <p>Looks like your browser is waiting for you to confirm whether or not you want to use your actual location. Click "Allow" in the top-right corner of your browser to allow <?php echo _name ?> to access your current location</p>
+    <p><?php echo _name; ?> is waiting for your approval to use your location. A toolbar or a popup must have been displayed in your browser so that you can acknowledge it and continue.</p><p class="muted">If you do not wish to share it, dismiss this alert and everything will still be running fine.</p>
   </div>
   <div class="modal-footer">
-    <a href="#" class="btn btn-info">Do not allow</a>
+    <a href="#" data-toggle="modal" data-target="#locationRequest" class="btn btn-primary">Dismiss</a>
   </div>
 </div>
