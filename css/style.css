@@ -52,6 +52,10 @@
   -o-font-feature-settings: "liga" 1, "dlig" 1;
   font-feature-settings: "liga" 1, "dlig" 1;
 }
+.lsf.bigIcon{
+  font-size: 800%;
+  line-height: 0.8em;
+}
 
 body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -187,6 +191,8 @@ header {
   #top.contact {background: url('/img/bg/bg_contact.png') no-repeat center center black;}  
   #top.about {background: url('/img/bg/bg_about.png') no-repeat center center black;}  
   #top.ohmy {background: url('/img/bg/bg_404.png') no-repeat center center black;}  
+  #paragraphs.about div.icons {text-align: center;}
+  #paragraphs.about .iconHolder {border: 2px solid white; padding: 20px;}
 
 /* Loader */
 
