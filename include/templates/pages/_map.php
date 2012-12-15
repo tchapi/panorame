@@ -30,7 +30,7 @@
       <div id="speed" style="display: none">
         <div class="btn-group" data-toggle="buttons-radio" id="speedSelector">
           <button type="button" class="btn lsf" value="0">time slow</button>
-          <button type="button" class="btn active lsf" value="1">dashboard fast</button>
+          <button type="button" class="btn lsf" value="1">dashboard fast</button>
         </div>
       </div>
     </div>
@@ -71,7 +71,7 @@
 <!-- specific map scripts -->
 <?php echo $parameters['addedScript']; ?>
 <script src="/js/helpers/userPositionHelper.js" type="text/javascript"></script>
-<script src="/js/isocronMap.class.js.php<?php if ($parameters['editMode'] === true) echo '?edit=1'; ?>" type="text/javascript"></script>
+<script src="/js/isocronMap.class.js.php?v=1<?php if ($parameters['editMode'] === true) echo '&edit=1'; ?><?php foreach ($parameters['inits'] as $key => $value) { echo  '&'.$key.'='.$value; } ?>" type="text/javascript"></script>
 <script src="/js/providers/mapsWrapper.<?php echo $parameters['framework']; ?>.class.js.php<?php if ($parameters['editMode'] === true) echo '?edit=1'; ?>" type="text/javascript"></script>
 <script src="/js/database/databaseWrapper.class.js" type="text/javascript"></script>
 <script>

@@ -374,7 +374,8 @@ class DBUtils {
 			"is_deleted" => 0,
 			"from_id" => $startVertex_id,
 			"to_id" => $destVertex_id,
-			"type" => $type 
+			"type" => $type,
+      "tagged_by" => $_COOKIE["panorame_auth_name"]
     	));
 
     self::consolidate();

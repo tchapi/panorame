@@ -689,13 +689,14 @@ class DBUtils {
     $distance = GeoUtils::haversine($start_lat, $start_lng, $dest_lat, $dest_lng);
     $grade = $dest_alt - $start_alt;
 
-    $createEdge_query = sprintf("INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`) 
-                 VALUES ('%d', '%d', '%F', '%d', '%d');",
+    $createEdge_query = sprintf("INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`, `tagged_by`) 
+                 VALUES ('%d', '%d', '%F', '%d', '%d', '%s');",
             $DBConnection->link->escape_string($startVertex_id),
             $DBConnection->link->escape_string($destVertex_id),
             $DBConnection->link->escape_string($distance),
             $DBConnection->link->escape_string($grade),
-            $DBConnection->link->escape_string($type));
+            $DBConnection->link->escape_string($type),
+            $DBConnection->link->escape_string($_COOKIE["panorame_auth_name"]));
 
     // Executes the query
     $createEdge_result = $DBConnection->link->query($createEdge_query);

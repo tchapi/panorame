@@ -83,7 +83,7 @@ class Controller {
         }
       }
 
-      if ($exists !== false) {
+      if ($exists !== false) {  
         self::$parameters['page'] = $page;
       } else {
         self::$parameters['page'] = array('slug' => '404', 'name' => '404');
@@ -96,19 +96,21 @@ class Controller {
     /* Short links */
     if (self::$parameters['page']['slug'] == 'map') {
 
-      $lat = isset($_GET['lat'])?floatval($_GET['lat']):null;
-      $lng = isset($_GET['lng'])?floatval($_GET['lng']):null;
+      self::$parameters['inits'] = array(
+        'lat' => isset($_GET['lat'])?floatval($_GET['lat']):null,
+        'lng' => isset($_GET['lng'])?floatval($_GET['lng']):null,
 
-      $mean   = isset($_GET['v'])?trim($_GET['v']):null;
+        'mean' => isset($_GET['v'])?trim($_GET['v']):$constants['defaults']['mean'],
         // Check if mean is in the range of correct values
 
-      $speed  = isset($_GET['s'])?intval($_GET['s']):null;
-        if ($speed != 0) $speed = 1;
+        'speed'  => isset($_GET['s'])?intval($_GET['s']):$constants['defaults']['speed'],
+        // Check if its in the range of authorized values
 
-      $time   = isset($_GET['t'])?max(0,intval($_GET['t'])):null;
-        // check if its in the range of authorized values
-      
-      $poi = isset($_GET['i'])?explode(',', trim($_GET['i'])):null;
+        'time'   => isset($_GET['t'])?max(0,intval($_GET['t'])):$constants['defaults']['time'],
+        // Check if its in the range of authorized values
+
+        'poi' => isset($_GET['i'])?trim($_GET['i']):$constants['defaults']['poi'],
+      );
 
       $slug = isset($_GET['slug'])?floatval($_GET['slug']):null;
 
@@ -214,14 +216,15 @@ class Controller {
     self::$parameters['error'] = false;
 
     if ( (!isset($_POST['name']) || !isset($_POST['password']) || $_POST['password'] != $password || $_POST['name'] == "")
-      && (!isset($_COOKIE[$cookieName]) || $_COOKIE[$cookieName] != md5($password)) ){
+      && (!isset($_COOKIE[$cookieName]) || $_COOKIE[$cookieName] != md5(md5($password)) ) ){
 
       if (isset($_POST['password'])) self::$parameters['error'] = true;
       return false;
 
     } else {
 
-      setcookie( $cookieName, md5($password), strtotime( '+30 days' ) );
+      setcookie( $cookieName, md5(md5($password)), strtotime( '+30 days' ) );
+      setcookie( $cookieName."_name", $_POST['name'], strtotime( '+30 days' ) );
       return true;
 
     }

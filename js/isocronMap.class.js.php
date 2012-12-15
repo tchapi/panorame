@@ -29,7 +29,7 @@ var isocronMap = function() {
     this.displayData = true;
 
     // Initial limit 
-    this.limit = 300;
+    this.limit = <?php echo $_GET['time'] ?>;
 
     // Speed slow multiplier
     this.slowness = 0.35;
@@ -69,7 +69,7 @@ var isocronMap = function() {
         // Options
         this.options={
             canvas: this.canvas,      
-            center:{lat:48.8566667, lng:2.3509871}, // PARIS
+            center:{lat:<?php echo !empty($_GET['lat'])?floatval($_GET['lat']):48.8566667 ?>, lng:<?php echo !empty($_GET['lng'])?floatval($_GET['lng']):2.3509871 ?>}, // PARIS
             searchInput: this.searchInput,
             addPinButton: this.addPinButton,
             apiKeys: this.apiKeys,
@@ -93,9 +93,10 @@ var isocronMap = function() {
     this.mapIsReady = function(){
 
         mapsWrapper.setupEvents(this.options);
-
+<?php if( empty($_GET['lat']) && empty($_GET['lng']) ) : ?>
         // Finally, we center the map at the user's position
         this.setToUserPositionIfAvailable();
+<?php endif ?>
     };
 
     this.setupVisual = function(){
@@ -303,21 +304,25 @@ var isocronMap = function() {
 
             $.each(data, $.proxy(function(key, value) {   
                 
-                this.meanSelect
-                     .append($('<button type="button" class="btn btn-info lsf"></button>')
+                var el = $('<button type="button" class="btn btn-info lsf"></button>')
                      .attr("value",value.id)
-                     .text(value.slug).tooltip({placement: 'bottom'})); 
+                     .text(value.slug).tooltip({placement: 'bottom'});
 
+                this.meanSelect.append(el); 
                 this.meansAndSpeeds[value.id] = value.explorables;
 
-            }, this));
-            this.meanSelect.children(":first").addClass('active');
-            this.selectedMean = this.meansAndSpeeds[1];
+                if (value.id == <?php echo $_GET['mean'] ?>){
+                    el.addClass('active');
+                    this.selectedMean = this.meansAndSpeeds[value.id];
+                }
 
+            }, this));
+            
         }, this));
 
         $("#mean, #speed").fadeIn();
-        this.selectedSpeed = 1;
+        this.selectedSpeed = <?php echo $_GET['speed'] ?>;
+        this.speedSelect.find("[value=<?php echo $_GET['speed'] ?>]").addClass('active');
 
         this.meanSelect.mouseup($.proxy(function(e){ 
             this.selectedMean = this.meansAndSpeeds[e.target.value];

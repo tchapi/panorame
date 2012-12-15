@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS `edges` (
   `type` int(10) unsigned NOT NULL,
   `is_deleted` tinyint(1) NOT NULL,
   `is_dirty` tinyint(1) NOT NULL,
+  `tagged_by` VARCHAR( 256 ) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `from_id` (`from_id`),
   KEY `to_id` (`to_id`),
