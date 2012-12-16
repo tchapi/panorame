@@ -533,8 +533,8 @@ var isocronMap = function() {
     };
 
     this.dijkstra = function(tree, poi, closestPoint){
-        console.log('-----------------------');
-console.time('dijkstra');
+
+        // console.time('dijkstra');
         // init, we need to copy
         var treeCopy = $.extend(true, {}, tree);
 
@@ -658,7 +658,7 @@ console.time('dijkstra');
             }
 
         }
-console.timeEnd('dijkstra');
+        // console.timeEnd('dijkstra');
         // console.log('-------------- end --------------');
         return edges;
     };
