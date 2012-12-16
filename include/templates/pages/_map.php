@@ -40,7 +40,7 @@
       <div id="places">
         <select id="poiChooser" multiple="multiple" style="display: none; width: 210px;">
         </select>
-        <select id="poiSorter" style="display: none; width: 100px;">
+        <select id="poiSorter" style="display: none; width: 90px;">
           <option>Ratings</option>
           <option>Price</option>
         </select>
