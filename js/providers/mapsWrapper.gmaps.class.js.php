@@ -14,6 +14,7 @@ var mapsWrapper = function(type) {
     this.map = null;
     this.edges = [];
     this.closestPoint = null;
+    this.previousLimit = 0;
 
     this.getUrl = function(genericOptions){
 
@@ -225,28 +226,49 @@ var mapsWrapper = function(type) {
 
     this.setDataOverlay = function(edges, limit, display){
 
-        this.removeDataOverlay();
-        this.edges.length = 0;
-
         var count = edges.length;
         var startPoint = null, destPoint = null;
         var currentLine = null;
 
+        var canDrawFull = false, mustDraw = false, mustKeep = true;
+
         for(var i = 0; i < count; i++) {
 
-            if (limit == null || (edges[i].start.cost < limit && edges[i].dest.cost < limit)){
+            // Check if we have to have it on the map, drawn or already drawn
+            canDrawFull =
+                edges[i].dest.cost < limit;
+
+            mustDraw = 
+                edges[i].start.cost < limit &&
+                (edges[i].dest.cost > this.previousLimit || edges[i].dest.cost > limit) &&
+                (canDrawFull || edges[i].secable == 1);
+
+            mustKeep =
+                edges[i].start.cost < limit &&
+                edges[i].dest.cost < this.previousLimit &&
+                edges[i].dest.cost < limit;
+
+            if ( limit == null || (mustDraw && canDrawFull) ){
 
                 startPoint = edges[i].start.point;
                 destPoint = edges[i].dest.point;
 
-            } else if (edges[i].start.cost < limit && edges[i].dest.cost > limit && edges[i].secable == 1){
+            } else if (mustDraw){
                 
                 // semi-distance at the end of a leaf
                 startPoint = edges[i].start.point;
                 var percent = (limit-edges[i].start.cost)/(edges[i].dest.cost - edges[i].start.cost);
                 destPoint = {lat: edges[i].start.point.lat + (edges[i].dest.point.lat - edges[i].start.point.lat)*percent, lng: edges[i].start.point.lng + (edges[i].dest.point.lng - edges[i].start.point.lng)*percent};
                 
-            } else { continue; }
+            } else if (!mustKeep) { 
+
+                // We scrap the line since we must get rid of it
+                if (this.edges[i]) this.edges[i].setMap(null); 
+                this.edges[i] = null;
+
+                continue;
+
+            } else { continue; } // We must keep it AS IS
 
             // Creation of the line
             currentLine = new google.maps.Polyline({
@@ -266,13 +288,12 @@ var mapsWrapper = function(type) {
                 {icon: {path: "M 0.4,-0.5 0.4,0.5", strokeOpacity: 0.7, strokeWeight: 4, strokeColor: this.colorsForType[edges[i].type]}, repeat: '3px'}
               ]
               // ADMIN ------------------------------------------------------------------------------------------------------------
-<?php endif ?>
+<?php endif ?> 
             });
-
-            google.maps.event.addListener(currentLine, 'click', $.proxy(this.clickListener, this));
 
 <?php if ($editMode === true): ?>
             // ADMIN ------------------------------------------------------------------------------------------------------------
+            google.maps.event.addListener(currentLine, 'click', $.proxy(this.clickListener, this));
             google.maps.event.addListener(currentLine, 'mouseover', function(event){ this.setEditable(true);});
             google.maps.event.addListener(currentLine, 'rightclick', (function(index, iM) {
               return function() {
@@ -298,13 +319,17 @@ var mapsWrapper = function(type) {
               }
             })([edges[i].start.id, edges[i].dest.id, edges[i].id], isocronMap));
             // ADMIN ------------------------------------------------------------------------------------------------------------
-<?php endif ?>
+<?php endif ?> 
 
+            // Removes the old reference :
+            if (this.edges[i]) this.edges[i].setMap(null);
             // Pushes the line into the array
-            this.edges.push(currentLine);
+            this.edges[i] = currentLine;
+            if (display) this.edges[i].setMap(this.map);
         };
 
-        if (display == true) this.displayDataOverlay();
+        this.previousLimit = limit;
+
     };
 
     this.setClosestOverlay = function(closestPoint, display){
@@ -324,37 +349,33 @@ var mapsWrapper = function(type) {
     };
 
     this.displayDataOverlay = function(){
-
         if (this.edges) {
             for (i in this.edges) {
-                this.edges[i].setMap(this.map);
+                if (this.edges[i]) this.edges[i].setMap(this.map);
             }
         }
     };
 
     this.displayClosestOverlay = function(){
-
         if (this.closestPoint){
             this.closestPoint.setMap(this.map);
         }
-
     };
 
     this.removeDataOverlay = function(){
-
         if (this.edges) {
             for (i in this.edges) {
-              this.edges[i].setMap(null);
+              if (this.edges[i]) this.edges[i].setMap(null);
             }
         }
+
+        this.previousLimit = 0;
     };
 
     this.removeClosestOverlay = function(){
-
         if (this.closestPoint){
             this.closestPoint.setMap(null);
         }
-
     };
 
 }

@@ -12,6 +12,8 @@ var mapsWrapper = function(type) {
     this.type = type;
     this.map = null;
     this.edges = [];
+    this.closestPoint = null;
+    this.previousLimit = 0;
 
     this.getUrl = function(genericOptions){
 
@@ -257,6 +259,7 @@ var mapsWrapper = function(type) {
               this.map.objects.remove(this.edges[i]);
             }
         }
+        this.previousLimit = 0;
     };
 
     this.removeClosestOverlay = function(){

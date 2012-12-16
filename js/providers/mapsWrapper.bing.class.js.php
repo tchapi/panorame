@@ -12,11 +12,13 @@ var mapsWrapper = function(type) {
     this.type = type;
     this.map = null;
     this.edges = [];
+    this.closestPoint = null;
+    this.previousLimit = 0;
 
     this.getUrl = function(genericOptions){
 
         this.ownCallback = false;
-        this.delay = 1000;
+        this.delay = 2000;
 
         /* In case it's already been loaded */
         if (typeof Microsoft !== 'undefined') return '';
@@ -253,6 +255,7 @@ var mapsWrapper = function(type) {
         if (this.edgesCollection) {
             this.map.entities.remove(this.edgesCollection);
         }
+        this.previousLimit = 0;
     };
 
     this.removeClosestOverlay = function(){

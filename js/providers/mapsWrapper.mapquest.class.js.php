@@ -12,6 +12,7 @@ var mapsWrapper = function(type) {
     this.type = type;
     this.map = null;
     this.edges = [];
+    this.previousLimit = 0;
         
     this.getUrl = function(genericOptions){
 
@@ -246,7 +247,7 @@ var mapsWrapper = function(type) {
     this.removeDataOverlay = function(){
 
         this.map.removeShapeCollection('edges');
-
+        this.previousLimit = 0;
     };
 
     this.removeClosestOverlay = function(){

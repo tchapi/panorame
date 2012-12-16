@@ -122,7 +122,7 @@ var isocronMap = function() {
         this.POIs = $("#poiChooser");
         this.POISort = $("#poiSorter");
 
-        // Insert means and speed values
+        // Insert POIs
         databaseWrapper.getPOIs($.proxy(function(data){
 
             $.each(data, $.proxy(function(key, value) {   
@@ -141,32 +141,34 @@ var isocronMap = function() {
                 }, this));
 
             }, this));
+
+            /* POIs Chooser type */
+            function formatResult(item) {
+                if ($(item.element).data('icon') && $(item.element).data('cat') == "1")
+                    return "<span class='lsf'>" + $(item.element).data('icon') + "</span> " + item.text;
+                else
+                    return item.text;
+            }
+            function formatSelection(item) {
+                return "<span class='lsf " + $(item.element).data('class') + "'>" + $(item.element).data('icon') + "</span> " + item.text;
+            }
             
+            this.POIs.select2({
+                maximumSelectionSize: 3,
+                placeholder: "Type anything !",
+                formatResult: formatResult,
+                formatSelection: formatSelection,
+            });
+            this.POIs.select2('val',[<?php echo $_GET['poi']; ?>]);
+            this.POISort.select2();
+
         }, this));
 
-        /* POIs Chooser type */
-        function formatResult(state) {
-            if ($(state.element).data('icon') && $(state.element).data('cat') == "1")
-                return "<span class='lsf'>" + $(state.element).data('icon') + "</span> " + state.text;
-            else
-                return state.text;
-        }
-        function formatSelection(state) {
-            return "<span class='lsf " + $(state.element).data('class') + "'>" + $(state.element).data('icon') + "</span> " + state.text;
-        }
-        this.POIs.select2({
-            maximumSelectionSize: 3,
-            placeholder: "Type anything !",
-            formatResult: formatResult,
-            formatSelection: formatSelection,
-        });
-        this.POISort.select2();
 
 <?php if ($editMode === true): ?>
         /* ------------------- ADMIN ------------------- */
 
         this.addEdgeButton     = $('#addEdge');
-        this.consolidateButton = $('#consolidate');
         this.typeSelect       = $('#addEdge_type');
         this.typeSelectDisplay= $('#display_type')
         this.autoReverse      = $('input[type=radio][name=addEdge_autoReverse]');
@@ -186,15 +188,6 @@ var isocronMap = function() {
                 this.continuousMode.attr('disabled', 'disabled');
                 this.setNotice('Now in adding mode', 'danger');
             }
-
-        },this));
-
-        this.consolidateButton.click($.proxy(function(event){
-
-            databaseWrapper.consolidate($.proxy(function(data){
-                this.boundsHaveChanged();
-                this.setNotice('Database consolidated', 'success');
-            }, this));
 
         },this));
 
@@ -229,7 +222,7 @@ var isocronMap = function() {
         this.continuousMode = $('#addEdge_continuous');
 
         this.notice = $('#notice');
-        this.setNotice('Welcome', 'info');
+        this.setNotice("Welcome <?php echo $_COOKIE['panorame_auth_name']?>", 'info');
 
         // Keymaster
         key('esc', $.proxy(function(){
@@ -290,7 +283,7 @@ var isocronMap = function() {
           change: $.proxy(function(v){
                 this.limit = Math.max(0,v*10);
                 this.limitValue.html(this.getLimit());
-                this.rangeHasChanged();
+                this.timeRangeHasChanged();
             }, this)
         });
 
@@ -326,11 +319,11 @@ var isocronMap = function() {
 
         this.meanSelect.mouseup($.proxy(function(e){ 
             this.selectedMean = this.meansAndSpeeds[e.target.value];
-            this.recalculateGraph();
+            this.meanOrSpeedHasChanged();
         }, this));
         this.speedSelect.mouseup($.proxy(function(e){ 
             this.selectedSpeed = e.target.value;
-            this.recalculateGraph();
+            this.meanOrSpeedHasChanged();
         }, this));
 
 <?php endif ?>
@@ -436,6 +429,8 @@ var isocronMap = function() {
 
     };
 
+    this.processDataAnd
+
     this.getDataAndRecalculateGraph = function(){
 
 <?php if ($editMode === true): ?>
@@ -448,7 +443,8 @@ var isocronMap = function() {
             if (data !== null && data.closest != null) {
 
                 this.data = data;
-                this.recalculateGraph();
+
+                this.recalculateGraph({force: true});
                 
             } else {
                 mapsWrapper.removeDataOverlay();
@@ -459,7 +455,7 @@ var isocronMap = function() {
         
     };
 
-    this.recalculateGraph = function(){
+    this.recalculateGraph = function(options){
 
         if (this.data == null) {
             this.getDataAndRecalculateGraph();
@@ -474,20 +470,26 @@ var isocronMap = function() {
         mapsWrapper.setClosestOverlay(this.data.closest.point, this.displayData);
 <?php else: ?>
     
-        var edges = this.dijkstra(this.data.tree, this.position, this.data.closest);
+        if (options && options.force == true){
+            // Force Dijkstra recalculation
+            this.edges = this.dijkstra(this.data.tree, this.position, this.data.closest);
+            mapsWrapper.removeDataOverlay(); // We need to do this to reset the limit
+        }
 
-        if (edges != false) {
+        if (this.edges != false) {
 
             mapsWrapper.setDataOverlay(
-                edges,
+                this.edges,
                 this.limit,
                 this.displayData
             );
             mapsWrapper.setClosestOverlay(this.data.closest.point, this.displayData);
 
         } else {
+
             mapsWrapper.removeDataOverlay();
             mapsWrapper.removeClosestOverlay();
+
         }
 
 <?php endif ?>
@@ -495,9 +497,10 @@ var isocronMap = function() {
     };
 
     /* Event binding */
-    this.boundsHaveChanged = function() { this.getDataAndRecalculateGraph(); };
-    this.poiHasChanged = function()     { this.getDataAndRecalculateGraph(); };
-    this.rangeHasChanged = function()   { this.recalculateGraph(); }
+    this.boundsHaveChanged = function()     { this.getDataAndRecalculateGraph(); };
+    this.poiHasChanged = function()         { this.getDataAndRecalculateGraph(); };
+    this.timeRangeHasChanged = function()   { this.recalculateGraph({force: false}); }
+    this.meanOrSpeedHasChanged = function() { this.recalculateGraph({force: true}); }
 
     /* DIJKSTRA STUFF */
     this.findMinimumCost = function(array){
@@ -530,7 +533,8 @@ var isocronMap = function() {
     };
 
     this.dijkstra = function(tree, poi, closestPoint){
-
+        console.log('-----------------------');
+console.time('dijkstra');
         // init, we need to copy
         var treeCopy = $.extend(true, {}, tree);
 
@@ -654,7 +658,7 @@ var isocronMap = function() {
             }
 
         }
-
+console.timeEnd('dijkstra');
         // console.log('-------------- end --------------');
         return edges;
     };

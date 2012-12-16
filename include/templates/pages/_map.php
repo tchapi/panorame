@@ -63,7 +63,9 @@
 <?php endif ?>
 
 <!-- canvas -->
-<div id="mapCanvas"></div>
+<div id="mapWrapper" class="<?php echo $parameters['framework']; ?>">
+  <div id="mapCanvas"></div>
+</div>
 
 <!-- infos box -->
 <?php include(_PATH.'include/templates/partials/_infos.php'); ?>

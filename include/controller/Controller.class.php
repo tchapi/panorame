@@ -96,20 +96,45 @@ class Controller {
     /* Short links */
     if (self::$parameters['page']['slug'] == 'map') {
 
+      // mean
+      $mean = $constants['defaults']['mean'];
+      if ( isset($_GET['v']) && in_array($_GET['v'], $constants['limits']['mean'])) {
+        $mean = intval($_GET['v']);
+      }
+
+      // speed
+      $speed = $constants['defaults']['speed'];
+      if ( isset($_GET['s']) && in_array($_GET['s'], $constants['limits']['speed'])) {
+        $speed = intval($_GET['s']);
+      }
+
+      // poi
+      $poi = $constants['defaults']['poi'];
+      if ( isset($_GET['i']) ) {
+
+        $rawPOI = explode(',', $_GET['i']);
+        if ( count(array_intersect($rawPOI, $constants['limits']['poi'])) == count($rawPOI) ) {
+          $poi = trim($_GET['i']);
+        }
+
+      } 
+
+      // time
+      $time = $constants['defaults']['time'];
+      if ( isset($_GET['t']) && $_GET['t'] < $constants['limits']['time']['max'] 
+                             && $_GET['t'] > $constants['limits']['time']['min'] ) {
+        $time = intval($_GET['t']);
+      }
+
       self::$parameters['inits'] = array(
         'lat' => isset($_GET['lat'])?floatval($_GET['lat']):null,
         'lng' => isset($_GET['lng'])?floatval($_GET['lng']):null,
 
-        'mean' => isset($_GET['v'])?trim($_GET['v']):$constants['defaults']['mean'],
-        // Check if mean is in the range of correct values
+        'mean' => $mean,
+        'speed'  => $speed,
+        'time'   => $time,
 
-        'speed'  => isset($_GET['s'])?intval($_GET['s']):$constants['defaults']['speed'],
-        // Check if its in the range of authorized values
-
-        'time'   => isset($_GET['t'])?max(0,intval($_GET['t'])):$constants['defaults']['time'],
-        // Check if its in the range of authorized values
-
-        'poi' => isset($_GET['i'])?trim($_GET['i']):$constants['defaults']['poi'],
+        'poi' => $poi,
       );
 
       $slug = isset($_GET['slug'])?floatval($_GET['slug']):null;
@@ -140,6 +165,8 @@ class Controller {
 
     if (isset($_GET['engine']) && in_array($_GET['engine'], $constants['engines'])){
       self::$parameters['engine'] = $_GET['engine'];
+    } else {
+      self::$parameters['engine'] = $constants['defaults']['engine'];
     }
 
 
@@ -209,7 +236,7 @@ class Controller {
 
   }
 
-  public static function login(){
+  public static function login($setCookie = false){
 
     $password = "panorame";
     $cookieName = "panorame_auth";
@@ -224,7 +251,9 @@ class Controller {
     } else {
 
       setcookie( $cookieName, md5(md5($password)), strtotime( '+30 days' ) );
-      setcookie( $cookieName."_name", $_POST['name'], strtotime( '+30 days' ) );
+      if (isset($_POST['name'])) 
+        setcookie( $cookieName."_name", $_POST['name'], strtotime( '+30 days' ) );
+
       return true;
 
     }
