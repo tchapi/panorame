@@ -462,6 +462,7 @@ var isocronMap = function() {
             return;
         }
 <?php if ($editMode === true): ?>
+        mapsWrapper.removeDataOverlay();
         mapsWrapper.setDataOverlay(
             this.data.edges,
             null,
