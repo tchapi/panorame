@@ -7,6 +7,7 @@ Options +FollowSymLinks
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
 
+  RewriteRule ^edit index.php?edit=1
   RewriteRule ^action/(.*) index.php?action=$1
   RewriteRule ^page/(.*) index.php?page=$1
 
