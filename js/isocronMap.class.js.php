@@ -15,7 +15,7 @@ var isocronMap = function() {
         gmaps: "AIzaSyAcfMo5fGvQ11nZ7h68vaxSVr7ATu_32ks",
         bing: "AqOiHyGALNGGhB_HHKor3uUOZ7epiJ1k31-hXDcnaUnqOgoDl2GA_mYEAiNGuYWG",
         mapquest: "Fmjtd%7Cluua250z2g%2C2x%3Do5-962al4",
-        nokia: { appId: '0', token: '0'},
+        nokia: { appId: 'mfx1fzXo1YtGMYy99ocR', token: 'Qc6HvlQzr25cBXh-gfc3jw'},
         openlayers: null,
     };
 
