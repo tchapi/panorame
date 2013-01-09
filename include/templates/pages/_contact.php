@@ -7,16 +7,7 @@
 <div id="paragraphs" class="about">
   <div class="inside">
 
-  <h3>Team</h3>
 
-  <p>
-    <ul>
-      <li>Chap : from elegant hacking to cool designs</li>
-      <li>Eric : from crazy ideas to shaking hands</li>
-    </ul>
-  </p>
-
-  
   <h3>Fair use / ToS</h3>
 
   <p>Using Panorame is free and will stay so: if you find it useful and ergonomic, we are happy. If not, we would be very interested in understanding the reasons for that, to try to improve the service: so please, drop us an email at the-team-is-listening@panorame.fr.</p>
