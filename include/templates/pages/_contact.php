@@ -1,7 +1,7 @@
 <div id="top" class="contact">
   <div class="hero-unit">
-    <h1>Contact us</h1>
-    <p>The team is listening.</p>
+    <h1>You want more ?</h1>
+    <p>Contact us, the team is listening.</p>
   </div>
 </div>
 <div id="paragraphs" class="about">
