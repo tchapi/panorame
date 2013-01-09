@@ -31,7 +31,7 @@ Then only come the landmarks recommendations, in the area covered by your zone o
   <h3>Technology</h3>
 
   <div class="row-fluid icons">
-    <div class="span4 iconHolder"><div class="lsf bigIcon">map</div>Maps providers agnostic</div>
+    <div class="span4 iconHolder"><div class="lsf bigIcon">earth</div>Maps providers agnostic</div>
     <div class="span4 iconHolder"><div class="lsf bigIcon">dashboard</div>Real-time (doesn't it feel so ?)</div>
     <div class="span4 iconHolder"><div class="lsf bigIcon">cloud</div>Open (see API)</div>
   </div>
