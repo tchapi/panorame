@@ -36,12 +36,6 @@ Then only come the landmarks recommendations, in the area covered by your zone o
     <div class="span4 iconHolder"><div class="lsf bigIcon">cloud</div>Open (see API)</div>
   </div>
 
-  <h3>Fair use / ToS</h3>
-
-  <p>Using Panorame is free and will stay so: if you find it useful and ergonomic, we are happy. If not, we would be very interested in understanding the reasons for that, to try to improve the service: so please, drop us an email at the-team-is-listening@panorame.fr.</p>
-
-  <p>We have a lot of ideas about how the Panorame technology could benefit other websites and services. If you are interested in discussing it, please feel free to contact us at the-team-is-listening@panorame.fr. You can also visit the API section.</p>
-
   <h3>Hardcopy posters</h3>
 
   <p>Panorame offers you the possibility to order a customized poster of your playzone. To be pinned in your toilets. Or elsewhere.
