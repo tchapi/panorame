@@ -35,6 +35,17 @@ Then only come the landmarks recommendations, in the area covered by your zone o
     <div class="span4 iconHolder"><div class="lsf bigIcon">dashboard</div>Real-time (doesn't it feel so ?)</div>
     <div class="span4 iconHolder"><div class="lsf bigIcon">cloud</div>Open (see API)</div>
   </div>
+  
+  
+  <h3>Team</h3>
+
+  <p>
+    <ul>
+      <li>Chap : from elegant hacking to cool designs</li>
+      <li>Newix : from crazy ideas to shaking hands</li>
+    </ul>
+  </p>
+  
 
   <h3>Hardcopy posters</h3>
 
