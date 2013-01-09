@@ -27,6 +27,7 @@
     </ul>
   </p>
   
+  
   <h3>API</h3>
   
   <p>Panorame offers an API which allow developers to embed the Panorame experience into their web services.</p>
