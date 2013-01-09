@@ -1,7 +1,7 @@
 <div id="top" class="about">
   <div class="hero-unit">
-    <h1>Panora.me</h1>
-    <h2>The city around you. Visual. Dynamic. Reinvented.</h2>
+    <h1>Panorame</h1>
+    <h2>Paris around you. Visual. Dynamic. Reinvented.</h2>
     <p><a class="btn btn-success btn-large" href="#"><span class="lsf">playmedia</span> Watch the tour</a></p>
   </div>
 </div>
@@ -12,33 +12,21 @@
 
   <p>Panorame redefines the 'search-for-a-place-to-go' experience.</p>
 
-  <p>You were exploring long webpages of nice places, and then only
-  estimating if it's not too far from home? How often did you complain
-  that your best choices were in fact too far, that you had just lost
-  5minutes, and you needed to restart the search from scratch?
-  That's really not the experience the web should offer you.</p>
+  <p>You were crawling long webpages of recommended places, shortlisting a few ones, and then checking for each one how to 	get there and if it's not too far from home? That's really not the experience the web should offer you.</p>
 
   <p>Our research shows that 94% of users are regularly irritated by the
   classical 'search-for-a-place' experience on the web.</p>
 
   <p>What if the area easily reachable around your home mattered first.
-  What if you were intuitively and dynamically configuring it,
-  visualizing it. What if the search-for-a-place part came only then, in
-  your personalized area, your playzone.</p>
+  What if you were intuitively and dynamically configuring this area, visualizing it.
+  What if the recommended places came only then, localized in your personalized area, your playzone.</p>
 
-  <p>What if, from the very beginning, we took into consideration that you
-  were willing to move not farther than 10min by foot from home? Or
-  maybe by bike today. And why not tomorrow with combining walking and
-  taking the tube.</p>
+  <p>What if, from the very beginning, we took into consideration that you were willing to move not farther than 10min by 	         foot from home? Or maybe by bike today. And why not tomorrow with combining walking and
+taking the tube.</p>
 
-  <p>With Panorame you first define your start location (home is a good
-  choice!), choose your transportation mean, and decide how long you are
-  willing to invest in the journey. Here comes your playzone: you just
-  defined it, and it is there, on your screen. Of course you can refine
-  your parameters, your playzone is totally dynamic and will update
-  instantly.
-  Then only come the landmarks recommendations, in the area covered by
-  your zone of course.</p>
+  <p>With Panorame you first define your start location (home is a good choice!), choose your transportation mean, and decide how long you are willing to invest in the journey. Here comes your playzone: you just
+defined it, and it is there, on your screen. Of course you can refine your parameters, your playzone is totally dynamic and will update instantly.
+Then only come the landmarks recommendations, in the area covered by your zone of course.</p>
 
   <h3>Technology</h3>
 
@@ -50,7 +38,7 @@
 
   <h3>Fair use / ToS</h3>
 
-  <p>Using Panorame is free and will stay so: if you find it useful and ergonomic, we are happy. If not, we are happy to discuss the reasons and to try to improve the service.</p>
+  <p>Using Panorame is free and will stay so: if you find it useful and ergonomic, we are happy. If not, we would be very interested in understanding the reasons for that, to try to improve the service: so please, drop us an email at the-team-is-listening@panorame.fr.</p>
 
   <p>We have a lot of ideas about how the Panorame technology could benefit other websites and services. If you are interested in discussing it, please feel free to contact us at the-team-is-listening@panorame.fr. You can also visit the API section.</p>
 
@@ -58,9 +46,9 @@
 
   <p>Panorame offers you the possibility to order a customized poster of your playzone. To be pinned in your toilets. Or elsewhere.
 
-  <p>Your friend just moved in a new flat: isn't it the perfect gift?</p>
+  <p>Your friend just moved in a new flat: isn't it the perfect housewarming gift?</p>
 
-  <p>Your playzone hardcopy is delivered with a pile of stylized post-its that you could use to enrich the poster each time you discover a new cool place around. That's your playzone, your neighboryouds.</p>
+  <p>Your playzone hardcopy is delivered with a pile of stylized sticky notes you could use to enrich the poster each time you discover a new cool place around. That's your playzone, your neighboryouds.</p>
 
   <p><button class="btn btn-info">Order now (19,99€)</button></p>
 
