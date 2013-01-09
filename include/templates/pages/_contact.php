@@ -16,17 +16,16 @@
 
   <h3>Partnerships</h3>
 
-  <p>
-    <ul>
-      <li>Your job is to curate places / landmarks and recommend it to your visitors? Give them an easier, smoother, simply more natural experience of your service: upgrade your 'search-for-a-place' ergonomics by embedding Panorame in your website.
-(--> see API)</li>
-      <li>You manage a cultural or entertainment place, and would like it to appear in the playzones of Panorame users?
-(--> contact us)</li>
-      <li>You edit/administrate opendata sets from your organization? These could be part of printable data for Panorame users.
-(--> contact us)</li>
-    </ul>
-  </p>
-  
+  <div class="row-fluid icons">
+    <div class="span4 iconHolder">
+      <div class="lsf bigIcon">meal</div>Your job is to curate places / landmarks and recommend it to your visitors? Give them an easier, smoother, simply more natural experience of your service: upgrade your 'search-for-a-place' ergonomics by embedding Panorame in your website.
+(--> see API)</div>
+    <div class="span4 iconHolder"><div class="lsf bigIcon">earth</div>You manage a cultural or entertainment place, and would like it to appear in the playzones of Panorame users?
+(--> contact us)</div>
+    <div class="span4 iconHolder"><div class="lsf bigIcon">table</div>You edit/administrate opendata sets from your organization? These could be part of printable data for Panorame users.
+(--> contact us)</div>
+  </div>
+
   
   <h3>API</h3>
   
