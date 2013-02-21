@@ -2,6 +2,6 @@
 
 function doAction() {
 
-  return DBUtils::getPOIs();
+  return DBUtils::getPOIProviders();
 
 }
