@@ -15,6 +15,6 @@
    */
 
   define('_server'  , "localhost");
-  define('_user'    , "panorame"); // tchap_panorame
-  define('_password', "panorame"); // 8y3nP9922z6tu2en
-  define('_database', "panorame"); // tchap_panorame
+  define('_user'    , "panorame");
+  define('_password', "panorame");
+  define('_database', "panorame");
