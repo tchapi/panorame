@@ -123,7 +123,7 @@ var isocronMap = function() {
         this.POISort = $("#poiSorter");
 
         // Insert POIs
-        databaseWrapper.getPOIs($.proxy(function(data){
+        databaseWrapper.getPOIProviders($.proxy(function(data){
 
             $.each(data, $.proxy(function(key, value) {   
                 
