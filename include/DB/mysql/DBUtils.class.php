@@ -47,7 +47,7 @@ class DBUtils {
   /*
    * GET The POI categories and providers
    */
-  public static function getPOIs(){
+  public static function getPOIProviders(){
 
     global $DBConnection;
 
