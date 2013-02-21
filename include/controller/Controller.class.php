@@ -65,10 +65,11 @@ class Controller {
     /** Load action if any */
     if (self::$action != null) {
 
-      if ( substr(self::$action,0,4) === 'edit' )
+      if ( substr(self::$action,0,4) === 'edit' ) {
         $admin_utils_path = _PATH.'include/DB/'.self::$parameters['engine'].'/AdminUtils.class.php';
         require_once($admin_utils_path);
-
+      }
+      
       if (! @include_once(_PATH.'include/actions/'.self::$action.'.action.php'))
         throw new Exception ('No action with this name');
 
