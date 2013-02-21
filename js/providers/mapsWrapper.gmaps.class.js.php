@@ -25,7 +25,7 @@ var mapsWrapper = function(type) {
         if (typeof google !== 'undefined') return '';
 
         return "http://maps.googleapis.com/maps/api/js?sensor=false&key=" + genericOptions.apiKeys.gmaps + "&libraries=places" + 
-               "&callback=isocronMap.init";
+               "&callback=panorame.init";
 
     };
 
@@ -302,14 +302,14 @@ var mapsWrapper = function(type) {
                     this.setNotice('Edge #' + index + ' deleted. You cannot undo.', 'success');
                 }, iM));
               }
-            })(edges[i].id, isocronMap));
+            })(edges[i].id, panorame));
             google.maps.event.addListener(currentLine.getPath(), 'set_at', (function(indexes, iM) {
               return function() {
                 databaseWrapper.updateVertexCouple(indexes[0], this.getAt(0).lat(), this.getAt(0).lng(), 0, indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(function(){
                     this.setNotice('Vertices #' + indexes[0] + ' and #' + indexes[1] + ' updated. You can undo.', 'info');
                 }, iM));
               }
-            })([edges[i].start.id, edges[i].dest.id, edges[i].id],isocronMap));
+            })([edges[i].start.id, edges[i].dest.id, edges[i].id],panorame));
             google.maps.event.addListener(currentLine.getPath(), 'insert_at', (function(indexes, iM) {
               return function() {
                 databaseWrapper.cutEdge(indexes[0], indexes[1], this.getAt(1).lat(), this.getAt(1).lng(), 0, indexes[2], $.proxy(function(){
@@ -317,7 +317,7 @@ var mapsWrapper = function(type) {
                     this.setNotice('Edge #' + indexes[2] + ' cut in two. You cannot undo.', 'success');
                 }, iM));
               }
-            })([edges[i].start.id, edges[i].dest.id, edges[i].id], isocronMap));
+            })([edges[i].start.id, edges[i].dest.id, edges[i].id], panorame));
             // ADMIN ------------------------------------------------------------------------------------------------------------
 <?php endif ?> 
 

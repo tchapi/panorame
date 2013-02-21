@@ -2,6 +2,6 @@
 
 function doAction() {
 
-  return DBUtils::getMeansAndSpeeds();
+  return MapUtils::getMeansAndSpeeds();
 
 }

@@ -14,7 +14,7 @@ function doAction() {
 
     $type = isset($_POST['type'])?intval($_POST['type']):1;
 
-    $result = DBUtils::addEdge($start_lat, $start_lng, $start_alt, $dest_lat, $dest_lng, $dest_alt, $type);
+    $result = AdminUtils::addEdge($start_lat, $start_lng, $start_alt, $dest_lat, $dest_lng, $dest_alt, $type);
   
     if ($result == null || $result == false){
 

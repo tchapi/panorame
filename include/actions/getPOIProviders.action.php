@@ -2,6 +2,6 @@
 
 function doAction() {
 
-  return DBUtils::getPOIProviders();
+  return PoiUtils::getPOIProviders();
 
 }

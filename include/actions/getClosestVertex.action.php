@@ -9,7 +9,7 @@ function doAction() {
 
     $radius = isset($_POST['radius'])?intval($_POST['radius']):_closestPointRadius_search;
 
-    $result = DBUtils::getClosestVertex($lat, $lon, $radius);
+    $result = MapUtils::getClosestVertex($lat, $lon, $radius);
   
   } else {
   

@@ -7,7 +7,7 @@ function doAction() {
 
     $edge_id = intval($_POST['edge_id']);
 
-    $result = DBUtils::deleteEdge($edge_id);
+    $result = AdminUtils::deleteEdge($edge_id);
   
     if ($result == null || $result == false){
 

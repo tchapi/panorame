@@ -1,9 +1,9 @@
 <?php header('Content-type: application/javascript'); ?>
 <?php if(isset($_GET['edit']) && $_GET['edit'] == 1) $editMode = true; else $editMode = false; ?>
-/* isocronMap
+/* panorame main script
  *
  */
-var isocronMap = function() {
+var panorame = function() {
 
     // Singleton Stuff
     if ( arguments.callee._singletonInstance )
@@ -54,7 +54,7 @@ var isocronMap = function() {
             oScript.src  = url;
             
             if (!mapsWrapper.ownCallback)
-                oScript.onload = $.proxy(function(){setTimeout("isocronMap.init()", mapsWrapper.delay);}, this);
+                oScript.onload = $.proxy(function(){setTimeout("panorame.init()", mapsWrapper.delay);}, this);
 
             document.body.appendChild(oScript);
 
@@ -123,7 +123,7 @@ var isocronMap = function() {
         this.POISort = $("#poiSorter");
 
         // Insert POIs
-        databaseWrapper.getPOIProviders($.proxy(function(data){
+        poiService.getPOIProviders($.proxy(function(data){
 
             $.each(data, $.proxy(function(key, value) {   
                 
@@ -697,4 +697,4 @@ var isocronMap = function() {
 /* Instanciates
  *
  */
-isocronMap = new isocronMap();
+panorame = new panorame();

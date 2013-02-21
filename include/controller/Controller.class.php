@@ -56,14 +56,22 @@ class Controller {
 
     /** Load utils */
     $geo_utils_path = _PATH.'include/Geo/GeoUtils.class.php';
-    $database_utils_path = _PATH.'include/DB/'.self::$parameters['engine'].'/DBUtils.class.php';
+    $map_utils_path = _PATH.'include/DB/'.self::$parameters['engine'].'/MapUtils.class.php';
+    $poi_utils_path = _PATH.'include/DB/'.self::$parameters['engine'].'/PoiUtils.class.php';
     require_once($geo_utils_path);
-    require_once($database_utils_path);
+    require_once($map_utils_path);
+    require_once($poi_utils_path);
 
     /** Load action if any */
     if (self::$action != null) {
+
+      if ( substr(self::$action,0,4) === 'edit' )
+        $admin_utils_path = _PATH.'include/DB/'.self::$parameters['engine'].'/AdminUtils.class.php';
+        require_once($admin_utils_path);
+
       if (! @include_once(_PATH.'include/actions/'.self::$action.'.action.php'))
         throw new Exception ('No action with this name');
+
     }
 
   }

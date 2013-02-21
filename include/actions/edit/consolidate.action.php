@@ -2,7 +2,7 @@
 
 function doAction() {
   
-  $result = DBUtils::consolidate();
+  $result = AdminUtils::consolidate();
 
   if ($result == null || $result == false){
 

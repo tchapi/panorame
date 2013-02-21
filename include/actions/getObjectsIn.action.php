@@ -19,20 +19,20 @@ function doAction() {
 
     // Get POI Closest point
     $poi = array('lat' => $_POST['poi']['lat'], 'lng' => $_POST['poi']['lng']);
-    $closestVertex = DBUtils::getClosestVertex($poi['lat'], $poi['lng'], _closestPointRadius_search);
+    $closestVertex = MapUtils::getClosestVertex($poi['lat'], $poi['lng'], _closestPointRadius_search);
 
     // Get objects
     if ($type == 'vertices'){
 
-      $objects = DBUtils::getVerticesIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $closestVertex['point']['lat'], $closestVertex['point']['lng']);
+      $objects = MapUtils::getVerticesIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $closestVertex['point']['lat'], $closestVertex['point']['lng']);
     
     } elseif ($type == 'edges'){
 
-      $objects = DBUtils::getEdgesIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $restrictToType, $closestVertex['point']['lat'], $closestVertex['point']['lng']);
+      $objects = MapUtils::getEdgesIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $restrictToType, $closestVertex['point']['lat'], $closestVertex['point']['lng']);
 
     } elseif ($type == 'tree'){
 
-      $objects = DBUtils::getVerticesAndChildrenIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $closestVertex['point']['lat'], $closestVertex['point']['lng']);
+      $objects = MapUtils::getVerticesAndChildrenIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $closestVertex['point']['lat'], $closestVertex['point']['lng']);
 
     }
 

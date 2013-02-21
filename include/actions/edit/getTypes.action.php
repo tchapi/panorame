@@ -2,6 +2,6 @@
 
 function doAction(){
 
-  return DBUtils::getTypes();
+  return AdminUtils::getTypes();
 
 }

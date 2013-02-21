@@ -1,4 +1,4 @@
-/* isocronMap Database Wrapper
+/* Database Wrapper
  *
  */
 var databaseWrapper = function() {
@@ -10,7 +10,6 @@ var databaseWrapper = function() {
     getObjectsIn:      path + "getObjectsIn",
     getClosestVertex:  path + "getClosestVertex",
     getMeansAndSpeeds: path + "getMeansAndSpeeds",
-    getPOIProviders:   path + "getPOIProviders",
     /* ADMIN */
     getTypes:          path + "edit/getTypes",
     addEdge:           path + "edit/addEdge",
@@ -30,12 +29,6 @@ var databaseWrapper = function() {
   this.getMeansAndSpeeds = function(callback){
 
     $.post(actions.getMeansAndSpeeds, callback);
-
-  };
-
-  this.getPOIProviders = function(callback){
-
-    $.post(actions.getPOIProviders, callback);
 
   };
 
