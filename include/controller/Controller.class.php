@@ -55,10 +55,12 @@ class Controller {
     if ($DBConnection->connect()) $DBConnection->selectdb();
 
     /** Load utils */
-    $geo_utils_path = _PATH.'include/Geo/GeoUtils.class.php';
-    $map_utils_path = _PATH.'include/DB/'.self::$parameters['engine'].'/MapUtils.class.php';
-    $poi_utils_path = _PATH.'include/DB/'.self::$parameters['engine'].'/PoiUtils.class.php';
+    $geo_utils_path   = _PATH.'include/Geo/GeoUtils.class.php';
+    $poi_service_path = _PATH.'include/POI/PoiService.class.php';
+    $map_utils_path   = _PATH.'include/DB/'.self::$parameters['engine'].'/MapUtils.class.php';
+    $poi_utils_path   = _PATH.'include/DB/'.self::$parameters['engine'].'/PoiUtils.class.php';
     require_once($geo_utils_path);
+    require_once($poi_service_path);
     require_once($map_utils_path);
     require_once($poi_utils_path);
 
