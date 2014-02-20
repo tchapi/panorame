@@ -2,7 +2,7 @@
 
 function doAction() {
 
-  if (isset($_POST['bounds']) && $_POST['bounds'] != null && isset($_POST['poi']) && isset($_POST['type'])){
+  if (isset($_POST['bounds']) && !is_null($_POST['bounds']) && isset($_POST['poi']) && isset($_POST['type'])){
 
     switch ($_POST['type']){
       case 'vertices':
@@ -22,15 +22,15 @@ function doAction() {
     $closestVertex = MapUtils::getClosestVertex($poi['lat'], $poi['lng'], _closestPointRadius_search);
 
     // Get objects
-    if ($type == 'vertices'){
+    if ($type === 'vertices'){
 
       $objects = MapUtils::getVerticesIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $closestVertex['point']['lat'], $closestVertex['point']['lng']);
     
-    } elseif ($type == 'edges'){
+    } elseif ($type === 'edges'){
 
       $objects = MapUtils::getEdgesIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $restrictToType, $closestVertex['point']['lat'], $closestVertex['point']['lng']);
 
-    } elseif ($type == 'tree'){
+    } elseif ($type === 'tree'){
 
       $objects = MapUtils::getVerticesAndChildrenIn(floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $closestVertex['point']['lat'], $closestVertex['point']['lng']);
 
