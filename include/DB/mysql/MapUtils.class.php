@@ -1,46 +1,47 @@
 <?php
 
-class MapUtils {
+class MapUtils implements MapUtilsInterface {
 
   /*
    * GET The means availables and their respective speeds
    */
   public static function getMeansAndSpeeds(){
 
-    global $DBConnection;
+    $db = DBConnection::db();
 
     $getMeansAndSpeeds_query = "SELECT m.`id` AS id, m.`description` AS description, m.`slug` AS slug, GROUP_CONCAT(CONCAT('{\"type_id\":', s.`type_id`, ', \"speeds\": [', s.`flat_speed`, ',', s.`grade_speed`, ']}')) AS explorables
                        FROM `means` m
                        LEFT JOIN `speeds` s ON (m.`id`= s.`mean_id`)
                        GROUP BY mean_id ";
 
-    $getMeansAndSpeeds_result = $DBConnection->link->query($getMeansAndSpeeds_query);
+    $statement = $db->prepare($getMeansAndSpeeds_query);
+    $exe = $statement->execute();
 
-    // Returns true if the query was well executed
-    if (!$getMeansAndSpeeds_result || $getMeansAndSpeeds_result == false ) {
+    if (!$exe || $exe == false ) {
       return false;
     } else {
-      // Fetch the types
+      // Fetch the info
       $means = array();
-        while ($row = $getMeansAndSpeeds_result->fetch_assoc()) {
-          
-          $explorables = array();
 
-          if ($row["explorables"] == null){
-            $explorables = null;
-          } else {
-            $explorablesAsPHPArray = json_decode('['.$row["explorables"].']');
-            foreach ($explorablesAsPHPArray as $explorable){
-              $explorables[$explorable->type_id] = $explorable->speeds;
-            }
+      while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+
+        $explorables = array();
+
+        if ($row["explorables"] == null){
+          $explorables = null;
+        } else {
+          $explorablesAsPHPArray = json_decode('['.$row["explorables"].']');
+          foreach ($explorablesAsPHPArray as $explorable){
+            $explorables[$explorable->type_id] = $explorable->speeds;
           }
-
-          array_push($means, array('id' => $row['id'], 'slug' => $row['slug'], 'description' => $row['description'], 'explorables' => $explorables));
-        
         }
+
+        array_push($means, array('id' => $row['id'], 'slug' => $row['slug'], 'description' => $row['description'], 'explorables' => $explorables));
+        
       }
 
       return $means;
+    }
 
   }
 
@@ -48,74 +49,69 @@ class MapUtils {
    * Restricts a query for a vertex (of table v) for a bounding box
    * Takes the POI into account if existing
    */
-  public static function restrictForVertex($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+  public static function restrictForVertex($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
-    global $DBConnection;
-    
     if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
 
       // Poi should be included
       $where_clause = sprintf(" WHERE MBRIntersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))') )",
-            $DBConnection->link->escape_string($NW_lng),
-            $DBConnection->link->escape_string($NW_lat),
-            $DBConnection->link->escape_string($SE_lng),
-            $DBConnection->link->escape_string($SE_lat),
-            $DBConnection->link->escape_string($POI_lng),
-            $DBConnection->link->escape_string($POI_lat),
-            $DBConnection->link->escape_string($NW_lng),
-            $DBConnection->link->escape_string($NW_lat));
+            floatval($NW_lng),
+            floatval($NW_lat),
+            floatval($SE_lng),
+            floatval($SE_lat),
+            floatval($POI_lng),
+            floatval($POI_lat),
+            floatval($NW_lng),
+            floatval($NW_lat));
 
     } else {
 
       // Just a polyline without the POI
       $where_clause = sprintf(" WHERE MBRIntersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F))') )",
-            $DBConnection->link->escape_string($NW_lng),
-            $DBConnection->link->escape_string($NW_lat),
-            $DBConnection->link->escape_string($SE_lng),
-            $DBConnection->link->escape_string($SE_lat),
-            $DBConnection->link->escape_string($NW_lng),
-            $DBConnection->link->escape_string($NW_lat));
-      
+            floatval($NW_lng),
+            floatval($NW_lat),
+            floatval($SE_lng),
+            floatval($SE_lat),
+            floatval($NW_lng),
+            floatval($NW_lat));
+
     }
 
-    return $query.$where_clause;
+    return $where_clause;
   }
 
   /*
    * Restricts a query for an edge (of table v and v_dest) for a bounding box
    * Takes the POI into account if existing
    */
-  public static function restrictForEdgeBBox($query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+  public static function restrictForEdgeBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
-    global $DBConnection;
-    
     if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
 
       // Poi should be included
       $where_clause = sprintf(" WHERE MBRIntersects( LINESTRING(v.point,v_dest.point), GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))') )",
-            $DBConnection->link->escape_string($NW_lng),
-            $DBConnection->link->escape_string($NW_lat),
-            $DBConnection->link->escape_string($SE_lng),
-            $DBConnection->link->escape_string($SE_lat),
-            $DBConnection->link->escape_string($POI_lng),
-            $DBConnection->link->escape_string($POI_lat),
-            $DBConnection->link->escape_string($NW_lng),
-            $DBConnection->link->escape_string($NW_lat));
-
+            floatval($NW_lng),
+            floatval($NW_lat),
+            floatval($SE_lng),
+            floatval($SE_lat),
+            floatval($POI_lng),
+            floatval($POI_lat),
+            floatval($NW_lng),
+            floatval($NW_lat));
+    
     } else {
 
       // Just a polygon without the POI
       $where_clause = sprintf(" WHERE MBRIntersects( LINESTRING(v.point,v_dest.point), GeomFromText('POLYGON((%F %F, %F %F, %F %F))') )",
-            $DBConnection->link->escape_string($NW_lng),
-            $DBConnection->link->escape_string($NW_lat),
-            $DBConnection->link->escape_string($SE_lng),
-            $DBConnection->link->escape_string($SE_lat),
-            $DBConnection->link->escape_string($NW_lng),
-            $DBConnection->link->escape_string($NW_lat));   
-
+            floatval($NW_lng),
+            floatval($NW_lat),
+            floatval($SE_lng),
+            floatval($SE_lat),
+            floatval($NW_lng),
+            floatval($NW_lat));
     }
 
-    return $query.$where_clause;
+    return $where_clause;
   }
 
   /*
@@ -123,23 +119,23 @@ class MapUtils {
    */
   public static function getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
-    global $DBConnection;
+    $db = DBConnection::db();
 
-    $getVerticesIn_query = sprintf("SELECT `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` v");
+    $getVerticesIn_query = "SELECT `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` v";
 
-    $getVerticesIn_query = self::restrictForVertex($getVerticesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
+    $getVerticesIn_query .= self::restrictForVertex($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
     $getVerticesIn_query .= " AND v.`is_deleted` = 0";
 
-    $queryResult = $DBConnection->link->query($getVerticesIn_query);
+    $statement = $db->prepare($getVerticesIn_query);
+    $exe = $statement->execute();
 
-    // Returns true if the query was well executed
-    if (!$queryResult || $queryResult == false ) {
+    if (!$exe || $exe == false ) {
       return false;
     } else {
       // Fetch the vertices
       $verticesArray = array();
-      while ($row = $queryResult->fetch_assoc()) {
-      $verticesArray[] = array(
+      while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+        $verticesArray[] = array(
                     'id' => intval($row["id"]), 
                     'point' => array(
                       'lat' => floatval($row["lat"]),
@@ -159,29 +155,30 @@ class MapUtils {
    */
   public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
 
-    global $DBConnection;
+    $db = DBConnection::db();
 
     // Extends the bounds
-    $b = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, null);
+    $bbox = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, null);
 
-    $getVerticesAndChildrenIn_query = sprintf("SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
+    $getVerticesAndChildrenIn_query = "SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
                     group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,', \"secable\":', t.`secable`, '}')) AS children FROM `vertices` v
-                    LEFT JOIN `edges` e ON (e.`from_id` = v.`id` AND e.`is_deleted` =0)
-                    JOIN `types` t ON (e.`type` = t.`id`)");
+                    LEFT JOIN `edges` e ON (e.`from_id` = v.`id` AND e.`is_deleted` = 0)
+                    JOIN `types` t ON (e.`type` = t.`id`)";
 
-    $getVerticesAndChildrenIn_query  = self::restrictForVertex($getVerticesAndChildrenIn_query, $b['NW_lat'], $b['NW_lng'], $b['SE_lat'], $b['SE_lng'], $POI_lat, $POI_lng);
+    $getVerticesAndChildrenIn_query .= self::restrictForVertex($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
     $getVerticesAndChildrenIn_query .= " GROUP BY v.`id`";
 
-    $queryResult = $DBConnection->link->query($getVerticesAndChildrenIn_query);
+    $statement = $db->prepare($getVerticesAndChildrenIn_query);
+    $exe = $statement->execute();
 
     // Returns true if the query was well executed
-    if (!$queryResult || $queryResult == false ) {
+    if (!$exe || $exe == false ) {
       return false;
     } else {
       // Fetch the vertices
       $vertices = array();
-      while ($row = $queryResult->fetch_assoc()) {
-        
+      while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+
         if ($row["children"] == null){
           $childrenAsPHPArray = null;
         } else {
@@ -208,7 +205,7 @@ class MapUtils {
    */
   public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $restrictToType, $POI_lat, $POI_lng){
 
-    global $DBConnection;
+    $db = DBConnection::db();
     
     $getEdgesIn_query = "SELECT e.`id` AS id, Y(v.`point`) AS lat_start, X(v.`point`) AS lng_start, v.`elevation` AS alt_start, v.`id` AS id_start,
                   Y(v_dest.`point`) AS lat_dest, X(v_dest.`point`) AS lng_dest, v_dest.`elevation` AS alt_dest, v_dest.`id` AS id_dest,
@@ -217,20 +214,21 @@ class MapUtils {
                   INNER JOIN `vertices` v ON v.`id` = e.`from_id`
                   INNER JOIN `vertices` v_dest ON v_dest.`id` = e.`to_id`";
 
-    $getEdgesIn_query  = self::restrictForEdgeBBox($getEdgesIn_query, $NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
+    $getEdgesIn_query .= self::restrictForEdgeBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
     $getEdgesIn_query .= " AND e.`is_deleted` = 0";
 
     if ($restrictToType != null && $restrictToType != 0) $getEdgesIn_query .= " AND e.`type` = ".intval($restrictToType);
     
-    $queryResult = $DBConnection->link->query($getEdgesIn_query);
+    $statement = $db->prepare($getEdgesIn_query);
+    $exe = $statement->execute();
 
     // Returns true if the query was well executed
-    if (!$queryResult || $queryResult == false ) {
+    if (!$exe || $exe == false ) {
       return false;
     } else {
       // Fetch the edges
       $edges = array();
-      while ($row = $queryResult->fetch_assoc()) {
+      while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
         $edges[] = array(
                   'id' => intval($row["id"]), 
                   'start' => array(
@@ -262,32 +260,35 @@ class MapUtils {
   /*
    * GET The closest vertex from a given lat / lng couple within a x meters radius
    */
-  public static function getClosestVertex($lat, $lng, $radius_in_m){
+  public static function getClosestVertex ($lat, $lng, $radius_in_m){
 
-    global $DBConnection;
+    $db = DBConnection::db();
     
+    // Extends the Bounding Box
     $bbox = GeoUtils::extendBBox($lat, $lng, $lat, $lng, $radius_in_m, null);
 
-    $getClosest_query = sprintf("CALL getClosest(%F, %F, %d, %F, %F, %F, %F);",
-      $DBConnection->link->escape_string($lat),
-      $DBConnection->link->escape_string($lng),
-      $DBConnection->link->escape_string($radius_in_m),
-      $DBConnection->link->escape_string($bbox['NW_lat']),
-      $DBConnection->link->escape_string($bbox['NW_lng']),
-      $DBConnection->link->escape_string($bbox['SE_lat']),
-      $DBConnection->link->escape_string($bbox['SE_lng']));
+    $getClosest_query = "CALL getClosest(:lat, :lng, :radius, :NW_lat, :NW_lng, :SE_lat, :SE_lng);";
 
-    $res = $DBConnection->link->multi_query($getClosest_query);
+    $statement = $db->prepare($getClosest_query);
+      $statement->bindParam(':lat', $lat, PDO::PARAM_STR);
+      $statement->bindParam(':lng', $lng, PDO::PARAM_STR);
+      $statement->bindParam(':radius', $radius_in_m, PDO::PARAM_STR);
+      $statement->bindParam(':NW_lng', $bbox['NW_lng'], PDO::PARAM_STR);
+      $statement->bindParam(':NW_lat', $bbox['NW_lat'], PDO::PARAM_STR);
+      $statement->bindParam(':SE_lng', $bbox['SE_lng'], PDO::PARAM_STR);
+      $statement->bindParam(':SE_lat', $bbox['SE_lat'], PDO::PARAM_STR);
 
-    $closest = $DBConnection->link->use_result();
-    $closest = $closest->fetch_assoc();
+    // Executes the query
+    $exe = $statement->execute();
 
-    // Flush ....
-    while ($DBConnection->link->more_results() && $DBConnection->link->next_result());
-   
-    if ($closest == null || $closest == false) return null;
-
-    return array(
+    if (!$exe || $exe == false ) {
+      return false;
+    } else {
+      // Fetch the info
+      $closest = $statement->fetch(PDO::FETCH_ASSOC);
+      if (!$closest) return null;
+      
+      return array(
             'id' => intval($closest["id"]), 
             'point' => array(
               'lat' => floatval($closest["lat"]),
@@ -296,6 +297,7 @@ class MapUtils {
             ),
             'distance' => floatval($closest["distance"]),
           );
+    }
 
   }
 

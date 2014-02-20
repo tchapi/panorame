@@ -46,13 +46,15 @@ class Controller {
 
   public static function loadClasses(){
 
-    $database_connector_path = _PATH.'include/DB/'.self::$parameters['engine'].'/DBConnector.class.php';
+    /** Load interfaces */
+    $maps_utils_interface = _PATH.'include/DB/MapUtilsInterface.php';
+    require_once($maps_utils_interface);
+    $poi_utils_interface = _PATH.'include/DB/PoiUtilsInterface.php';
+    require_once($poi_utils_interface);
+
+    // Load database connector
+    $database_connector_path = _PATH.'include/DB/'.self::$parameters['engine'].'/DBConnection.class.php';
     require_once($database_connector_path);
-
-    global $DBConnection;
-
-    $DBConnection = new DBConnector(_server, _user, _password, _database);
-    if ($DBConnection->connect()) $DBConnection->selectdb();
 
     /** Load utils */
     $geo_utils_path   = _PATH.'include/Geo/GeoUtils.class.php';
@@ -216,7 +218,6 @@ class Controller {
     if ($templateName != null) {
     
       header('X-Panorame-Engine: '.self::$parameters['engine']);
-      header('X-Powered-By: tchap');
       
       if (self::$ajaxRequest === true && isset($parameters['page'])) {
 

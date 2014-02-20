@@ -1,6 +1,6 @@
 <?php
 
-class PoiUtils {
+class PoiUtils implements PoiUtilsInterface {
 
   /*
    * GET The POI categories and providers

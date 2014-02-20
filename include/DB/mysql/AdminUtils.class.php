@@ -13,18 +13,19 @@ class AdminUtils {
    */
   public static function getTypes(){
 
-    global $DBConnection;
+    $db = DBConnection::db();
     
     $getTypes_query = "SELECT `id`, `description`, `slug` from `types` where `editable` = 1;";
-    $queryResult = $DBConnection->link->query($getTypes_query);
+    
+    $statement = $db->prepare($getMeansAndSpeeds_query);
+    $exe = $statement->execute();
 
-    // Returns true if the query was well executed
-    if (!$queryResult || $queryResult == false ) {
+    if (!$exe || $exe == false ) {
       return false;
     } else {
       // Fetch the types
       $types = array();
-        while ($row = $queryResult->fetch_assoc()) {
+        while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
           array_push($types, array('id' => $row['id'], 'description' => $row['description'], 'slug' => $row['slug']));
         }
       }
@@ -39,7 +40,7 @@ class AdminUtils {
    */
   public static function updateVertexCouple($start_id, $start_lat, $start_lng, $start_alt, $dest_id, $dest_lat, $dest_lng, $dest_alt, $edge_id){
 
-    global $DBConnection;
+    $db = DBConnection::db();
     
     $startExistsAlready = self::getClosestVertex($start_lat, $start_lng, _closestPointRadius_edit);
     $destExistsAlready = self::getClosestVertex($dest_lat, $dest_lng, _closestPointRadius_edit);
@@ -115,7 +116,7 @@ class AdminUtils {
    */
   public static function deleteEdge($edge_id){
 
-    global $DBConnection;
+    $db = DBConnection::db();
     
     // Get the two vertices of the edge
     $selectVertices = sprintf("SELECT `from_id`, `to_id` FROM `edges` WHERE `id` = %d;",
@@ -183,7 +184,7 @@ class AdminUtils {
    */
   public static function cutEdge($start_id, $dest_id, $new_lat, $new_lng, $new_alt, $edge_id){
 
-    global $DBConnection;
+    $db = DBConnection::db();
     
     $newVertexAlreadyExists = self::getClosestVertex($new_lat, $new_lng, _closestPointRadius_edit);
 
@@ -295,7 +296,7 @@ class AdminUtils {
    */
   public static function addEdge($start_lat, $start_lng, $start_alt, $dest_lat, $dest_lng, $dest_alt, $type){
 
-    global $DBConnection;
+    $db = DBConnection::db();
     
     $startExistsAlready = self::getClosestVertex($start_lat, $start_lng, _closestPointRadius_edit);
     $destExistsAlready = self::getClosestVertex($dest_lat, $dest_lng, _closestPointRadius_edit);
@@ -384,7 +385,7 @@ class AdminUtils {
    */
   public static function consolidate(){
 
-    global $DBConnection;
+    $db = DBConnection::db();
     
     // Finds orphan vertices and deletes them
     $findOrphans_query = "UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` NOT IN 

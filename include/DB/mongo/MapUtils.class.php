@@ -1,6 +1,6 @@
 <?php
 
-class MapUtils {
+class MapUtils implements MapUtilsInterface {
 
   /*
    * GET The means availables and their respective speeds
