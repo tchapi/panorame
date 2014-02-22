@@ -8,7 +8,7 @@ function doAction() {
     $provider = intval($_POST['provider']);
     $term = strtolower(trim($_POST['term']));
 
-    $result = PoiUtils::getPOIResultsIn($provider, floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $term);
+    $result = PoiService::getPOIResultsIn($provider, floatval($bounds["NW_lat"]), floatval($bounds["NW_lng"]), floatval($bounds["SE_lat"]), floatval($bounds["SE_lng"]), $term);
 
   } else {
 
