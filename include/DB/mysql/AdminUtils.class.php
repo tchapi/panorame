@@ -1,6 +1,6 @@
 <?php
 
-class AdminUtils {
+class AdminUtils extends MapUtils {
 
 /* ======================================================================== *
  *                                                                          *
@@ -17,7 +17,7 @@ class AdminUtils {
     
     $getTypes_query = "SELECT `id`, `description`, `slug` from `types` where `editable` = 1;";
     
-    $statement = $db->prepare($getMeansAndSpeeds_query);
+    $statement = $db->prepare($getTypes_query);
     $exe = $statement->execute();
 
     if (!$exe || $exe == false ) {
@@ -45,62 +45,83 @@ class AdminUtils {
     $startExistsAlready = self::getClosestVertex($start_lat, $start_lng, _closestPointRadius_edit);
     $destExistsAlready = self::getClosestVertex($dest_lat, $dest_lng, _closestPointRadius_edit);
 
-    if ($startExistsAlready == null || intval($startExistsAlready['id']) == $start_id) {
+    if ( is_null($startExistsAlready) || intval($startExistsAlready['id']) === intval($start_id) ) {
+      
       // Updating start vertex
-      $updateVertex1_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
-                $DBConnection->link->escape_string($start_lng),
-                $DBConnection->link->escape_string($start_lat),
-                $DBConnection->link->escape_string($start_alt),
-                $DBConnection->link->escape_string($start_id));
+      $updateVertex1_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = :elevation WHERE `id` = :id;",
+        floatval($start_lng),
+        floatval($start_lat));
 
-      $updateVertex1_result = $DBConnection->link->query($updateVertex1_query);
+      $statement = $db->prepare($updateVertex1_query);
+        $statement->bindParam(':elevation', $start_alt, PDO::PARAM_INT);
+        $statement->bindParam(':id', $start_id, PDO::PARAM_INT);
+
+      $updateVertex1_result = $statement->execute();
+
     } else {
+
       // We must update all the edges that use this id with the new start_id
-      $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `from_id` = %d WHERE `from_id` = %d;",
-              $DBConnection->link->escape_string(intval($startExistsAlready['id'])),
-              $DBConnection->link->escape_string($start_id));
+      $changeEdge_query = "UPDATE `edges` SET `is_dirty` = 1, `from_id` = :from_id WHERE `from_id` = :start_id;";
+      
+      $statement = $db->prepare($changeEdge_query);
+        $statement->bindParam(':from_id', $startExistsAlready['id'], PDO::PARAM_INT);
+        $statement->bindParam(':start_id', $start_id, PDO::PARAM_INT);
 
-      $changeEdge_result = $DBConnection->link->query($changeEdge_query);
+      $changeEdge_result = $statement->execute();
 
-      $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `to_id` = %d WHERE `to_id` = %d;",
-              $DBConnection->link->escape_string(intval($startExistsAlready['id'])),
-              $DBConnection->link->escape_string($start_id));
+      $changeEdge_query = "UPDATE `edges` SET `is_dirty` = 1, `to_id` = :to_id WHERE `to_id` = :start_id;";
+      
+      $statement = $db->prepare($changeEdge_query);
+        $statement->bindParam(':to_id', $startExistsAlready['id'], PDO::PARAM_INT);
+        $statement->bindParam(':start_id', $start_id, PDO::PARAM_INT);
 
-      $changeEdge_result = $DBConnection->link->query($changeEdge_query);
+      $changeEdge_result = $statement->execute();
+
     }
 
-    if ($destExistsAlready == null || intval($destExistsAlready['id']) == $dest_id) {
+    if ( is_null($destExistsAlready) || intval($destExistsAlready['id']) === intval($dest_id) ) {
+
       // Updating destination vertex
-      $updateVertex2_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = %d WHERE `id` = %d;",
-                $DBConnection->link->escape_string($dest_lng),
-                $DBConnection->link->escape_string($dest_lat),
-                $DBConnection->link->escape_string($dest_alt),
-                $DBConnection->link->escape_string($dest_id));
+      $updateVertex2_query = sprintf("UPDATE `vertices` SET `point` = GeomFromText('point(%F %F)', 4326), `elevation` = :elevation WHERE `id` = :id;",
+                floatval($dest_lng),
+                floatval($dest_lat));
+      
+      $statement = $db->prepare($updateVertex2_query);
+        $statement->bindParam(':elevation', $dest_alt, PDO::PARAM_INT);
+        $statement->bindParam(':id', $dest_id, PDO::PARAM_INT);
 
-      $updateVertex2_result = $DBConnection->link->query($updateVertex2_query);
+      $updateVertex2_result = $statement->execute();
+
     } else {
+      
       // We must update all the edges that use this id with the new dest_id
-      $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `from_id` = %d WHERE `from_id` = %d;",
-              $DBConnection->link->escape_string(intval($destExistsAlready['id'])),
-              $DBConnection->link->escape_string($dest_id));
+      $changeEdge_query = "UPDATE `edges` SET `is_dirty` = 1, `from_id` = :from_id WHERE `from_id` = :dest_id;";
+      
+      $statement = $db->prepare($changeEdge_query);
+        $statement->bindParam(':from_id', $destExistsAlready['id'], PDO::PARAM_INT);
+        $statement->bindParam(':dest_id', $dest_id, PDO::PARAM_INT);
 
-      $changeEdge_result = $DBConnection->link->query($changeEdge_query);
+      $changeEdge_result = $statement->execute();
 
-      $changeEdge_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, `to_id` = %d WHERE `to_id` = %d;",
-              $DBConnection->link->escape_string(intval($destExistsAlready['id'])),
-              $DBConnection->link->escape_string($dest_id));
 
-      $changeEdge_result = $DBConnection->link->query($changeEdge_query);
+      $changeEdge_query = "UPDATE `edges` SET `is_dirty` = 1, `to_id` = :to_id WHERE `to_id` = :dest_id;";
+      
+      $statement = $db->prepare($changeEdge_query);
+        $statement->bindParam(':to_id', $destExistsAlready['id'], PDO::PARAM_INT);
+        $statement->bindParam(':dest_id', $dest_id, PDO::PARAM_INT);
+
+      $changeEdge_result = $statement->execute();
+
     }
 
     // We should tag the edges containing these points as 'dirty'
-    $tagEdgesAsDirty_query = sprintf("UPDATE `edges` SET `is_dirty` = 1, WHERE `from_id` IN (%d,%d) OR `to_id` IN (%d,%d);",
-              $DBConnection->link->escape_string($start_id),
-              $DBConnection->link->escape_string($dest_id),
-              $DBConnection->link->escape_string($start_id),
-              $DBConnection->link->escape_string($dest_id));
+    $tagEdgesAsDirty_query = "UPDATE `edges` SET `is_dirty` = 1, WHERE `from_id` IN (:start_id,:dest_id) OR `to_id` IN (:start_id,:dest_id);";
 
-    $result = $DBConnection->link->query($tagEdgesAsDirty_query);
+    $statement = $db->prepare($tagEdgesAsDirty_query);
+        $statement->bindParam(':start_id', $start_id, PDO::PARAM_INT);
+        $statement->bindParam(':dest_id', $dest_id, PDO::PARAM_INT);
+
+    $result = $statement->execute();
 
     self::consolidate();
 
@@ -119,51 +140,70 @@ class AdminUtils {
     $db = DBConnection::db();
     
     // Get the two vertices of the edge
-    $selectVertices = sprintf("SELECT `from_id`, `to_id` FROM `edges` WHERE `id` = %d;",
-                      $DBConnection->link->escape_string($edge_id));
+    $selectVertices = "SELECT `from_id`, `to_id` FROM `edges` WHERE `id` = :edge_id;";
 
-    $vertices = $DBConnection->link->query($selectVertices);
+    $statement = $db->prepare($selectVertices);
+        $statement->bindParam(':edge_id', $edge_id, PDO::PARAM_INT);
+
+    $vertices = $statement->execute();
 
     if ($vertices != false) {
-      $row = $vertices->fetch_assoc();
+
+      $row = $statement->fetch(PDO::FETCH_ASSOC);
       $from_id = intval($row['from_id']);
       $to_id = intval($row['to_id']);
+
     } else {
+
       return false;
+
     }
     
     // Deletes the edge
-    $deleteEdge_query = sprintf("UPDATE `edges` SET `is_deleted` = 1, `is_dirty`= 1 WHERE `id` = %d;",
-              $DBConnection->link->escape_string($edge_id));
-    $delete_result = $DBConnection->link->query($deleteEdge_query);
+    $deleteEdge_query = "UPDATE `edges` SET `is_deleted` = 1, `is_dirty`= 1 WHERE `id` = :edge_id;";
+    
+    $statement = $db->prepare($deleteEdge_query);
+        $statement->bindParam(':edge_id', $edge_id, PDO::PARAM_INT);
+
+    $delete_result = $statement->execute();
     
     // Checks if any edge still uses vertex with id 'from_id'
-    $fromIdCheck_query = sprintf("SELECT `id` FROM `edges` WHERE `is_deleted` = 0 AND (`from_id` = %d OR `to_id`= %d);",
-              $DBConnection->link->escape_string($from_id),
-              $DBConnection->link->escape_string($from_id));
-    $fromIdCheck_result = $DBConnection->link->query($fromIdCheck_query);
+    $fromIdCheck_query = "SELECT `id` FROM `edges` WHERE `is_deleted` = 0 AND (`from_id` = :from_id OR `to_id`= :from_id);";
 
-    if ($fromIdCheck_result->num_rows === 0){
+    $statement = $db->prepare($fromIdCheck_query);
+        $statement->bindParam(':from_id', $from_id, PDO::PARAM_INT);
+
+    $fromIdCheck_result = $statement->execute();
+
+    if ($statement->rowCount() === 0){
 
       // the vertex is not used anymore
-      $deleteFromId_query = sprintf("UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` = %d;",
-            $DBConnection->link->escape_string($from_id));
-      $deleteFromId_result = $DBConnection->link->query($deleteFromId_query);
+      $deleteFromId_query = "UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` = :from_id;";
+
+      $statement = $db->prepare($deleteFromId_query);
+        $statement->bindParam(':from_id', $from_id, PDO::PARAM_INT);
+
+      $deleteFromId_result = $statement->execute();
 
     }
 
     // Checks if any edge still uses vertex with id 'to_id'
-    $toIdCheck_query = sprintf("SELECT `id` FROM `edges` WHERE `is_deleted` = 0 AND (`from_id` = %d OR `to_id`= %d);",
-              $DBConnection->link->escape_string($to_id),
-              $DBConnection->link->escape_string($to_id));
-    $toIdCheck_result = $DBConnection->link->query($toIdCheck_query);
+    $toIdCheck_query = "SELECT `id` FROM `edges` WHERE `is_deleted` = 0 AND (`from_id` = :to_id OR `to_id`= :to_id);";
 
-    if ($toIdCheck_result->num_rows === 0){
+    $statement = $db->prepare($toIdCheck_query);
+        $statement->bindParam(':to_id', $to_id, PDO::PARAM_INT);
+
+    $toIdCheck_result = $statement->execute();
+
+    if ($statement->rowCount() === 0){
 
       // the vertex is not used anymore
-      $deleteToId_query = sprintf("UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` = %d;",
-            $DBConnection->link->escape_string($to_id));
-      $deleteToId_result = $DBConnection->link->query($deleteToId_query);
+      $deleteToId_query = "UPDATE `vertices` SET `is_deleted` = 1 WHERE `id` = :to_id;";
+
+      $statement = $db->prepare($deleteToId_query);
+        $statement->bindParam(':to_id', $to_id, PDO::PARAM_INT);
+
+      $deleteToId_result = $statement->execute();
 
     }
 
@@ -188,55 +228,70 @@ class AdminUtils {
     
     $newVertexAlreadyExists = self::getClosestVertex($new_lat, $new_lng, _closestPointRadius_edit);
 
-    if ($newVertexAlreadyExists == null) {
+    if ( is_null($newVertexAlreadyExists) ) {
 
       // Creates the new vertex and retrieves its id
-      $newVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), %d);",
-                $DBConnection->link->escape_string($new_lng),
-                $DBConnection->link->escape_string($new_lat),
-                $DBConnection->link->escape_string($new_alt));
-      $newVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
-              $DBConnection->link->escape_string($new_lng),
-              $DBConnection->link->escape_string($new_lat));
+      $newVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`, `is_deleted`) VALUES (GeomFromText('point(%F %F)', 4326), :elevation, 0);",
+                floatval($new_lng),
+                floatval($new_lat));
       
-      $DBConnection->link->query('BEGIN');
-      $newVertex_insert_result = $DBConnection->link->query($newVertex_query);
-      $newVertex_fetch_result  = $DBConnection->link->query($newVertex_query_fetch);
-      $DBConnection->link->query('COMMIT');
+      $statement_1 = $db->prepare($newVertex_query);
+      $statement_1->bindParam(':elevation', $new_alt, PDO::PARAM_INT);
+
+      $newVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
+                floatval($new_lng),
+                floatval($new_lat));
+      
+      $statement_2 = $db->prepare($newVertex_query_fetch);
+
+      $db->beginTransaction();
+        $newVertex_insert_result = $statement_1->execute();
+        $newVertex_fetch_result  = $statement_2->execute();
+      $db->commit();
 
       if( $newVertex_fetch_result !== false){
-        $row = $newVertex_fetch_result->fetch_assoc();
+        $row = $statement_2->fetch(PDO::FETCH_ASSOC);
         $newVertex_id = intval($row['id']);
       } else {
         return false;
       }
       
     } else {
+      $newVertex_insert_result = false;
+      $newVertex_fetch_result = false;
       $newVertex_id = intval($newVertexAlreadyExists['id']);
     }
     
     // Gets the two previous vertices
-    $getStartVertex_query = sprintf("SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` WHERE `id` = %d;",
-                            $DBConnection->link->escape_string($start_id));
-    $getStartVertex_result = $DBConnection->link->query($getStartVertex_query);
+    $getStartVertex_query = "SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` WHERE `id` = :start_id;";
+    
+    $statement = $db->prepare($getStartVertex_query);
+      $statement->bindParam(':start_id', $start_id, PDO::PARAM_INT);
+
+    $getStartVertex_result = $statement->execute();
     
     if ($getStartVertex_result !== false){
-      $row = $getStartVertex_result->fetch_assoc();
+      $row = $statement->fetch(PDO::FETCH_ASSOC);
       $start_lat = floatval($row['lat']);
       $start_lng = floatval($row['lng']);
       $start_alt = intval($row['alt']);
     } else { return false; }
 
-    $getDestVertex_query = sprintf("SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` WHERE `id` = %d;",
-              $DBConnection->link->escape_string($dest_id));
-    $getDestVertex_result = $DBConnection->link->query($getDestVertex_query);
-    
+    $getDestVertex_query = "SELECT Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` WHERE `id` = :dest_id;";
+
+    $statement = $db->prepare($getDestVertex_query);
+      $statement->bindParam(':dest_id', $dest_id, PDO::PARAM_INT);
+
+    $getDestVertex_result = $statement->execute();
+
     if ($getDestVertex_result !== false){
-      $row = $getDestVertex_result->fetch_assoc();
+      $row = $statement->fetch(PDO::FETCH_ASSOC);
       $dest_lat = floatval($row['lat']);
       $dest_lng = floatval($row['lng']);
       $dest_alt = intval($row['alt']);
-    } else { return false; }
+    } else { 
+      return false; 
+    }
     
     
     // -------------------------------
@@ -244,43 +299,52 @@ class AdminUtils {
     $startNew_distance = GeoUtils::haversine($start_lat, $start_lng, $new_lat, $new_lng);
     $startNew_grade = $new_alt - $start_alt;
 
-    $startNew_query = sprintf("UPDATE `edges` SET `distance` = %F, `grade`= %d, `to_id`= %d, `is_dirty`= 0 WHERE `id` = %d;",
-              $DBConnection->link->escape_string($startNew_distance),
-              $DBConnection->link->escape_string($startNew_grade),
-              $DBConnection->link->escape_string($newVertex_id),
-              $DBConnection->link->escape_string($edge_id));
+    $startNew_query = "UPDATE `edges` SET `distance` = :distance, `grade`= :grade, `to_id`= :to_id, `is_dirty`= 0 WHERE `id` = :edge_id;";
 
-    $startNew_result = $DBConnection->link->query($startNew_query);
+    $statement = $db->prepare($startNew_query);
+      $statement->bindParam(':distance', $startNew_distance, PDO::PARAM_INT);
+      $statement->bindParam(':grade', $startNew_grade, PDO::PARAM_INT);
+      $statement->bindParam(':to_id', $newVertex_id, PDO::PARAM_INT);
+      $statement->bindParam(':edge_id', $edge_id, PDO::PARAM_INT);
+
+    $startNew_result = $statement->execute();
 
     // Retrieves type that we are going to use for the new edge
-    $getType_query = sprintf("SELECT `type` FROM `edges` WHERE `id` = %d;",
-                $DBConnection->link->escape_string($edge_id));
-    $getType_result = $DBConnection->link->query($getType_query);
+    $getType_query = "SELECT `type` FROM `edges` WHERE `id` = :edge_id;";
+
+    $statement = $db->prepare($getType_query);
+      $statement->bindParam(':edge_id', $edge_id, PDO::PARAM_INT);
+
+    $getType_result = $statement->execute();
     
     if ($getType_result !== false){
-      $row = $getType_result->fetch_assoc();
+      $row = $statement->fetch(PDO::FETCH_ASSOC);
       $type = intval($row['type']);
-    } else { return false; }
+    } else { 
+      return false; 
+    }
     
     // -------------------------------
     // Update edge from new ---> dest 
     $newDest_distance = GeoUtils::haversine($new_lat, $new_lng, $dest_lat, $dest_lng);
     $newDest_grade = $dest_alt - $new_alt;
 
-    $newDest_query = sprintf("INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`, `is_dirty`) 
-                 VALUES ('%d', '%d', '%F', '%d', '%d', 0);",
-            $DBConnection->link->escape_string($newVertex_id),
-            $DBConnection->link->escape_string($dest_id),
-            $DBConnection->link->escape_string($newDest_distance),
-            $DBConnection->link->escape_string($newDest_grade),
-            $DBConnection->link->escape_string($type), 0);
+    $newDest_query = "INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`, `is_dirty`, `is_deleted`) 
+                 VALUES (:from_id, :to_id, :distance, :grade, :type, 0, 0);";
 
-    $newDest_result = $DBConnection->link->query($newDest_query);
+    $statement = $db->prepare($newDest_query);
+      $statement->bindParam(':from_id', $newVertex_id, PDO::PARAM_INT);
+      $statement->bindParam(':to_id', $dest_id, PDO::PARAM_INT);
+      $statement->bindParam(':distance', $newDest_distance, PDO::PARAM_STR);
+      $statement->bindParam(':grade', $newDest_grade, PDO::PARAM_INT);
+      $statement->bindParam(':type', $type, PDO::PARAM_INT);
 
+    $newDest_result = $statement->execute();
+    
     self::consolidate();
 
     return array(
-      '1_insert_new_vertex' => $newVertex_insert_result,
+      '1_insert_new_vertex' => ($newVertex_insert_result!==false)?true:false,
       '2_fetch_new_vertex' => ($newVertex_fetch_result!==false)?true:false,
       '3_get_start_vertex' => ($getStartVertex_result!==false)?true:false,
       '4_get_dest_vertex' => ($getDestVertex_result!==false)?true:false,
@@ -302,49 +366,61 @@ class AdminUtils {
     $destExistsAlready = self::getClosestVertex($dest_lat, $dest_lng, _closestPointRadius_edit);
 
     // Create start vertex if it doesn't exist
-    if ($startExistsAlready == null) {
-      $startVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
-              $DBConnection->link->escape_string($start_lng),
-              $DBConnection->link->escape_string($start_lat),
-              $DBConnection->link->escape_string($start_alt));
+    if ($startExistsAlready === null) {
+      $startVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`, `is_deleted`) VALUES (GeomFromText('point(%F %F)', 4326), :elevation, 0);",
+              floatval($start_lng),
+              floatval($start_lat));
+
+      $statement_1 = $db->prepare($startVertex_query);
+      $statement_1->bindParam(':elevation', $start_alt, PDO::PARAM_INT);
+
       $startVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
-              $DBConnection->link->escape_string($start_lng),
-              $DBConnection->link->escape_string($start_lat));
-              
-      $DBConnection->link->query('BEGIN');
-      $startVertex_insert_result = $DBConnection->link->query($startVertex_query);
-      $startVertex_fetch_result  = $DBConnection->link->query($startVertex_query_fetch);
-      $DBConnection->link->query('COMMIT');
+              floatval($start_lng),
+              floatval($start_lat));
+      
+      $statement_2 = $db->prepare($startVertex_query_fetch);
+
+      $startVertex_insert_result = $statement_1->execute();
+      $startVertex_fetch_result  = $statement_2->execute();
 
       if ($startVertex_fetch_result !== false){
-        $row = $startVertex_fetch_result->fetch_assoc();
+        $row = $statement_2->fetch(PDO::FETCH_ASSOC);
         $startVertex_id = intval($row['id']);
-      } else { return false; }
+      } else { 
+        return false; 
+      }
       
     } else {
       $startVertex_id = intval($startExistsAlready['id']);
     }
 
     // Create dest vertex if it doesn't exist
-    if ($destExistsAlready == null) {
+    if ($destExistsAlready === null) {
 
-      $destVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`) VALUES (GeomFromText('point(%F %F)', 4326), '%d');",
-            $DBConnection->link->escape_string($dest_lng),
-            $DBConnection->link->escape_string($dest_lat),
-            $DBConnection->link->escape_string($dest_alt));
+      $destVertex_query = sprintf("INSERT INTO `vertices` (`point`, `elevation`, `is_deleted`) VALUES (GeomFromText('point(%F %F)', 4326), :elevation, 0);",
+            floatval($dest_lng),
+            floatval($dest_lat));
+
+      $statement_1 = $db->prepare($destVertex_query);
+      $statement_1->bindParam(':elevation', $dest_alt, PDO::PARAM_INT);
+
       $destVertex_query_fetch = sprintf("SELECT `id` FROM `vertices` WHERE `point` = GeomFromText('point(%F %F)', 4326);",
-              $DBConnection->link->escape_string($dest_lng),
-              $DBConnection->link->escape_string($dest_lat));
+              floatval($dest_lng),
+              floatval($dest_lat));
               
-      $DBConnection->link->query('BEGIN');
-      $destVertex_insert_result = $DBConnection->link->query($destVertex_query);
-      $destVertex_fetch_result  = $DBConnection->link->query($destVertex_query_fetch);
-      $DBConnection->link->query('COMMIT');
+      $statement_2 = $db->prepare($destVertex_query_fetch);
+
+      $db->beginTransaction();
+        $destVertex_insert_result = $statement_1->execute();
+        $destVertex_fetch_result  = $statement_2->execute();
+      $db->commit();
 
       if ($destVertex_fetch_result !== false){
-        $row = $destVertex_fetch_result->fetch_assoc();
+        $row = $statement_2->fetch(PDO::FETCH_ASSOC);
         $destVertex_id = intval($row['id']);
-      } else { return false;}
+      } else { 
+        return false;
+      }
       
     } else {
       $destVertex_id = intval($destExistsAlready['id']);
@@ -354,17 +430,19 @@ class AdminUtils {
     $distance = GeoUtils::haversine($start_lat, $start_lng, $dest_lat, $dest_lng);
     $grade = $dest_alt - $start_alt;
 
-    $createEdge_query = sprintf("INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`, `tagged_by`) 
-                 VALUES ('%d', '%d', '%F', '%d', '%d', '%s');",
-            $DBConnection->link->escape_string($startVertex_id),
-            $DBConnection->link->escape_string($destVertex_id),
-            $DBConnection->link->escape_string($distance),
-            $DBConnection->link->escape_string($grade),
-            $DBConnection->link->escape_string($type),
-            $DBConnection->link->escape_string($_COOKIE["panorame_auth_name"]));
+    $createEdge_query = "INSERT INTO `edges` (`from_id`, `to_id`, `distance`, `grade`, `type`, `tagged_by`, `is_dirty`, `is_deleted`) 
+                 VALUES (:from_id, :to_id, :distance, :grade, :type, :tagged_by, 0, 0);";
+
+    $statement = $db->prepare($createEdge_query);
+      $statement->bindParam(':from_id', $startVertex_id, PDO::PARAM_INT);
+      $statement->bindParam(':to_id', $destVertex_id, PDO::PARAM_INT);
+      $statement->bindParam(':distance', $distance, PDO::PARAM_STR);
+      $statement->bindParam(':grade', $grade, PDO::PARAM_INT);
+      $statement->bindParam(':type', $type, PDO::PARAM_INT);
+      $statement->bindParam(':tagged_by', $_COOKIE["panorame_auth_name"], PDO::PARAM_STR);
 
     // Executes the query
-    $createEdge_result = $DBConnection->link->query($createEdge_query);
+    $createEdge_result = $statement->execute();
 
     self::consolidate();
 
@@ -393,13 +471,13 @@ class AdminUtils {
                 SELECT `to_id` AS `id` FROM `edges`)";
 
     // Executes the query
-    $findOrphans_result = $DBConnection->link->query($findOrphans_query);
+    $findOrphans_result = $db->prepare($findOrphans_query)->execute();
 
     // Finds edges of zero distance
     $zeroDistance_query = "UPDATE `edges` SET `is_deleted` = 1 WHERE `from_id` = `to_id`;";
 
     // Executes the query
-    $zeroDistance_result = $DBConnection->link->query($zeroDistance_query);
+    $zeroDistance_result = $db->prepare($zeroDistance_query)->execute();
 
     // Find non-deleted edges linking to at least one deleted vertex
     $deletedInconsistencies_query = "UPDATE `edges` SET `is_deleted` = 1 WHERE `from_id` IN
@@ -407,18 +485,21 @@ class AdminUtils {
                   (SELECT `id` FROM `vertices` WHERE `is_deleted` = 1)";
 
     // Executes the query
-    $deletedInconsistencies_result = $DBConnection->link->query($deletedInconsistencies_query);
+    $deletedInconsistencies_result = $db->prepare($deletedInconsistencies_query)->execute();
 
     // Updates distances and grades
     $updateDistances_query = "SELECT consolidate() AS nb;";
+    $statement = $db->prepare($updateDistances_query);
     
     // Executes the query
-    $updateDistances_result = $DBConnection->link->query($updateDistances_query);
+    $updateDistances_result = $statement->execute();
 
     if ($updateDistances_result !== false) {
-      $row = $updateDistances_result->fetch_assoc();
-      $updateDistances_result_nb = $row['nb'];
-    } else $updateDistances_result_nb = false;
+      $row = $statement->fetch(PDO::FETCH_ASSOC);
+      $updateDistances_result_nb = intval($row['nb']);
+    } else {
+      $updateDistances_result_nb = false;
+    }
 
     return array(
       '1_find_orphans' => $findOrphans_result,
@@ -427,3 +508,5 @@ class AdminUtils {
       '4_update_distances' => $updateDistances_result
     );
   }
+
+}
