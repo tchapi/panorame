@@ -10,9 +10,9 @@ class Vertex {
   public function __construct($id, $latitude, $longitude, $altitude) {
 
     $this->id = $id;
-    $this->latitude = $latitude;
-    $this->longitude = $longitude;
-    $this->altitude = $altitude;
+    $this->latitude = (float) $latitude;
+    $this->longitude = (float) $longitude;
+    $this->altitude = (int) $altitude;
 
   }
 
@@ -23,23 +23,32 @@ class Vertex {
   public function getLatitude() {
     return $this->latitude;
   }
+  public function lat() {
+    return $this->latitude;
+  }
 
   public function getLongitude() {
+    return $this->longitude;
+  }
+  public function lng() {
     return $this->longitude;
   }
 
   public function getAltitude() {
     return $this->altitude;
   }
+  public function alt() {
+    return $this->altitude;
+  }
 
   public function toArray() {
     return array(
       'id' => $this->id, 
-        'point' => array(
-          'lat' => $this->latitude,
-          'lng' => $this->longitude,
-          'alt' => $this->altitude
-        )
+      'point' => array(
+        'lat' => $this->latitude,
+        'lng' => $this->longitude,
+        'alt' => $this->altitude
+      )
     );
   }
 

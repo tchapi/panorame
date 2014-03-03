@@ -28,15 +28,15 @@ class GeoUtils {
    * Extends the given bounding box by $extent, to allow for more smooth panning in the view
    * Allows to have more routes in the view as well, by capilarity
    */
-  public static function extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, $extent){
+  public static function extendBBox($bounds, $extent){
 
     if ($extent == null) $extent = _extendBoundsPointRadius;
 
     $ratio = $extent/_earth_radius;
     
     // Calculating new NW point
-    $lat_rad = $NW_lat*pi()/180;
-    $lng_rad = $NW_lng*pi()/180;
+    $lat_rad = $bounds->NW_lat()*pi()/180;
+    $lng_rad = $bounds->NW_lng()*pi()/180;
     $cos_lat_rad = cos($lat_rad);
     $sin_lat_rad = sin($lat_rad);
 
@@ -45,8 +45,8 @@ class GeoUtils {
     $newNW_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($newNW_lat*pi()/180)))* 180 / pi();
 
     // Calculating new SE point
-    $lat_rad = $SE_lat*pi()/180;
-    $lng_rad = $SE_lng*pi()/180;
+    $lat_rad = $bounds->SE_lat()*pi()/180;
+    $lng_rad = $bounds->SE_lng()*pi()/180;
     $cos_lat_rad = cos($lat_rad);
     $sin_lat_rad = sin($lat_rad);
 
@@ -54,7 +54,7 @@ class GeoUtils {
     $newSE_lat = asin( $sin_lat_rad*cos($ratio) + $cos_lat_rad*sin($ratio)*cos($brng) )* 180 / pi();
     $newSE_lng = ($lng_rad + atan2(sin($brng)*sin($ratio)*$cos_lat_rad, cos($ratio)-$sin_lat_rad*sin($newSE_lat*pi()/180)))* 180 / pi();
 
-    return array('NW_lat' => $newNW_lat, 'NW_lng' => $newNW_lng, 'SE_lat' => $newSE_lat, 'SE_lng' => $newSE_lng);
+    return new Bounds(array('NW_lat' => $newNW_lat, 'NW_lng' => $newNW_lng, 'SE_lat' => $newSE_lat, 'SE_lng' => $newSE_lng));
 
   }
 

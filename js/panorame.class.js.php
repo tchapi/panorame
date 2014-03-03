@@ -473,7 +473,7 @@ var panorame = function() {
     
         if (options && options.force == true){
             // Force Dijkstra recalculation
-            this.edges = this.dijkstra(this.data.tree, this.position, this.data.closest);
+            this.edges = this.dijkstra(this.data.tree, this.position, this.data.closest, this.data.distance);
             mapsWrapper.removeDataOverlay(); // We need to do this to reset the limit
         }
 
@@ -533,7 +533,7 @@ var panorame = function() {
 
     };
 
-    this.dijkstra = function(tree, poi, closestPoint){
+    this.dijkstra = function(tree, poi, closestPoint, distance){
 
         // console.time('dijkstra');
         // init, we need to copy
@@ -543,7 +543,7 @@ var panorame = function() {
         var nodeId = closestPoint.id;
         if (!(node = treeCopy[nodeId])) return false; // if closest is not in tree, return
         
-        node.cost = closestPoint.distance;
+        node.cost = distance;
         node.path = [];
 
         // Array of computed edges

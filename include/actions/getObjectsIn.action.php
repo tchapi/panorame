@@ -15,37 +15,31 @@ function doAction() {
     }
 
     $restrictToType = $_POST['restrictToType'];
-    $bounds = $_POST['bounds'];
+    $bounds = new Bounds($_POST['bounds']);
 
     // Get POI Closest point
-    $poi = array('lat' => $_POST['poi']['lat'], 'lng' => $_POST['poi']['lng']);
-    $closestVertex = MapUtils::getClosestVertex($poi['lat'], $poi['lng'], _closestPointRadius_search);
+    $closestVertex = MapUtils::getClosestVertex($_POST['poi']['lat'], $_POST['poi']['lng'], _closestPointRadius_search);
 
-    // Converts to floats
-    $NW_lat = floatval($bounds["NW_lat"]);
-    $NW_lng = floatval($bounds["NW_lng"]);
-    $SE_lat = floatval($bounds["SE_lat"]);
-    $SE_lng = floatval($bounds["SE_lng"]);
-    
     // Get objects
     if ($type === 'vertices'){
 
-      $objects = MapUtils::getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $closestVertex['point']['lat'], $closestVertex['point']['lng']);
+      $objects = MapUtils::getVerticesIn($bounds, $closestVertex['point']);
     
     } elseif ($type === 'edges'){
 
-      $objects = MapUtils::getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $restrictToType, $closestVertex['point']['lat'], $closestVertex['point']['lng']);
+      $objects = MapUtils::getEdgesIn($bounds, $closestVertex['point'], $restrictToType);
 
     } elseif ($type === 'tree'){
 
-      $objects = MapUtils::getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $closestVertex['point']['lat'], $closestVertex['point']['lng']);
+      $objects = MapUtils::getVerticesAndChildrenIn($bounds, $closestVertex['point']);
 
     }
 
     $result = array(
-      'closest' => $closestVertex,
-      'count'   => count($objects),
-      $type     => $objects
+      'closest'  => $closestVertex?$closestVertex['point']->toArray():null,
+      'distance' => $closestVertex?$closestVertex['distance']:null,
+      'count'    => count($objects),
+      $type      => $objects
     );
 
   } else {

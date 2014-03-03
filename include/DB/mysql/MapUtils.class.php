@@ -49,31 +49,31 @@ class MapUtils implements MapUtilsInterface {
    * Restricts a query for a vertex (of table v) for a bounding box
    * Takes the POI into account if existing
    */
-  public static function restrictForVertex($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+  public static function restrictForVertex($bounds, $POI){
 
-    if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
+    if ($POI !== null) {
 
       // Poi should be included
       $where_clause = sprintf(" WHERE MBRIntersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))') )",
-            floatval($NW_lng),
-            floatval($NW_lat),
-            floatval($SE_lng),
-            floatval($SE_lat),
-            floatval($POI_lng),
-            floatval($POI_lat),
-            floatval($NW_lng),
-            floatval($NW_lat));
+            floatval($bounds->NW_lng()),
+            floatval($bounds->NW_lat()),
+            floatval($bounds->SE_lng()),
+            floatval($bounds->SE_lat()),
+            floatval($POI->lng()),
+            floatval($POI->lat()),
+            floatval($bounds->NW_lng()),
+            floatval($bounds->NW_lat()));
 
     } else {
 
       // Just a polyline without the POI
       $where_clause = sprintf(" WHERE MBRIntersects( v.`point`, GeomFromText('POLYGON((%F %F, %F %F, %F %F))') )",
-            floatval($NW_lng),
-            floatval($NW_lat),
-            floatval($SE_lng),
-            floatval($SE_lat),
-            floatval($NW_lng),
-            floatval($NW_lat));
+            floatval($bounds->NW_lng()),
+            floatval($bounds->NW_lat()),
+            floatval($bounds->SE_lng()),
+            floatval($bounds->SE_lat()),
+            floatval($bounds->NW_lng()),
+            floatval($bounds->NW_lat()));
 
     }
 
@@ -84,31 +84,31 @@ class MapUtils implements MapUtilsInterface {
    * Restricts a query for an edge (of table v and v_dest) for a bounding box
    * Takes the POI into account if existing
    */
-  public static function restrictForEdgeBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+  public static function restrictForEdgeBBox($bounds, $POI){
 
-    if (isset($POI_lat) && $POI_lat != null && isset($POI_lng) && $POI_lng != null) {
+    if ($POI !== null) {
 
       // Poi should be included
       $where_clause = sprintf(" WHERE MBRIntersects( LINESTRING(v.point,v_dest.point), GeomFromText('POLYGON((%F %F, %F %F, %F %F, %F %F))') )",
-            floatval($NW_lng),
-            floatval($NW_lat),
-            floatval($SE_lng),
-            floatval($SE_lat),
-            floatval($POI_lng),
-            floatval($POI_lat),
-            floatval($NW_lng),
-            floatval($NW_lat));
+            floatval($bounds->NW_lng()),
+            floatval($bounds->NW_lat()),
+            floatval($bounds->SE_lng()),
+            floatval($bounds->SE_lat()),
+            floatval($POI->lng()),
+            floatval($POI->lat()),
+            floatval($bounds->NW_lng()),
+            floatval($bounds->NW_lat()));
     
     } else {
 
       // Just a polygon without the POI
       $where_clause = sprintf(" WHERE MBRIntersects( LINESTRING(v.point,v_dest.point), GeomFromText('POLYGON((%F %F, %F %F, %F %F))') )",
-            floatval($NW_lng),
-            floatval($NW_lat),
-            floatval($SE_lng),
-            floatval($SE_lat),
-            floatval($NW_lng),
-            floatval($NW_lat));
+            floatval($bounds->NW_lng()),
+            floatval($bounds->NW_lat()),
+            floatval($bounds->SE_lng()),
+            floatval($bounds->SE_lat()),
+            floatval($bounds->NW_lng()),
+            floatval($bounds->NW_lat()));
     }
 
     return $where_clause;
@@ -117,13 +117,13 @@ class MapUtils implements MapUtilsInterface {
   /*
    * GET ALL THE VERTICES in given bounds expressed as two LAT / LNG couples for NW and SE
    */
-  public static function getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+  public static function getVerticesIn($bounds, $POI){
 
     $db = DBConnection::db();
 
     $getVerticesIn_query = "SELECT `id`, Y(`point`) AS lat, X(`point`) AS lng, `elevation` AS alt FROM `vertices` v";
 
-    $getVerticesIn_query .= self::restrictForVertex($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
+    $getVerticesIn_query .= self::restrictForVertex($bounds, $POI);
     $getVerticesIn_query .= " AND v.`is_deleted` = 0";
 
     $statement = $db->prepare($getVerticesIn_query);
@@ -135,14 +135,7 @@ class MapUtils implements MapUtilsInterface {
       // Fetch the vertices
       $verticesArray = array();
       while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-        $verticesArray[] = array(
-                    'id' => intval($row["id"]), 
-                    'point' => array(
-                      'lat' => floatval($row["lat"]),
-                      'lng' => floatval($row["lng"]),
-                      'alt' => intval($row["alt"])
-                    )
-                  );
+        $verticesArray[] = new Vertex($row["id"], $row["lat"], $row["lng"], $row["alt"]); 
       }
       return $verticesArray;
     }
@@ -153,19 +146,19 @@ class MapUtils implements MapUtilsInterface {
    * GET ALL THE VERTICES in given bounds expressed as two LAT / LNG couples for NW and SE
    * AND their 1th children
    */
-  public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng){
+  public static function getVerticesAndChildrenIn($bounds, $POI){
 
     $db = DBConnection::db();
 
     // Extends the bounds
-    $bbox = GeoUtils::extendBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, null);
+    $bounds = GeoUtils::extendBBox($bounds, null);
 
     $getVerticesAndChildrenIn_query = "SELECT v.`id` AS id, Y(v.`point`) AS lat, X(v.`point`) AS lng, v.`elevation` AS alt, 
                     group_concat(CONCAT('{\"id\":',e.`to_id`, ', \"path_id\":', e.`id`, ', \"distance\":', e.`distance`, ', \"grade\":', e.`grade`, ', \"type\":', e.`type`,', \"secable\":', t.`secable`, '}')) AS children FROM `vertices` v
                     LEFT JOIN `edges` e ON (e.`from_id` = v.`id` AND e.`is_deleted` = 0)
                     JOIN `types` t ON (e.`type` = t.`id`)";
 
-    $getVerticesAndChildrenIn_query .= self::restrictForVertex($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
+    $getVerticesAndChildrenIn_query .= self::restrictForVertex($bounds, $POI);
     $getVerticesAndChildrenIn_query .= " GROUP BY v.`id`";
 
     $statement = $db->prepare($getVerticesAndChildrenIn_query);
@@ -203,7 +196,7 @@ class MapUtils implements MapUtilsInterface {
   /*
    * GET ALL THE EDGES in given bounds expressed as two LAT / LNG couples for NW and SE
    */
-  public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $restrictToType, $POI_lat, $POI_lng){
+  public static function getEdgesIn($bounds, $POI, $restrictToType){
 
     $db = DBConnection::db();
     
@@ -214,7 +207,7 @@ class MapUtils implements MapUtilsInterface {
                   INNER JOIN `vertices` v ON v.`id` = e.`from_id`
                   INNER JOIN `vertices` v_dest ON v_dest.`id` = e.`to_id`";
 
-    $getEdgesIn_query .= self::restrictForEdgeBBox($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
+    $getEdgesIn_query .= self::restrictForEdgeBBox($bounds, $POI);
     $getEdgesIn_query .= " AND e.`is_deleted` = 0";
 
     if ($restrictToType != null && $restrictToType != 0) $getEdgesIn_query .= " AND e.`type` = ".intval($restrictToType);
@@ -231,22 +224,8 @@ class MapUtils implements MapUtilsInterface {
       while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
         $edges[] = array(
                   'id' => intval($row["id"]), 
-                  'start' => array(
-                    'id' => intval($row["id_start"]),
-                    'point' => array(
-                      'lat' => floatval($row["lat_start"]),
-                      'lng' => floatval($row['lng_start']),
-                      'alt' => intval($row["alt_start"])
-                    )
-                  ),
-                  'dest' => array(
-                    'id' => intval($row["id_dest"]),
-                    'point' => array(
-                      'lat' => floatval($row["lat_dest"]),
-                      'lng' => floatval($row['lng_dest']),
-                      'alt' => intval($row["alt_dest"])
-                    )
-                  ),
+                  'start' => new Vertex($row["id_start"], $row["lat_start"], $row['lng_start'], $row["alt_start"]),
+                  'dest' => new Vertex($row["id_dest"], $row["lat_dest"], $row['lng_dest'], $row["alt_dest"]),
                   'distance' => floatval($row['distance']),
                   'grade' => intval($row['grade']),
                   'type' => intval($row['type'])
@@ -265,7 +244,7 @@ class MapUtils implements MapUtilsInterface {
     $db = DBConnection::db();
     
     // Extends the Bounding Box
-    $bbox = GeoUtils::extendBBox($lat, $lng, $lat, $lng, $radius_in_m, null);
+    $bounds = GeoUtils::extendBBox(new Bounds(array("NW_lat" => $lat, "NW_lng" => $lng, "SE_lat" => $lat, "SE_lng" => $lng)), $radius_in_m, null);
 
     $getClosest_query = "CALL getClosest(:lat, :lng, :radius, :NW_lat, :NW_lng, :SE_lat, :SE_lng);";
 
@@ -273,10 +252,10 @@ class MapUtils implements MapUtilsInterface {
       $statement->bindParam(':lat', $lat, PDO::PARAM_STR);
       $statement->bindParam(':lng', $lng, PDO::PARAM_STR);
       $statement->bindParam(':radius', $radius_in_m, PDO::PARAM_STR);
-      $statement->bindParam(':NW_lng', $bbox['NW_lng'], PDO::PARAM_STR);
-      $statement->bindParam(':NW_lat', $bbox['NW_lat'], PDO::PARAM_STR);
-      $statement->bindParam(':SE_lng', $bbox['SE_lng'], PDO::PARAM_STR);
-      $statement->bindParam(':SE_lat', $bbox['SE_lat'], PDO::PARAM_STR);
+      $statement->bindParam(':NW_lng', $bounds->NW_lng(), PDO::PARAM_STR);
+      $statement->bindParam(':NW_lat', $bounds->NW_lat(), PDO::PARAM_STR);
+      $statement->bindParam(':SE_lng', $bounds->SE_lng(), PDO::PARAM_STR);
+      $statement->bindParam(':SE_lat', $bounds->SE_lat(), PDO::PARAM_STR);
 
     // Executes the query
     $exe = $statement->execute();
@@ -289,12 +268,7 @@ class MapUtils implements MapUtilsInterface {
       if (!$closest) return null;
       
       return array(
-            'id' => intval($closest["id"]), 
-            'point' => array(
-              'lat' => floatval($closest["lat"]),
-              'lng' => floatval($closest["lng"]),
-              'alt' => intval($closest["alt"])
-            ),
+            'point' => new Vertex($closest["id"], $closest["lat"], $closest['lng'], $closest["alt"]),
             'distance' => floatval($closest["distance"]),
           );
     }

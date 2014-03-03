@@ -3,9 +3,9 @@
 interface MapUtilsInterface {
 
   public static function getMeansAndSpeeds();
-  public static function getVerticesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
-  public static function getVerticesAndChildrenIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $POI_lat, $POI_lng);
-  public static function getEdgesIn($NW_lat, $NW_lng, $SE_lat, $SE_lng, $restrictToType, $POI_lat, $POI_lng);
+  public static function getVerticesIn($bounds, $POI);
+  public static function getVerticesAndChildrenIn($bounds, $POI);
+  public static function getEdgesIn($bounds, $POI, $restrictToType);
 
   /*
    * Returns the closest vertex as an array

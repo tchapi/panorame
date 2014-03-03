@@ -46,6 +46,12 @@ class Controller {
 
   public static function loadClasses(){
 
+    /** Load types */
+    $vertex = _PATH.'include/DB/Vertex.class.php';
+    require_once($vertex);
+    $bounds = _PATH.'include/DB/Bounds.class.php';
+    require_once($bounds);
+
     /** Load interfaces */
     $maps_utils_interface = _PATH.'include/DB/MapUtilsInterface.php';
     require_once($maps_utils_interface);
