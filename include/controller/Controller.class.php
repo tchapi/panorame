@@ -223,7 +223,7 @@ class Controller {
 
     if ($templateName != null) {
     
-      header('X-Panorame-Engine: '.self::$parameters['engine']);
+      header('X-Panorame-Engine: '.$parameters['engine']);
       
       if (self::$ajaxRequest === true && isset($parameters['page'])) {
 
