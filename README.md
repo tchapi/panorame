@@ -3,12 +3,17 @@ Panorame
 
 A one-pager that instanciates various maps API and tile providers
 
+![Screenshot](https://github.com/tchapi/panorame/blob/master/screenshots/ui.png)
 
 - - - -
 
 ## Usage ##
 
 Various Layering API and Tile providers can be used to display map information.
+
+## Fixtures ##
+
+Panorame is now open-source — a fixtures database has been included in the repository. See the fixtures folder.
 
 ### Available Layering APIs ###
 
